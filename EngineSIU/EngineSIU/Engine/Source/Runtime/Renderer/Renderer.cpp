@@ -35,6 +35,7 @@
 #include "Stats/Stats.h"
 #include "Stats/GPUTimingManager.h"
 
+#include "FBXLoader.h"
 //------------------------------------------------------------------------------
 // 초기화 및 해제 관련 함수
 //------------------------------------------------------------------------------
@@ -287,6 +288,7 @@ void FRenderer::Render(const std::shared_ptr<FEditorViewportClient>& Viewport)
     {
         return;
     }
+    FFBXLoader::LoadFBX("Assets/FBX/Unreal_Mannequin.fbx");
 
     QUICK_SCOPE_CYCLE_COUNTER(Renderer_Render_CPU)
     QUICK_GPU_SCOPE_CYCLE_COUNTER(Renderer_Render_GPU, *GPUTimingManager)

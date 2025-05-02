@@ -73,18 +73,26 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>$(SolutionDir)Binaries\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)Intermediate\Build\$(Platform)\$(Configuration)\</IntDir>
+    <IncludePath>$(IncludePath)</IncludePath>
+    <LibraryPath>$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(SolutionDir)Binaries\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)Intermediate\Build\$(Platform)\$(Configuration)\</IntDir>
+    <IncludePath>$(IncludePath)</IncludePath>
+    <LibraryPath>$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)Binaries\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)Intermediate\Build\$(Platform)\$(Configuration)\</IntDir>
+    <IncludePath>$(IncludePath)</IncludePath>
+    <LibraryPath>$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)Binaries\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)Intermediate\Build\$(Platform)\$(Configuration)\</IntDir>
+    <IncludePath>$(IncludePath)</IncludePath>
+    <LibraryPath>$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -365,6 +373,7 @@ xcopy /y /d "$(SolutionDir)$(ProjectName)\Engine\Source\ThirdParty\FBX\lib\x64\$
     <ClCompile Include="Engine\Source\ThirdParty\ImGui\include\ImGui\imgui_tables.cpp" />
     <ClCompile Include="Engine\Source\ThirdParty\ImGui\include\ImGui\imgui_widgets.cpp" />
     <ClCompile Include="Engine\Source\ThirdParty\tinyfiledialogs\include\tinyfiledialogs.cpp" />
+    <ClCompile Include="FBXLoader.cpp" />
     <ClCompile Include="LuaScripts\LuaScriptComponent.cpp" />
     <ClCompile Include="SoundManager.cpp" />
     <None Include="Shaders\CompositingShader.hlsl">
@@ -701,6 +710,7 @@ xcopy /y /d "$(SolutionDir)$(ProjectName)\Engine\Source\ThirdParty\FBX\lib\x64\$
     <ClInclude Include="Engine\Source\ThirdParty\sol2\include\sol\forward.hpp" />
     <ClInclude Include="Engine\Source\ThirdParty\sol2\include\sol\sol.hpp" />
     <ClInclude Include="Engine\Source\ThirdParty\tinyfiledialogs\include\tinyfiledialogs.h" />
+    <ClInclude Include="FBXLoader.h" />
     <ClInclude Include="LuaScripts\LuaBindingHelpers.h" />
     <ClInclude Include="LuaScripts\LuaScriptComponent.h" />
     <ClInclude Include="LuaScripts\LuaScriptFileUtils.h" />
