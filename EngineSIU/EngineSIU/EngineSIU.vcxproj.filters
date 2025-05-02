@@ -1648,7 +1648,7 @@
     <ClInclude Include="LuaScripts\LuaScriptFileUtils.h">
       <Filter>LuaScripts</Filter>
     </ClInclude>
-    <ClCompile Include="FBXLoader.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Engine\FBXLoader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="EngineSIU.natvis" />
@@ -1663,7 +1663,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Source\ThirdParty\DirectXTK\Include\DirectXTK\SimpleMath.inl" />
-    <ClInclude Include="FBXLoader.h" />
+    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Engine\FBXLoader.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\CompositingShader.hlsl" />
