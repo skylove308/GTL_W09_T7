@@ -19,6 +19,8 @@ bool FFbxLoader::LoadFBX(const FString& FBXFilePath, FStaticMeshRenderData& OutM
         ProcessNode(RootNode, OutMeshData, bApplyCPUSkinning);
     }
 
+    ComputeBoundingBox(OutMeshData.Vertices, OutMeshData.BoundingBoxMin, OutMeshData.BoundingBoxMax);
+
     DestroySdk();
     return true;
 }
@@ -184,4 +186,24 @@ FVector FFbxLoader::ConvertNormal(const FbxVector4& Vec)
 FVector2D FFbxLoader::ConvertUV(const FbxVector2& Vec)
 {
     return FVector2D((float)Vec[0], 1.0f - (float)Vec[1]);
+}
+
+void FFbxLoader::ComputeBoundingBox(const TArray<FStaticMeshVertex>& InVertices, FVector& OutMinVector, FVector& OutMaxVector)
+{
+    FVector MinVector = { FLT_MAX, FLT_MAX, FLT_MAX };
+    FVector MaxVector = { -FLT_MAX, -FLT_MAX, -FLT_MAX };
+
+    for (const auto& V : InVertices)
+    {
+        MinVector.X = std::min(MinVector.X, V.X);
+        MinVector.Y = std::min(MinVector.Y, V.Y);
+        MinVector.Z = std::min(MinVector.Z, V.Z);
+
+        MaxVector.X = std::max(MaxVector.X, V.X);
+        MaxVector.Y = std::max(MaxVector.Y, V.Y);
+        MaxVector.Z = std::max(MaxVector.Z, V.Z);
+    }
+
+    OutMinVector = MinVector;
+    OutMaxVector = MaxVector;
 }

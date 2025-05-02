@@ -16,6 +16,7 @@ private:
     static FVector ConvertPosition(const FbxVector4& Vec);
     static FVector ConvertNormal(const FbxVector4& Vec);
     static FVector2D ConvertUV(const FbxVector2& Vec);
+    static void ComputeBoundingBox(const TArray<FStaticMeshVertex>& InVertices, FVector& OutMinVector, FVector& OutMaxVector);
 
 private:
     inline static FbxManager* SdkManager = nullptr;
