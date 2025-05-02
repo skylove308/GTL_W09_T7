@@ -83,6 +83,48 @@ void FFbxLoader::ProcessMesh(FbxMesh* Mesh, FStaticMeshRenderData& MeshData, boo
     const int ControlPointsCount = Mesh->GetControlPointsCount();
     FbxVector4* ControlPoints = Mesh->GetControlPoints();
 
+    // [Optional] CPU Skinning 적용
+    std::vector<FbxVector4> SkinnedPositions(ControlPointsCount);
+    for (int i = 0; i < ControlPointsCount; ++i)
+        SkinnedPositions[i] = ControlPoints[i];
+
+    if (bApplyCPUSkinning && Mesh->GetDeformerCount(FbxDeformer::eSkin) > 0)
+    {
+        FbxSkin* Skin = static_cast<FbxSkin*>(Mesh->GetDeformer(0, FbxDeformer::eSkin));
+        int ClusterCount = Skin->GetClusterCount();
+
+        std::vector<FbxAMatrix> ClusterMatrices(ClusterCount);
+
+        for (int c = 0; c < ClusterCount; ++c)
+        {
+            FbxCluster* Cluster = Skin->GetCluster(c);
+
+            FbxAMatrix BindPoseMatrix, ReferenceMatrix, TransformMatrix;
+            Cluster->GetTransformMatrix(TransformMatrix);
+            Cluster->GetTransformLinkMatrix(ReferenceMatrix);
+            BindPoseMatrix = ReferenceMatrix.Inverse() * TransformMatrix;
+            ClusterMatrices[c] = BindPoseMatrix;
+        }
+
+        for (int c = 0; c < ClusterCount; ++c)
+        {
+            FbxCluster* Cluster = Skin->GetCluster(c);
+            int* indices = Cluster->GetControlPointIndices();
+            double* weights = Cluster->GetControlPointWeights();
+            int idxCount = Cluster->GetControlPointIndicesCount();
+
+            for (int i = 0; i < idxCount; ++i)
+            {
+                int ctrlIdx = indices[i];
+                double weight = weights[i];
+                if (ctrlIdx < ControlPointsCount)
+                {
+                    SkinnedPositions[ctrlIdx] += (ClusterMatrices[c].MultT(ControlPoints[ctrlIdx]) - ControlPoints[ctrlIdx]) * weight;
+                }
+            }
+        }
+    }
+
     int PolygonCount = Mesh->GetPolygonCount();
     FbxGeometryElementUV* UVElement = Mesh->GetElementUV();
 
@@ -91,7 +133,7 @@ void FFbxLoader::ProcessMesh(FbxMesh* Mesh, FStaticMeshRenderData& MeshData, boo
         for (int vertIndex = 0; vertIndex < 3; ++vertIndex)
         {
             int ctrlPointIndex = Mesh->GetPolygonVertex(polyIndex, vertIndex);
-            FbxVector4 pos = ControlPoints[ctrlPointIndex];
+            FbxVector4 pos = SkinnedPositions[ctrlPointIndex];
 
             FStaticMeshVertex vertex = {};
             FVector position = ConvertPosition(pos);
