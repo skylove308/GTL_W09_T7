@@ -8,11 +8,37 @@
 #include "Engine/FObjLoader.h"
 
 #include "GameFramework/Actor.h"
+#include "Engine/FBXLoader.h"
 
 ACube::ACube()
 {
-    StaticMeshComponent->SetStaticMesh(FObjManager::GetStaticMesh(L"Contents/Reference/Reference.obj"));
+    //StaticMeshComponent->SetStaticMesh(FObjManager::GetStaticMesh(L"Contents/Reference/Reference.obj"));
 
+    FString FBXPath = TEXT("Assets/FBX/Unreal_Mannequin.fbx");
+
+    // 2. 메시 데이터 구조체 생성
+    FStaticMeshRenderData* RenderData = new FStaticMeshRenderData();
+
+    // 3. FBX 로딩 (T-Pose로 변환 포함)
+    if (FFbxLoader::LoadFBX(FBXPath, *RenderData, true))
+    {
+        // 4. UStaticMesh 생성
+        UStaticMesh* StaticMesh = FObjectFactory::ConstructObject<UStaticMesh>(nullptr);
+        StaticMesh->SetData(RenderData);
+
+        // 5. 메시 컴포넌트에 할당
+        //UStaticMeshComponent* MeshComponent = NewObject<UStaticMeshComponent>(MyActor);
+        //MeshComponent->StaticMesh = StaticMesh;
+
+        // 6. 씬에 붙이기 (또는 등록)
+        //MeshComponent->RegisterComponent();
+        //MyActor->AddComponent(MeshComponent);
+        StaticMeshComponent->SetStaticMesh(StaticMesh);
+    }
+    else
+    {
+        UE_LOG(ELogLevel::Display, TEXT("FBX Load 실패: %s"), *FBXPath);
+    }
     
 }
 

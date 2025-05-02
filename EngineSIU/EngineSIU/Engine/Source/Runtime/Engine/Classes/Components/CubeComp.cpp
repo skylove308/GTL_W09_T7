@@ -2,7 +2,6 @@
 #include "Engine/FObjLoader.h"
 #include "UObject/ObjectFactory.h"
 
-
 UCubeComp::UCubeComp()
 {
     SetType(StaticClass()->GetName());
@@ -19,9 +18,10 @@ void UCubeComp::InitializeComponent()
     //SetStaticMesh(FManagerGetStaticMesh(L"helloBlender.obj"));
     // 
     // Begin Test
-    FObjManager::CreateStaticMesh("Contents/Reference/Reference.obj");
-    SetStaticMesh(FObjManager::GetStaticMesh(L"Reference.obj"));
+    //FObjManager::CreateStaticMesh("Contents/Reference/Reference.obj");
+    //SetStaticMesh(FObjManager::GetStaticMesh(L"Reference.obj"));
     // End Test
+
 }
 
 void UCubeComp::TickComponent(float DeltaTime)
