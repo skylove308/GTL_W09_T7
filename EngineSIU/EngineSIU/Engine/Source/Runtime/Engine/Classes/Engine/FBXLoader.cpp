@@ -238,7 +238,14 @@ void FFbxLoader::ProcessNode(FbxNode* Node, FStaticMeshRenderData& MeshData, boo
 {
     if (FbxMesh* Mesh = Node->GetMesh())
     {
-        ProcessMesh(Mesh, MeshData, bApplyCPUSkinning);
+        FString NodeName = Node->GetName();
+
+        // 조건: 오직 LOD0만 처리
+        if (NodeName == TEXT("Aurora_LOD0"))
+        {
+            UE_LOG(ELogLevel::Display, TEXT("Using Mesh: %s"), *NodeName);
+            ProcessMesh(Mesh, MeshData, bApplyCPUSkinning);
+        }
     }
 
     for (int i = 0; i < Node->GetChildCount(); ++i)
