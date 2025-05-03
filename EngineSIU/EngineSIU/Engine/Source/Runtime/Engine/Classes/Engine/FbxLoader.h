@@ -97,5 +97,6 @@ public:
     inline static TMap<FWString, UStaticMesh*> StaticMeshMap;
     inline static TMap<FString, UMaterial*> MaterialMap;
     inline static FStaticMeshRenderData* StaticMeshRenderData = nullptr;
+    inline static FSkeletalMeshRenderData* SkeletalMeshRenderData = nullptr;
 };
 

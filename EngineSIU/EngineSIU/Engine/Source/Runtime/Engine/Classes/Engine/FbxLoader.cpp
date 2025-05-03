@@ -124,20 +124,52 @@ bool FFBXLoader::FindMesh(FbxNode* Node)
         // Skeletal Mesh
         if (IsSkeletalMesh(Mesh))
         {
-            FSkeletalMeshRenderData skelData;
             // Build bones and weights
-            BuildSkeletalBones(Mesh, skelData.Bones);
-            BuildBoneWeights(Mesh, skelData.BoneWeights);
-            BuildSkeletalVertexBuffers(Mesh, skelData.Vertices, skelData.Indices);
-            SetupMaterialSubsets(Mesh, skelData.MaterialSubsets);
+            BuildSkeletalBones(Mesh, FFBXManager::SkeletalMeshRenderData->Bones);
+            BuildBoneWeights(Mesh, FFBXManager::SkeletalMeshRenderData->BoneWeights);
+            BuildSkeletalVertexBuffers(Mesh, FFBXManager::SkeletalMeshRenderData->Vertices, FFBXManager::SkeletalMeshRenderData->Indices);
+
+            CopyNormals(Mesh, FFBXManager::SkeletalMeshRenderData->Vertices);
+            CopyUVs(Mesh, FFBXManager::SkeletalMeshRenderData->Vertices);
+            CopyTangents(Mesh, FFBXManager::SkeletalMeshRenderData->Vertices);
+
+            SetupMaterialSubsets(Mesh, FFBXManager::SkeletalMeshRenderData->MaterialSubsets);
+
+            int MaterialCount = Node->GetMaterialCount();
+            for (int m = 0; m < MaterialCount; ++m)
+            {
+                FbxSurfaceMaterial* Material = Node->GetMaterial(m);
+                FObjMaterialInfo MatInfo;
+
+                if (Material)
+                {
+                    MatInfo.MaterialName = Material->GetName();
+                    FbxProperty DiffuseProperty = Material->FindProperty(FbxSurfaceMaterial::sDiffuse);
+                    if (DiffuseProperty.IsValid())
+                    {
+                        int TextureCount = DiffuseProperty.GetSrcObjectCount<FbxFileTexture>();
+                        if (TextureCount > 0)
+                        {
+                            FbxFileTexture* Texture = DiffuseProperty.GetSrcObject<FbxFileTexture>(0);
+                            const uint32 SlotIdx = static_cast<uint32>(EMaterialTextureSlots::MTS_Diffuse);
+                            MatInfo.TextureInfos[SlotIdx].TexturePath = ((FString)Texture->GetFileName()).ToWideString();
+                        }
+                    }
+                }
+
+                FFBXManager::SkeletalMeshRenderData->Materials.Add(MatInfo);
+            }
+
+
+
             // Update skinning matrices
             TArray<FMatrix> GlobalBoneTransforms;
-            for (int i = 0; i < skelData.Bones.Num(); ++i)
+            for (int i = 0; i < FFBXManager::SkeletalMeshRenderData->Bones.Num(); ++i)
             {
                 FbxAMatrix GlobalTransform = Node->EvaluateGlobalTransform();
                 GlobalBoneTransforms.Add(FbxAMatrixToFMatrix(GlobalTransform));
             }
-            UpdateSkinningMatrices(GlobalBoneTransforms, skelData.Bones);
+            UpdateSkinningMatrices(GlobalBoneTransforms, FFBXManager::SkeletalMeshRenderData->Bones);
 
         }
         // Static Mesh
