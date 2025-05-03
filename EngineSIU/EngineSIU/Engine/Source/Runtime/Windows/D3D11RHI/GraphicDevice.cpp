@@ -324,7 +324,7 @@ void FGraphicsDevice::CreateRTV(ID3D11Texture2D*& OutTexture, ID3D11RenderTarget
     TextureDesc.Height = ScreenHeight;
     TextureDesc.MipLevels = 1;
     TextureDesc.ArraySize = 1;
-    TextureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    TextureDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
     TextureDesc.SampleDesc.Count = 1;
     TextureDesc.SampleDesc.Quality = 0;
     TextureDesc.Usage = D3D11_USAGE_DEFAULT;
@@ -334,7 +334,7 @@ void FGraphicsDevice::CreateRTV(ID3D11Texture2D*& OutTexture, ID3D11RenderTarget
     Device->CreateTexture2D(&TextureDesc, nullptr, &OutTexture);
 
     D3D11_RENDER_TARGET_VIEW_DESC FogRTVDesc = {};
-    FogRTVDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;      // 색상 포맷
+    FogRTVDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;      // 색상 포맷
     FogRTVDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D; // 2D 텍스처
 
     Device->CreateRenderTargetView(OutTexture, &FogRTVDesc, &OutRTV);

@@ -108,7 +108,7 @@ void FEngineProfiler::Render(ID3D11DeviceContext* Context, UINT Width, UINT Heig
     ImGui::SetNextWindowPos(ImVec2(10, 10), ImGuiCond_FirstUseEver);
     ImGui::SetNextWindowSize(ImVec2(350, 400), ImGuiCond_FirstUseEver);
 
-    if (!ImGui::Begin("Engine Profiler", &bShowWindow))
+    if (!ImGui::Begin("Engine Profiler", &bShowWindow, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse))
     {
         ImGui::End();
         return;

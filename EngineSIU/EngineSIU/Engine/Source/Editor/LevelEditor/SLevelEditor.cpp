@@ -156,7 +156,8 @@ void SLevelEditor::ResizeViewports()
     }
     else
     {
-        ActiveViewportClient->GetViewport()->ResizeViewport(FRect(0.0f, 0.0f, EditorWidth, EditorHeight));
+        //ActiveViewportClient->GetViewport()->ResizeViewport(FRect(0.0f, 0.0f, EditorWidth, EditorHeight));
+        ActiveViewportClient->GetViewport()->ResizeViewport(FRect(0.0f, 72.f, EditorWidth * 0.8f, EditorHeight - 72.f - 32.f)); // 72 = Top padding height, 32 = bottom padding height
     }
 }
 

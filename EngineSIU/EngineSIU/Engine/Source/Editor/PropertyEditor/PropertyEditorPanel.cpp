@@ -45,17 +45,11 @@ void PropertyEditorPanel::Render()
     }
     
     /* Pre Setup */
-    float PanelWidth = (Width) * 0.2f - 6.0f;
-    float PanelHeight = (Height) * 0.65f;
+    float PanelWidth = (Width) * 0.2f - 3.0f;
+    float PanelHeight = (Height) - ((Height) * 0.3f + 10.0f) - 32.0f;
 
-    float PanelPosX = (Width) * 0.8f + 5.0f;
-    float PanelPosY = (Height) * 0.3f + 15.0f;
-
-    ImVec2 MinSize(140, 370);
-    ImVec2 MaxSize(FLT_MAX, 900);
-
-    /* Min, Max Size */
-    ImGui::SetNextWindowSizeConstraints(MinSize, MaxSize);
+    float PanelPosX = (Width) * 0.8f + 2.0f;
+    float PanelPosY = (Height) * 0.3f + 10.0f;
 
     /* Panel Position */
     ImGui::SetNextWindowPos(ImVec2(PanelPosX, PanelPosY), ImGuiCond_Always);
@@ -235,7 +229,7 @@ void PropertyEditorPanel::RenderForSceneComponent(USceneComponent* SceneComponen
             CoordiButtonLabel = "Local";
         }
 
-        if (ImGui::Button(CoordiButtonLabel.c_str(), ImVec2(ImGui::GetWindowContentRegionMax().x * 0.9f, 32)))
+        if (ImGui::Button(CoordiButtonLabel.c_str(), ImVec2(ImGui::GetContentRegionAvail().x - ImGui::GetStyle().IndentSpacing, 32)))
         {
             Player->AddCoordiMode();
         }

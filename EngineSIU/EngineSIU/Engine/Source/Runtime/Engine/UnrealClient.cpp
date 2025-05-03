@@ -184,7 +184,7 @@ HRESULT FViewportResource::CreateRenderTarget(EResourceType Type)
     TextureDesc.Height = static_cast<uint32>(D3DViewport.Height);
     TextureDesc.MipLevels = 1;
     TextureDesc.ArraySize = 1;
-    TextureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    TextureDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
     TextureDesc.SampleDesc.Count = 1;
     TextureDesc.SampleDesc.Quality = 0;
     TextureDesc.Usage = D3D11_USAGE_DEFAULT;
@@ -194,7 +194,7 @@ HRESULT FViewportResource::CreateRenderTarget(EResourceType Type)
     NewResource.Texture2D = FEngineLoop::GraphicDevice.CreateTexture2D(TextureDesc, nullptr);
 
     D3D11_RENDER_TARGET_VIEW_DESC RTVDesc = {};
-    RTVDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM; // TODO: srgb 옵션 고려해보기
+    RTVDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM; // TODO: srgb 옵션 고려해보기
     RTVDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
     hr = FEngineLoop::GraphicDevice.Device->CreateRenderTargetView(NewResource.Texture2D, &RTVDesc, &NewResource.RTV);
     if (FAILED(hr))
