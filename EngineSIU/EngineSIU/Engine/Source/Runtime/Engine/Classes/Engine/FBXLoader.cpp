@@ -67,6 +67,23 @@ static void RecalculateGlobalPoses(TArray<FSkeletonBone>& Bones)
     }
 }
 
+static void RotateBone(TArray<FSkeletonBone>& Bones, int32 BoneIndex, const FbxVector4& EulerDegrees)
+{
+    if (!Bones.IsValidIndex(BoneIndex)) return;
+
+    FSkeletonBone& Bone = Bones[BoneIndex];
+
+    FbxAMatrix RotationMatrix;
+    RotationMatrix.SetIdentity();
+    RotationMatrix.SetR(EulerDegrees); // XYZ Euler 회전값 적용 (도 단위)
+
+    // 기존 로컬 바인드 포즈에 회전 적용
+    Bone.LocalBindPose = RotationMatrix * Bone.LocalBindPose;
+
+    // 회전 후 글로벌 포즈 갱신
+    RecalculateGlobalPoses(Bones);
+}
+
 
 bool FFbxLoader::LoadFBX(const FString& FBXFilePath, FStaticMeshRenderData& OutMeshData, bool bApplyCPUSkinning)
 {
