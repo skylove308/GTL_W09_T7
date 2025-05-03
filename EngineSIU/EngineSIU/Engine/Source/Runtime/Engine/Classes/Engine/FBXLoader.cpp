@@ -89,22 +89,33 @@ void RotateBone(TArray<FSkeletonBone>& Bones, int32 BoneIndex, const FbxVector4&
 void ReskinVerticesCPU(
     FbxMesh* Mesh,
     const TArray<FSkeletonBone>& Bones,
-    TArray<FStaticMeshVertex>& Vertices,
-    const TMap<int32, TArray<TPair<int32, float>>>& ControlPointToBoneWeights)
+    TArray<FStaticMeshVertex>& OutVertices,
+    const TMap<int32, TArray<TPair<int32, float>>>& ControlPointToBoneWeights,
+    const TArray<FStaticMeshVertex>& OriginalVertices)
 {
-    for (FStaticMeshVertex& Vertex : Vertices)
-    {
-        const int32 CtrlIdx = Vertex.ControlPointIndex;
+    // OutVertices와 OriginalVertices의 개수는 반드시 동일해야 합니다
+    assert(OutVertices.Num() == OriginalVertices.Num());
 
+    for (int32 i = 0; i < OutVertices.Num(); ++i)
+    {
+        const FStaticMeshVertex& Original = OriginalVertices[i];
+        FStaticMeshVertex& Vertex = OutVertices[i];
+
+        const int32 CtrlIdx = Vertex.ControlPointIndex;
         if (!ControlPointToBoneWeights.Contains(CtrlIdx))
             continue;
 
         const TArray<TPair<int32, float>>& Influences = ControlPointToBoneWeights[CtrlIdx];
 
-        FbxVector4 Skinned = FbxVector4(0, 0, 0, 1);
+        FbxVector4 SkinnedPos(0, 0, 0, 1);
         float TotalWeight = 0.f;
 
-        FbxVector4 OrigPos(Vertex.X, Vertex.Y, Vertex.Z, 1.0);
+        FbxVector4 OrigPos(
+            Original.X,
+            Original.Y,
+            Original.Z,
+            1.0f
+        );
 
         for (const TPair<int32, float>& Influence : Influences)
         {
@@ -115,18 +126,19 @@ void ReskinVerticesCPU(
 
             const FbxAMatrix& GlobalPose = Bones[BoneIndex].GlobalPose;
             const FbxAMatrix& BindPose = Bones[BoneIndex].GlobalBindPose;
+
             FbxAMatrix OffsetMatrix = GlobalPose * BindPose.Inverse();
 
-            Skinned += OffsetMatrix.MultT(OrigPos) * Weight;
+            SkinnedPos += OffsetMatrix.MultT(OrigPos) * Weight;
             TotalWeight += Weight;
         }
 
-        if (TotalWeight > 0.0)
+        if (TotalWeight > 0.0f)
         {
-            Skinned /= TotalWeight;
-            Vertex.X = static_cast<float>(Skinned[0]);
-            Vertex.Y = static_cast<float>(Skinned[1]);
-            Vertex.Z = static_cast<float>(Skinned[2]);
+            SkinnedPos /= TotalWeight;
+            Vertex.X = static_cast<float>(SkinnedPos[0]);
+            Vertex.Y = static_cast<float>(SkinnedPos[1]);
+            Vertex.Z = static_cast<float>(SkinnedPos[2]);
         }
     }
 }
@@ -287,7 +299,8 @@ void FFbxLoader::ProcessMesh(FbxMesh* Mesh, FStaticMeshRenderData& MeshData, boo
     std::vector<FbxVector4> SkinnedPositions(ControlPointsCount);
     for (int i = 0; i < ControlPointsCount; ++i)
         SkinnedPositions[i] = ControlPoints[i];
-
+    /*
+    
     if (bApplyCPUSkinning && Mesh->GetDeformerCount(FbxDeformer::eSkin) > 0)
     {
         FbxSkin* Skin = static_cast<FbxSkin*>(Mesh->GetDeformer(0, FbxDeformer::eSkin));
@@ -323,8 +336,9 @@ void FFbxLoader::ProcessMesh(FbxMesh* Mesh, FStaticMeshRenderData& MeshData, boo
                 }
             }
         }
+        
     }
-
+    */
     int PolygonCount = Mesh->GetPolygonCount();
     FbxGeometryElementUV* UVElement = Mesh->GetElementUV();
 

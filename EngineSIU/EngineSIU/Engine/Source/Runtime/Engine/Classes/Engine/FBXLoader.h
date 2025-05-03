@@ -47,7 +47,8 @@ void ReskinVerticesCPU(
     FbxMesh* Mesh,
     const TArray<FSkeletonBone>& Bones,
     TArray<FStaticMeshVertex>& Vertices,
-    const TMap<int32, TArray<TPair<int32, float>>>& ControlPointToBoneWeights);
+    const TMap<int32, TArray<TPair<int32, float>>>& ControlPointToBoneWeights,
+    const TArray<FStaticMeshVertex>& OriginalVertices);
 //void UpdateVertexBuffer(FGraphicsSystem* Graphics, FBufferManager* BufferManager, const FWString& MeshName, const TArray<FStaticMeshVertex>& Vertices);
 FbxMesh* ExtractFirstMeshFromScene(FbxNode* Node);
 

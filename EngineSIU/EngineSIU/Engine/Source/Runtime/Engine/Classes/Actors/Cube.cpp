@@ -44,8 +44,11 @@ ACube::ACube()
         int32 PickedBone = FindBoneByName(Bones, TEXT("spine_01")); // 또는 index 직접
         if (PickedBone != -1)
         {
-            RotateBone(Bones, PickedBone, FbxVector4(0, 90, 0)); // Y축 30도 회전
-            ReskinVerticesCPU(Mesh, Bones, RenderData->Vertices, ControlPointToBoneWeights);
+            //RotateBone(Bones, PickedBone, FbxVector4(0, 90, 0)); // Y축 90도 회전
+            TArray<FStaticMeshVertex> OriginalVertices = RenderData->Vertices;
+            //TArray<FStaticMeshVertex> NewVertices = OriginalVertices;
+            ReskinVerticesCPU(Mesh, Bones, RenderData->Vertices, ControlPointToBoneWeights,OriginalVertices);
+            //RenderData->Vertices = NewVertices;
         }
 
         FFbxLoader::ComputeBoundingBox(RenderData->Vertices, RenderData->BoundingBoxMin, RenderData->BoundingBoxMax);
