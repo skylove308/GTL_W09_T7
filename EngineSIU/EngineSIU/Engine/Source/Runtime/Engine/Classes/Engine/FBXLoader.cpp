@@ -3,16 +3,9 @@
 #include <string>
 
 
-struct FSkeletonBone
-{
-    FString Name;
-    int32 ParentIndex;
-    FbxNode* Node;
-    FbxAMatrix LocalBindPose;
-    FbxAMatrix GlobalPose;
-};
 
-static void ExtractSkeleton(FbxMesh* Mesh, TArray<FSkeletonBone>& OutBones)
+
+void ExtractSkeleton(FbxMesh* Mesh, TArray<FSkeletonBone>& OutBones)
 {
     OutBones.Empty();
 
@@ -51,7 +44,7 @@ static void ExtractSkeleton(FbxMesh* Mesh, TArray<FSkeletonBone>& OutBones)
     }
 }
 
-static void RecalculateGlobalPoses(TArray<FSkeletonBone>& Bones)
+void RecalculateGlobalPoses(TArray<FSkeletonBone>& Bones)
 {
     for (int i = 0; i < Bones.Num(); ++i)
     {
@@ -67,7 +60,7 @@ static void RecalculateGlobalPoses(TArray<FSkeletonBone>& Bones)
     }
 }
 
-static void RotateBone(TArray<FSkeletonBone>& Bones, int32 BoneIndex, const FbxVector4& EulerDegrees)
+void RotateBone(TArray<FSkeletonBone>& Bones, int32 BoneIndex, const FbxVector4& EulerDegrees)
 {
     if (!Bones.IsValidIndex(BoneIndex)) return;
 
@@ -84,7 +77,7 @@ static void RotateBone(TArray<FSkeletonBone>& Bones, int32 BoneIndex, const FbxV
     RecalculateGlobalPoses(Bones);
 }
 
-static void ReskinVerticesCPU(FbxMesh* Mesh, const TArray<FSkeletonBone>& Bones, TArray<FStaticMeshVertex>& Vertices)
+void ReskinVerticesCPU(FbxMesh* Mesh, const TArray<FSkeletonBone>& Bones, TArray<FStaticMeshVertex>& Vertices)
 {
     if (!Mesh || Bones.Num() == 0) return;
 
@@ -139,7 +132,7 @@ static void ReskinVerticesCPU(FbxMesh* Mesh, const TArray<FSkeletonBone>& Bones,
     }
 }
 
-static FbxMesh* ExtractFirstMeshFromScene(FbxNode* Node)
+FbxMesh* ExtractFirstMeshFromScene(FbxNode* Node)
 {
     if (!Node) return nullptr;
     if (Node->GetMesh()) return Node->GetMesh();
@@ -153,7 +146,17 @@ static FbxMesh* ExtractFirstMeshFromScene(FbxNode* Node)
     return nullptr;
 }
 
-bool FFbxLoader::LoadFBX(const FString& FBXFilePath, FStaticMeshRenderData& OutMeshData, bool bApplyCPUSkinning, FbxScene** OutScene = nullptr, FbxMesh** OutMesh = nullptr)
+int32 FindBoneByName(const TArray<FSkeletonBone>& Bones, const FString& Name)
+{
+    for (int32 i = 0; i < Bones.Num(); ++i)
+    {
+        if (Bones[i].Name == Name)
+            return i;
+    }
+    return -1;
+}
+
+bool FFbxLoader::LoadFBX(const FString& FBXFilePath, FStaticMeshRenderData& OutMeshData, bool bApplyCPUSkinning, FbxScene** OutScene, FbxMesh** OutMesh)
 {
     InitializeSdk();
 

@@ -19,6 +19,7 @@ struct FFbxLoader
         FbxScene** OutScene = nullptr, 
         FbxMesh** OutMesh = nullptr
     );
+    static void ComputeBoundingBox(const TArray<FStaticMeshVertex>& InVertices, FVector& OutMinVector, FVector& OutMaxVector);
 
 private:
     static void InitializeSdk();
@@ -30,7 +31,6 @@ private:
     static FVector ConvertPosition(const FbxVector4& Vec);
     static FVector ConvertNormal(const FbxVector4& Vec);
     static FVector2D ConvertUV(const FbxVector2& Vec);
-    static void ComputeBoundingBox(const TArray<FStaticMeshVertex>& InVertices, FVector& OutMinVector, FVector& OutMaxVector);
 
 private:
     inline static FbxManager* SdkManager = nullptr;
@@ -44,3 +44,5 @@ void RotateBone(TArray<FSkeletonBone>& Bones, int32 BoneIndex, const FbxVector4&
 void ReskinVerticesCPU(FbxMesh* Mesh, const TArray<FSkeletonBone>& Bones, TArray<FStaticMeshVertex>& Vertices);
 //void UpdateVertexBuffer(FGraphicsSystem* Graphics, FBufferManager* BufferManager, const FWString& MeshName, const TArray<FStaticMeshVertex>& Vertices);
 FbxMesh* ExtractFirstMeshFromScene(FbxNode* Node);
+
+int32 FindBoneByName(const TArray<FSkeletonBone>& Bones, const FString& Name);

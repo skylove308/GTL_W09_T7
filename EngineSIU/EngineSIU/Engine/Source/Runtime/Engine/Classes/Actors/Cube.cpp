@@ -14,7 +14,7 @@ ACube::ACube()
 {
     //StaticMeshComponent->SetStaticMesh(FObjManager::GetStaticMesh(L"Contents/Reference/Reference.obj"));
 
-    FString FBXPath = TEXT("Assets/FBX/Unreal_Mannequin.fbx");
+    FString FBXPath = TEXT("Assets/FBX/SKM_Quinn_Simple.FBX");
 
     // 2. 메시 데이터 구조체 생성
     FStaticMeshRenderData* RenderData = new FStaticMeshRenderData();
@@ -23,11 +23,31 @@ ACube::ACube()
     FbxMesh* Mesh = nullptr;
 
     // 3. FBX 로딩 (T-Pose로 변환 포함)
-    if (FFbxLoader::LoadFBX(FBXPath, *RenderData, true))
+    if (FFbxLoader::LoadFBX(FBXPath, *RenderData, true,&Scene,&Mesh))
     {
 
+        TArray<FSkeletonBone> Bones;
         ExtractSkeleton(Mesh, Bones);
+        
+
+        UE_LOG(ELogLevel::Display, TEXT("Bone 개수: %d"), Bones.Num());
+
+        for (const FSkeletonBone& Bone : Bones)
+        {
+            UE_LOG(ELogLevel::Display, TEXT("Bone: %s (Parent: %d)"), *Bone.Name, Bone.ParentIndex);
+        }
+
         RecalculateGlobalPoses(Bones);
+
+        int32 PickedBone = FindBoneByName(Bones, TEXT("spine_01")); // 또는 index 직접
+        if (PickedBone != -1)
+        {
+            RotateBone(Bones, PickedBone, FbxVector4(0, 30, 0)); // Y축 30도 회전
+            ReskinVerticesCPU(Mesh, Bones, RenderData->Vertices);
+        }
+
+        FFbxLoader::ComputeBoundingBox(RenderData->Vertices, RenderData->BoundingBoxMin, RenderData->BoundingBoxMax);
+
 
         // 4. UStaticMesh 생성
         UStaticMesh* StaticMesh = FObjectFactory::ConstructObject<UStaticMesh>(nullptr);
@@ -41,6 +61,9 @@ ACube::ACube()
         //MeshComponent->RegisterComponent();
         //MyActor->AddComponent(MeshComponent);
         StaticMeshComponent->SetStaticMesh(StaticMesh);
+
+        FVertexInfo VertexInfo;
+        FEngineLoop::Renderer.BufferManager->CreateVertexBuffer(RenderData->ObjectName, RenderData->Vertices, VertexInfo);
     }
     else
     {
