@@ -82,6 +82,7 @@ struct VS_INPUT_StaticMesh
     float4 Tangent : TANGENT;
     float2 UV : TEXCOORD;
     uint MaterialIndex : MATERIAL_INDEX;
+    int ControlPointIndex : CONTROLPOINT_INDEX;
 };
 
 struct PS_INPUT_StaticMesh

@@ -14,7 +14,7 @@ ACube::ACube()
 {
     //StaticMeshComponent->SetStaticMesh(FObjManager::GetStaticMesh(L"Contents/Reference/Reference.obj"));
 
-    FString FBXPath = TEXT("Assets/FBX/SKM_Quinn_Simple.FBX");
+    FString FBXPath = TEXT("Assets/FBX/Aurora.FBX");
 
     // 2. 메시 데이터 구조체 생성
     FStaticMeshRenderData* RenderData = new FStaticMeshRenderData();
@@ -42,7 +42,7 @@ ACube::ACube()
         int32 PickedBone = FindBoneByName(Bones, TEXT("spine_01")); // 또는 index 직접
         if (PickedBone != -1)
         {
-            RotateBone(Bones, PickedBone, FbxVector4(0, 90, 0)); // Y축 30도 회전
+            //RotateBone(Bones, PickedBone, FbxVector4(0, 90, 0)); // Y축 30도 회전
             ReskinVerticesCPU(Mesh, Bones, RenderData->Vertices);
         }
 
