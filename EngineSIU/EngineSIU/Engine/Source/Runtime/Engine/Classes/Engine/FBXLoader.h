@@ -2,6 +2,14 @@
 #include <fbxsdk.h>
 #include "Asset/StaticMeshAsset.h"
 
+struct FSkeletonBone
+{
+    FString Name;
+    int32 ParentIndex;
+    FbxNode* Node;
+    FbxAMatrix LocalBindPose;
+};
+
 struct FFbxLoader
 {
     static bool LoadFBX(const FString& FBXFilePath, FStaticMeshRenderData& OutMeshData, bool bApplyCPUSkinning = true);

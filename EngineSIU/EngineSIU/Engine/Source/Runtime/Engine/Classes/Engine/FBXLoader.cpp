@@ -2,6 +2,55 @@
 
 #include <string>
 
+
+struct FSkeletonBone
+{
+    FString Name;
+    int32 ParentIndex;
+    FbxNode* Node;
+    FbxAMatrix LocalBindPose;
+};
+
+static void ExtractSkeleton(FbxMesh* Mesh, TArray<FSkeletonBone>& OutBones)
+{
+    OutBones.Empty();
+
+    if (Mesh->GetDeformerCount(FbxDeformer::eSkin) == 0)
+        return;
+
+    FbxSkin* Skin = static_cast<FbxSkin*>(Mesh->GetDeformer(0, FbxDeformer::eSkin));
+    const int ClusterCount = Skin->GetClusterCount();
+
+    for (int c = 0; c < ClusterCount; ++c)
+    {
+        FbxCluster* Cluster = Skin->GetCluster(c);
+        FbxNode* BoneNode = Cluster->GetLink();
+        if (!BoneNode)
+            continue;
+
+        FSkeletonBone Bone;
+        Bone.Name = BoneNode->GetName();
+        Bone.Node = BoneNode;
+        Bone.LocalBindPose = BoneNode->EvaluateLocalTransform();
+        Bone.GlobalPose.SetIdentity(); // 초기화
+
+        // Find parent index
+        FbxNode* Parent = BoneNode->GetParent();
+        Bone.ParentIndex = -1;
+        for (int i = 0; i < OutBones.Num(); ++i)
+        {
+            if (OutBones[i].Node == Parent)
+            {
+                Bone.ParentIndex = i;
+                break;
+            }
+        }
+
+        OutBones.Add(Bone);
+    }
+}
+
+
 bool FFbxLoader::LoadFBX(const FString& FBXFilePath, FStaticMeshRenderData& OutMeshData, bool bApplyCPUSkinning)
 {
     InitializeSdk();
