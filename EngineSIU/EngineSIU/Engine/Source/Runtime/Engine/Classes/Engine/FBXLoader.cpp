@@ -9,6 +9,7 @@ struct FSkeletonBone
     int32 ParentIndex;
     FbxNode* Node;
     FbxAMatrix LocalBindPose;
+    FbxAMatrix GlobalPose;
 };
 
 static void ExtractSkeleton(FbxMesh* Mesh, TArray<FSkeletonBone>& OutBones)
@@ -47,6 +48,22 @@ static void ExtractSkeleton(FbxMesh* Mesh, TArray<FSkeletonBone>& OutBones)
         }
 
         OutBones.Add(Bone);
+    }
+}
+
+static void RecalculateGlobalPoses(TArray<FSkeletonBone>& Bones)
+{
+    for (int i = 0; i < Bones.Num(); ++i)
+    {
+        FSkeletonBone& Bone = Bones[i];
+        if (Bone.ParentIndex == -1)
+        {
+            Bone.GlobalPose = Bone.LocalBindPose;
+        }
+        else
+        {
+            Bone.GlobalPose = Bones[Bone.ParentIndex].GlobalPose * Bone.LocalBindPose;
+        }
     }
 }
 
