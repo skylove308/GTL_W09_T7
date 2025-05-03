@@ -4,45 +4,54 @@
 
 
 
-
 void ExtractSkeleton(FbxMesh* Mesh, TArray<FSkeletonBone>& OutBones)
 {
     OutBones.Empty();
 
-    if (Mesh->GetDeformerCount(FbxDeformer::eSkin) == 0)
-        return;
+    if (!Mesh) return;
 
     FbxSkin* Skin = static_cast<FbxSkin*>(Mesh->GetDeformer(0, FbxDeformer::eSkin));
-    const int ClusterCount = Skin->GetClusterCount();
+    if (!Skin) return;
 
-    for (int c = 0; c < ClusterCount; ++c)
+    FbxCluster::ELinkMode LinkMode = FbxCluster::eTotalOne;
+    int ClusterCount = Skin->GetClusterCount();
+
+    TMap<FbxNode*, int32> NodeToIndex;
+
+    // 1. 수집 단계
+    for (int i = 0; i < ClusterCount; ++i)
     {
-        FbxCluster* Cluster = Skin->GetCluster(c);
-        FbxNode* BoneNode = Cluster->GetLink();
-        if (!BoneNode)
+        FbxCluster* Cluster = Skin->GetCluster(i);
+        FbxNode* Node = Cluster->GetLink(); // 본 노드
+
+        if (!Node || NodeToIndex.Contains(Node))
             continue;
 
         FSkeletonBone Bone;
-        Bone.Name = BoneNode->GetName();
-        Bone.Node = BoneNode;
-        Bone.LocalBindPose = BoneNode->EvaluateLocalTransform();
-        Bone.GlobalPose.SetIdentity(); // 초기화
+        Bone.Name = Node->GetName();
+        Bone.Node = Node;
 
-        // Find parent index
-        FbxNode* Parent = BoneNode->GetParent();
-        Bone.ParentIndex = -1;
-        for (int i = 0; i < OutBones.Num(); ++i)
-        {
-            if (OutBones[i].Node == Parent)
-            {
-                Bone.ParentIndex = i;
-                break;
-            }
-        }
+        FbxNode* Parent = Node->GetParent();
+        Bone.ParentIndex = Parent && NodeToIndex.Contains(Parent)
+            ? NodeToIndex[Parent]
+            : -1;
+
+        // 2. 바인드 포즈 저장
+        Bone.LocalBindPose = Node->EvaluateLocalTransform();
+        Bone.GlobalBindPose = Node->EvaluateGlobalTransform(); //  추가
 
         OutBones.Add(Bone);
+        NodeToIndex.Add(Node, OutBones.Num() - 1);
+    }
+
+    // 3. 디버그용 본 트리 출력
+    for (int i = 0; i < OutBones.Num(); ++i)
+    {
+        const FSkeletonBone& Bone = OutBones[i];
+        UE_LOG(ELogLevel::Display, TEXT("[%2d] %s (Parent: %d)"), i, *Bone.Name, Bone.ParentIndex);
     }
 }
+
 
 void RecalculateGlobalPoses(TArray<FSkeletonBone>& Bones)
 {
@@ -77,64 +86,51 @@ void RotateBone(TArray<FSkeletonBone>& Bones, int32 BoneIndex, const FbxVector4&
     RecalculateGlobalPoses(Bones);
 }
 
-void ReskinVerticesCPU(FbxMesh* Mesh, const TArray<FSkeletonBone>& Bones, TArray<FStaticMeshVertex>& Vertices)
+void ReskinVerticesCPU(
+    FbxMesh* Mesh,
+    const TArray<FSkeletonBone>& Bones,
+    TArray<FStaticMeshVertex>& Vertices,
+    const TMap<int32, TArray<TPair<int32, float>>>& ControlPointToBoneWeights)
 {
-    if (!Mesh || Bones.Num() == 0) return;
-
-    const int ControlPointsCount = Mesh->GetControlPointsCount();
-    FbxVector4* ControlPoints = Mesh->GetControlPoints();
-
-    std::vector<FbxVector4> Skinned(ControlPointsCount);
-    for (int i = 0; i < ControlPointsCount; ++i)
-        Skinned[i] = ControlPoints[i];
-
-    FbxSkin* Skin = static_cast<FbxSkin*>(Mesh->GetDeformer(0, FbxDeformer::eSkin));
-
-    for (int c = 0; c < Skin->GetClusterCount(); ++c)
+    for (FStaticMeshVertex& Vertex : Vertices)
     {
-        FbxCluster* Cluster = Skin->GetCluster(c);
-        int* Indices = Cluster->GetControlPointIndices();
-        double* Weights = Cluster->GetControlPointWeights();
-        int Count = Cluster->GetControlPointIndicesCount();
+        const int32 CtrlIdx = Vertex.ControlPointIndex;
 
-        FbxNode* BoneNode = Cluster->GetLink();
-        int BoneIndex = Bones.IndexOfByPredicate([&](const FSkeletonBone& B) { return B.Node == BoneNode; });
-        if (BoneIndex == INDEX_NONE) continue;
+        if (!ControlPointToBoneWeights.Contains(CtrlIdx))
+            continue;
 
-        FbxAMatrix TransformMatrix, ReferenceMatrix;
-        Cluster->GetTransformMatrix(TransformMatrix);
-        Cluster->GetTransformLinkMatrix(ReferenceMatrix);
+        const TArray<TPair<int32, float>>& Influences = ControlPointToBoneWeights[CtrlIdx];
 
-        FbxAMatrix BoneOffsetMatrix = ReferenceMatrix.Inverse() * TransformMatrix;
-        FbxAMatrix FinalMatrix = Bones[BoneIndex].GlobalPose * BoneOffsetMatrix;
+        FbxVector4 Skinned = FbxVector4(0, 0, 0, 1);
+        float TotalWeight = 0.f;
 
-        for (int i = 0; i < Count; ++i)
+        FbxVector4 OrigPos(Vertex.X, Vertex.Y, Vertex.Z, 1.0);
+
+        for (const TPair<int32, float>& Influence : Influences)
         {
-            int ctrlIdx = Indices[i];
-            double weight = Weights[i];
-            if (ctrlIdx < ControlPointsCount)
-            {
-                FbxVector4 SkinnedDelta = (FinalMatrix.MultT(ControlPoints[ctrlIdx]) - ControlPoints[ctrlIdx]) * weight;
-                Skinned[ctrlIdx] += SkinnedDelta;
-            }
+            int BoneIndex = Influence.Key;
+            float Weight = Influence.Value;
+
+            if (!Bones.IsValidIndex(BoneIndex)) continue;
+
+            const FbxAMatrix& GlobalPose = Bones[BoneIndex].GlobalPose;
+            const FbxAMatrix& BindPose = Bones[BoneIndex].GlobalBindPose;
+            FbxAMatrix OffsetMatrix = GlobalPose * BindPose.Inverse();
+
+            Skinned += OffsetMatrix.MultT(OrigPos) * Weight;
+            TotalWeight += Weight;
         }
-    }
 
-    for (auto& V : Vertices)
-    {
-        if ((int)V.MaterialIndex < ControlPointsCount)
+        if (TotalWeight > 0.0)
         {
-            //FVector Pos = FVector((float)Skinned[V.MaterialIndex][0], (float)Skinned[V.MaterialIndex][1], (float)Skinned[V.MaterialIndex][2]);
-            //V.X = Pos.X;
-            //V.Y = Pos.Y;
-            //V.Z = Pos.Z;
-            FbxVector4 P = Skinned[V.ControlPointIndex];
-            V.X = (float)P[0];
-            V.Y = (float)P[1];
-            V.Z = (float)P[2];
+            Skinned /= TotalWeight;
+            Vertex.X = static_cast<float>(Skinned[0]);
+            Vertex.Y = static_cast<float>(Skinned[1]);
+            Vertex.Z = static_cast<float>(Skinned[2]);
         }
     }
 }
+
 
 FbxMesh* ExtractFirstMeshFromScene(FbxNode* Node)
 {
@@ -158,6 +154,41 @@ int32 FindBoneByName(const TArray<FSkeletonBone>& Bones, const FString& Name)
             return i;
     }
     return -1;
+}
+
+void BuildControlPointInfluenceMap(FbxMesh* Mesh, const TArray<FSkeletonBone>& Bones, TMap<int32, TArray<TPair<int32, float>>>& OutMap)
+{
+    OutMap.Empty();
+
+    if (!Mesh) return;
+
+    FbxSkin* Skin = static_cast<FbxSkin*>(Mesh->GetDeformer(0, FbxDeformer::eSkin));
+    if (!Skin) return;
+
+    for (int ClusterIndex = 0; ClusterIndex < Skin->GetClusterCount(); ++ClusterIndex)
+    {
+        FbxCluster* Cluster = Skin->GetCluster(ClusterIndex);
+        FbxNode* BoneNode = Cluster->GetLink();
+
+        int32 BoneIndex = Bones.IndexOfByPredicate([BoneNode](const FSkeletonBone& B) {
+            return B.Node == BoneNode;
+            });
+
+        if (BoneIndex == INDEX_NONE)
+            continue;
+
+        int* Indices = Cluster->GetControlPointIndices();
+        double* Weights = Cluster->GetControlPointWeights();
+        int Count = Cluster->GetControlPointIndicesCount();
+
+        for (int i = 0; i < Count; ++i)
+        {
+            int CtrlIdx = Indices[i];
+            float Weight = static_cast<float>(Weights[i]);
+
+            OutMap.FindOrAdd(CtrlIdx).Add({ BoneIndex, Weight });
+        }
+    }
 }
 
 bool FFbxLoader::LoadFBX(const FString& FBXFilePath, FStaticMeshRenderData& OutMeshData, bool bApplyCPUSkinning, FbxScene** OutScene, FbxMesh** OutMesh)
@@ -288,7 +319,7 @@ void FFbxLoader::ProcessMesh(FbxMesh* Mesh, FStaticMeshRenderData& MeshData, boo
                 double weight = weights[i];
                 if (ctrlIdx < ControlPointsCount)
                 {
-                    SkinnedPositions[ctrlIdx] += (ClusterMatrices[c].MultT(ControlPoints[ctrlIdx]) - ControlPoints[ctrlIdx]) * weight;
+                    //SkinnedPositions[ctrlIdx] += (ClusterMatrices[c].MultT(ControlPoints[ctrlIdx]) - ControlPoints[ctrlIdx]) * weight;
                 }
             }
         }

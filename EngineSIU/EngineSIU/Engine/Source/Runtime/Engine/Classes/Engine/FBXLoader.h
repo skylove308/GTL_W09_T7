@@ -1,6 +1,7 @@
 #pragma once
 #include <fbxsdk.h>
 #include "Asset/StaticMeshAsset.h"
+#include "Container/Map.h"
 
 struct FSkeletonBone
 {
@@ -8,6 +9,7 @@ struct FSkeletonBone
     int32 ParentIndex;
     FbxNode* Node;
     FbxAMatrix LocalBindPose;
+    FbxAMatrix GlobalBindPose;
     FbxAMatrix GlobalPose;
 };
 
@@ -41,8 +43,17 @@ private:
 void ExtractSkeleton(FbxMesh* Mesh, TArray<FSkeletonBone>& OutBones);
 void RecalculateGlobalPoses(TArray<FSkeletonBone>& Bones);
 void RotateBone(TArray<FSkeletonBone>& Bones, int32 BoneIndex, const FbxVector4& EulerDegrees);
-void ReskinVerticesCPU(FbxMesh* Mesh, const TArray<FSkeletonBone>& Bones, TArray<FStaticMeshVertex>& Vertices);
+void ReskinVerticesCPU(
+    FbxMesh* Mesh,
+    const TArray<FSkeletonBone>& Bones,
+    TArray<FStaticMeshVertex>& Vertices,
+    const TMap<int32, TArray<TPair<int32, float>>>& ControlPointToBoneWeights);
 //void UpdateVertexBuffer(FGraphicsSystem* Graphics, FBufferManager* BufferManager, const FWString& MeshName, const TArray<FStaticMeshVertex>& Vertices);
 FbxMesh* ExtractFirstMeshFromScene(FbxNode* Node);
 
 int32 FindBoneByName(const TArray<FSkeletonBone>& Bones, const FString& Name);
+
+void BuildControlPointInfluenceMap(
+    FbxMesh* Mesh,
+    const TArray<FSkeletonBone>& Bones,
+    TMap<int32, TArray<TPair<int32, float>>>& OutMap);

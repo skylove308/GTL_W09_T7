@@ -29,6 +29,8 @@ ACube::ACube()
         TArray<FSkeletonBone> Bones;
         ExtractSkeleton(Mesh, Bones);
         
+        TMap<int32, TArray<TPair<int32, float>>> ControlPointToBoneWeights;
+        BuildControlPointInfluenceMap(Mesh, Bones, ControlPointToBoneWeights);
 
         UE_LOG(ELogLevel::Display, TEXT("Bone 개수: %d"), Bones.Num());
 
@@ -42,8 +44,8 @@ ACube::ACube()
         int32 PickedBone = FindBoneByName(Bones, TEXT("spine_01")); // 또는 index 직접
         if (PickedBone != -1)
         {
-            //RotateBone(Bones, PickedBone, FbxVector4(0, 90, 0)); // Y축 30도 회전
-            ReskinVerticesCPU(Mesh, Bones, RenderData->Vertices);
+            RotateBone(Bones, PickedBone, FbxVector4(0, 90, 0)); // Y축 30도 회전
+            ReskinVerticesCPU(Mesh, Bones, RenderData->Vertices, ControlPointToBoneWeights);
         }
 
         FFbxLoader::ComputeBoundingBox(RenderData->Vertices, RenderData->BoundingBoxMin, RenderData->BoundingBoxMax);
