@@ -124,10 +124,14 @@ void ReskinVerticesCPU(FbxMesh* Mesh, const TArray<FSkeletonBone>& Bones, TArray
     {
         if ((int)V.MaterialIndex < ControlPointsCount)
         {
-            FVector Pos = FVector((float)Skinned[V.MaterialIndex][0], (float)Skinned[V.MaterialIndex][1], (float)Skinned[V.MaterialIndex][2]);
-            V.X = Pos.X;
-            V.Y = Pos.Y;
-            V.Z = Pos.Z;
+            //FVector Pos = FVector((float)Skinned[V.MaterialIndex][0], (float)Skinned[V.MaterialIndex][1], (float)Skinned[V.MaterialIndex][2]);
+            //V.X = Pos.X;
+            //V.Y = Pos.Y;
+            //V.Z = Pos.Z;
+            FbxVector4 P = Skinned[V.ControlPointIndex];
+            V.X = (float)P[0];
+            V.Y = (float)P[1];
+            V.Z = (float)P[2];
         }
     }
 }
@@ -301,6 +305,7 @@ void FFbxLoader::ProcessMesh(FbxMesh* Mesh, FStaticMeshRenderData& MeshData, boo
             FbxVector4 pos = SkinnedPositions[ctrlPointIndex];
 
             FStaticMeshVertex vertex = {};
+            vertex.ControlPointIndex = ctrlPointIndex;
             FVector position = ConvertPosition(pos);
             vertex.X = position.X;
             vertex.Y = position.Y;

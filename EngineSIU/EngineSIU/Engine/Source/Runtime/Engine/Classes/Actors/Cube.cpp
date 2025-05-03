@@ -42,7 +42,7 @@ ACube::ACube()
         int32 PickedBone = FindBoneByName(Bones, TEXT("spine_01")); // 또는 index 직접
         if (PickedBone != -1)
         {
-            RotateBone(Bones, PickedBone, FbxVector4(0, 30, 0)); // Y축 30도 회전
+            RotateBone(Bones, PickedBone, FbxVector4(0, 90, 0)); // Y축 30도 회전
             ReskinVerticesCPU(Mesh, Bones, RenderData->Vertices);
         }
 
@@ -62,8 +62,8 @@ ACube::ACube()
         //MyActor->AddComponent(MeshComponent);
         StaticMeshComponent->SetStaticMesh(StaticMesh);
 
-        FVertexInfo VertexInfo;
-        FEngineLoop::Renderer.BufferManager->CreateVertexBuffer(RenderData->ObjectName, RenderData->Vertices, VertexInfo);
+        //FVertexInfo VertexInfo;
+        //FEngineLoop::Renderer.BufferManager->CreateVertexBuffer(RenderData->ObjectName, RenderData->Vertices, VertexInfo);
     }
     else
     {
