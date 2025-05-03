@@ -8,11 +8,17 @@ struct FSkeletonBone
     int32 ParentIndex;
     FbxNode* Node;
     FbxAMatrix LocalBindPose;
+    FbxAMatrix GlobalPose;
 };
 
 struct FFbxLoader
 {
-    static bool LoadFBX(const FString& FBXFilePath, FStaticMeshRenderData& OutMeshData, bool bApplyCPUSkinning = true);
+    static bool LoadFBX(const FString& FBXFilePath, 
+        FStaticMeshRenderData& OutMeshData, 
+        bool bApplyCPUSkinning = true,
+        FbxScene** OutScene = nullptr, 
+        FbxMesh** OutMesh = nullptr
+    );
 
 private:
     static void InitializeSdk();
@@ -30,3 +36,11 @@ private:
     inline static FbxManager* SdkManager = nullptr;
     inline static FbxImporter* Importer = nullptr;
 };
+
+// External skeleton and skinning utilities
+void ExtractSkeleton(FbxMesh* Mesh, TArray<FSkeletonBone>& OutBones);
+void RecalculateGlobalPoses(TArray<FSkeletonBone>& Bones);
+void RotateBone(TArray<FSkeletonBone>& Bones, int32 BoneIndex, const FbxVector4& EulerDegrees);
+void ReskinVerticesCPU(FbxMesh* Mesh, const TArray<FSkeletonBone>& Bones, TArray<FStaticMeshVertex>& Vertices);
+//void UpdateVertexBuffer(FGraphicsSystem* Graphics, FBufferManager* BufferManager, const FWString& MeshName, const TArray<FStaticMeshVertex>& Vertices);
+FbxMesh* ExtractFirstMeshFromScene(FbxNode* Node);

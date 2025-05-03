@@ -139,7 +139,21 @@ static void ReskinVerticesCPU(FbxMesh* Mesh, const TArray<FSkeletonBone>& Bones,
     }
 }
 
-bool FFbxLoader::LoadFBX(const FString& FBXFilePath, FStaticMeshRenderData& OutMeshData, bool bApplyCPUSkinning)
+static FbxMesh* ExtractFirstMeshFromScene(FbxNode* Node)
+{
+    if (!Node) return nullptr;
+    if (Node->GetMesh()) return Node->GetMesh();
+
+    for (int i = 0; i < Node->GetChildCount(); ++i)
+    {
+        FbxMesh* Mesh = ExtractFirstMeshFromScene(Node->GetChild(i));
+        if (Mesh) return Mesh;
+    }
+
+    return nullptr;
+}
+
+bool FFbxLoader::LoadFBX(const FString& FBXFilePath, FStaticMeshRenderData& OutMeshData, bool bApplyCPUSkinning, FbxScene** OutScene = nullptr, FbxMesh** OutMesh = nullptr)
 {
     InitializeSdk();
 
@@ -158,7 +172,16 @@ bool FFbxLoader::LoadFBX(const FString& FBXFilePath, FStaticMeshRenderData& OutM
 
     ComputeBoundingBox(OutMeshData.Vertices, OutMeshData.BoundingBoxMin, OutMeshData.BoundingBoxMax);
 
-    DestroySdk();
+    if (OutScene)
+    {
+        *OutScene = Scene;
+    }
+    if (OutMesh)
+    {
+        *OutMesh = ExtractFirstMeshFromScene(Scene->GetRootNode());
+    }
+
+    //DestroySdk(); 호출에게 넘긴 Scene을 사용해야 함.
     return true;
 }
 

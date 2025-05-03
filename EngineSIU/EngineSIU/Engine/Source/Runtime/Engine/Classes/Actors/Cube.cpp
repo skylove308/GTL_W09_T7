@@ -19,9 +19,16 @@ ACube::ACube()
     // 2. 메시 데이터 구조체 생성
     FStaticMeshRenderData* RenderData = new FStaticMeshRenderData();
 
+    FbxScene* Scene = nullptr;
+    FbxMesh* Mesh = nullptr;
+
     // 3. FBX 로딩 (T-Pose로 변환 포함)
     if (FFbxLoader::LoadFBX(FBXPath, *RenderData, true))
     {
+
+        ExtractSkeleton(Mesh, Bones);
+        RecalculateGlobalPoses(Bones);
+
         // 4. UStaticMesh 생성
         UStaticMesh* StaticMesh = FObjectFactory::ConstructObject<UStaticMesh>(nullptr);
         StaticMesh->SetData(RenderData);
