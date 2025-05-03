@@ -84,6 +84,60 @@ static void RotateBone(TArray<FSkeletonBone>& Bones, int32 BoneIndex, const FbxV
     RecalculateGlobalPoses(Bones);
 }
 
+static void ReskinVerticesCPU(FbxMesh* Mesh, const TArray<FSkeletonBone>& Bones, TArray<FStaticMeshVertex>& Vertices)
+{
+    if (!Mesh || Bones.Num() == 0) return;
+
+    const int ControlPointsCount = Mesh->GetControlPointsCount();
+    FbxVector4* ControlPoints = Mesh->GetControlPoints();
+
+    std::vector<FbxVector4> Skinned(ControlPointsCount);
+    for (int i = 0; i < ControlPointsCount; ++i)
+        Skinned[i] = ControlPoints[i];
+
+    FbxSkin* Skin = static_cast<FbxSkin*>(Mesh->GetDeformer(0, FbxDeformer::eSkin));
+
+    for (int c = 0; c < Skin->GetClusterCount(); ++c)
+    {
+        FbxCluster* Cluster = Skin->GetCluster(c);
+        int* Indices = Cluster->GetControlPointIndices();
+        double* Weights = Cluster->GetControlPointWeights();
+        int Count = Cluster->GetControlPointIndicesCount();
+
+        FbxNode* BoneNode = Cluster->GetLink();
+        int BoneIndex = Bones.IndexOfByPredicate([&](const FSkeletonBone& B) { return B.Node == BoneNode; });
+        if (BoneIndex == INDEX_NONE) continue;
+
+        FbxAMatrix TransformMatrix, ReferenceMatrix;
+        Cluster->GetTransformMatrix(TransformMatrix);
+        Cluster->GetTransformLinkMatrix(ReferenceMatrix);
+
+        FbxAMatrix BoneOffsetMatrix = ReferenceMatrix.Inverse() * TransformMatrix;
+        FbxAMatrix FinalMatrix = Bones[BoneIndex].GlobalPose * BoneOffsetMatrix;
+
+        for (int i = 0; i < Count; ++i)
+        {
+            int ctrlIdx = Indices[i];
+            double weight = Weights[i];
+            if (ctrlIdx < ControlPointsCount)
+            {
+                FbxVector4 SkinnedDelta = (FinalMatrix.MultT(ControlPoints[ctrlIdx]) - ControlPoints[ctrlIdx]) * weight;
+                Skinned[ctrlIdx] += SkinnedDelta;
+            }
+        }
+    }
+
+    for (auto& V : Vertices)
+    {
+        if ((int)V.MaterialIndex < ControlPointsCount)
+        {
+            FVector Pos = FVector((float)Skinned[V.MaterialIndex][0], (float)Skinned[V.MaterialIndex][1], (float)Skinned[V.MaterialIndex][2]);
+            V.X = Pos.X;
+            V.Y = Pos.Y;
+            V.Z = Pos.Z;
+        }
+    }
+}
 
 bool FFbxLoader::LoadFBX(const FString& FBXFilePath, FStaticMeshRenderData& OutMeshData, bool bApplyCPUSkinning)
 {
