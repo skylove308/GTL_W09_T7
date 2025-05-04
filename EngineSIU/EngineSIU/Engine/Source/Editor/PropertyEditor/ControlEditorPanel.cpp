@@ -41,6 +41,7 @@
 #include "Contents/Actors/GoalPlatformActor.h"
 #include "Contents/Actors/TriggerBox.h"
 #include "Renderer/CompositingPass.h"
+#include "Engine/SkeletalMeshActor.h"
 
 void ControlEditorPanel::Render()
 {
@@ -327,6 +328,7 @@ void ControlEditorPanel::CreateModifyButton(const ImVec2 ButtonSize, ImFont* Ico
             {.Label = "GoalPlatform", .OBJ = OBJ_GOALPLATFORM},
             {.Label = "Coin", .OBJ = OBJ_COIN},
             {.Label = "TriggerBox", .OBJ = OBJ_TRIGGERBOX},
+            {.Label = "FBX", .OBJ = OBJ_FBX},
         };
 
         for (const auto& primitive : primitives)
@@ -454,6 +456,10 @@ void ControlEditorPanel::CreateModifyButton(const ImVec2 ButtonSize, ImFont* Ico
                 case OBJ_TRIGGERBOX:
                     SpawnedActor = World->SpawnActor<ATriggerBox>();
                     SpawnedActor->SetActorLabel(TEXT("OBJ_TRIGGERBOX"));
+                    break;
+                case OBJ_FBX:
+                    SpawnedActor = World->SpawnActor<ASkeletalMeshActor>();
+                    SpawnedActor->SetActorLabel(TEXT("OBJ_FBX"));
                     break;
                 case OBJ_CAMERA:
                 case OBJ_PLAYER:

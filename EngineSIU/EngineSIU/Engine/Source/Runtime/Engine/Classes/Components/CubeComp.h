@@ -1,5 +1,5 @@
 #pragma once
-#include "StaticMeshComponent.h"
+#include "Components/Mesh/StaticMeshComponent.h"
 
 class UCubeComp : public UStaticMeshComponent
 {

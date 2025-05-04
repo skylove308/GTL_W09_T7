@@ -5,6 +5,7 @@
 #include "Asset/StaticMeshAsset.h"
 #include "UObject/ObjectFactory.h"
 #include "Components/Mesh/StaticMeshRenderData.h"
+#include "Components/Mesh/SkeletalMeshRenderData.h"
 
 bool FFBXLoader::Initialize()
 {
@@ -519,6 +520,24 @@ void FFBXLoader::ComputeBoundingBox(const TArray<FStaticMeshVertex>& InVerts, FV
     }
 }
 
+
+void FFBXLoader::CopyNormals(FbxMesh* Mesh, TArray<FSkeletalMeshVertex>& OutVerts) {
+    FFBXLoader::CopyNormals(Mesh, reinterpret_cast<TArray<FStaticMeshVertex>&>(OutVerts));
+}
+
+void FFBXLoader::CopyUVs(FbxMesh* Mesh, TArray<FSkeletalMeshVertex>& OutVerts) {
+    FFBXLoader::CopyUVs(Mesh, reinterpret_cast<TArray<FStaticMeshVertex>&>(OutVerts));
+}
+
+void FFBXLoader::CopyTangents(FbxMesh* Mesh, TArray<FSkeletalMeshVertex>& OutVerts) {
+    FFBXLoader::CopyTangents(Mesh, reinterpret_cast<TArray<FStaticMeshVertex>&>(OutVerts));
+}
+
+void FFBXLoader::ComputeBoundingBox(const TArray<FSkeletalMeshVertex>& InVerts, FVector& OutMin, FVector& OutMax)
+{
+    FFBXLoader::ComputeBoundingBox(reinterpret_cast<const TArray<FStaticMeshVertex>&>(InVerts), OutMin, OutMax);
+}
+
 UStaticMesh* FFBXManager::CreateStaticMesh(const FString& filePath)
 {
     FFBXLoader::Initialize();
@@ -540,4 +559,14 @@ UStaticMesh* FFBXManager::CreateStaticMesh(const FString& filePath)
 UStaticMesh* FFBXManager::GetStaticMesh(FWString name)
 {
     return StaticMeshMap[name];
+}
+
+USkeletalMesh* FFBXManager::CreateSkeletalMesh(const FString& filePath)
+{
+    return nullptr;
+}
+
+USkeletalMesh* FFBXManager::GetSkeletalMesh(FWString name)
+{
+    return nullptr;
 }

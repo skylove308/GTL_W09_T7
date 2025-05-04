@@ -21,7 +21,9 @@ struct FSkeletalMeshBoneWeight;
 struct FMaterialSubset;
 struct FStaticMeshVertex;
 struct FStaticMeshRenderData;
+struct FSkeletalMeshRenderData;
 class UStaticMesh;
+class USkeletalMesh;
 class UMaterial;
 
 static FMatrix FbxAMatrixToFMatrix(const FbxAMatrix& InM)
@@ -79,6 +81,11 @@ public:
     static void CopyTangents(FbxMesh* Mesh, TArray<FStaticMeshVertex>& OutVerts);
     static void ComputeBoundingBox(const TArray<FStaticMeshVertex>& InVerts, FVector& OutMin, FVector& OutMax);
 
+    static void CopyNormals(FbxMesh* Mesh, TArray<FSkeletalMeshVertex>& OutVerts);
+    static void CopyUVs(FbxMesh* Mesh, TArray<FSkeletalMeshVertex>& OutVerts);
+    static void CopyTangents(FbxMesh* Mesh, TArray<FSkeletalMeshVertex>& OutVerts);
+    static void ComputeBoundingBox(const TArray<FSkeletalMeshVertex>& InVerts, FVector& OutMin, FVector& OutMax);
+
 private:
     inline static FbxManager* Manager = nullptr;
     inline static FbxImporter* Importer = nullptr;
@@ -92,6 +99,8 @@ struct FFBXManager
 public:
     static UStaticMesh* CreateStaticMesh(const FString& filePath);
     static UStaticMesh* GetStaticMesh(FWString name);
+    static USkeletalMesh* CreateSkeletalMesh(const FString& filePath);
+    static USkeletalMesh* GetSkeletalMesh(FWString name);
 
     inline static TMap<FString, FStaticMeshRenderData*> FbxStaticMeshMap;
     inline static TMap<FWString, UStaticMesh*> StaticMeshMap;

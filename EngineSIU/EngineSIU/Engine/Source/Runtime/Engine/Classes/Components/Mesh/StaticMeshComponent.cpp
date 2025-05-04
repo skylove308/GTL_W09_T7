@@ -1,12 +1,9 @@
 #include <algorithm>
-
-#include "Components/StaticMeshComponent.h"
-
+#include "StaticMeshComponent.h"
 #include "Engine/FObjLoader.h"
 #include "Launch/EngineLoop.h"
 #include "UObject/Casts.h"
 #include "UObject/ObjectFactory.h"
-
 #include "GameFramework/Actor.h"
 
 UObject* UStaticMeshComponent::Duplicate(UObject* InOuter)
