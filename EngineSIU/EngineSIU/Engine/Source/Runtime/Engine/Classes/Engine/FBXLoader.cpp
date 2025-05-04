@@ -1,5 +1,5 @@
 #include "FbxLoader.h"
-
+#include "Container/Map.h"
 #include <string>
 
 
@@ -249,7 +249,7 @@ void FFbxLoader::ProcessNode(FbxNode* Node, FStaticMeshRenderData& MeshData, boo
                 UE_LOG(ELogLevel::Display, TEXT("Using LOD %d Mesh: %s"), i, *LODNodeName);
                 if (i == 0) // LOD0만 사용
                 {
-                    ProcessMesh(Mesh, MeshData, bApplyCPUSkinning);
+                    ProcessNode(LODNode, MeshData, bApplyCPUSkinning);
                 }
             }
         }
@@ -321,8 +321,10 @@ void FFbxLoader::ProcessMesh(FbxMesh* Mesh, FStaticMeshRenderData& MeshData, boo
     int PolygonCount = Mesh->GetPolygonCount();
     FbxGeometryElementUV* UVElement = Mesh->GetElementUV();
 
+    TMap<FStaticMeshVertex, int> VertexToIndex;
     for (int polyIndex = 0; polyIndex < PolygonCount; ++polyIndex)
     {
+        //triangle 가정
         for (int vertIndex = 0; vertIndex < 3; ++vertIndex)
         {
             int ctrlPointIndex = Mesh->GetPolygonVertex(polyIndex, vertIndex);
@@ -359,8 +361,26 @@ void FFbxLoader::ProcessMesh(FbxMesh* Mesh, FStaticMeshRenderData& MeshData, boo
 
             vertex.MaterialIndex = 0; // 임시. 머티리얼 인덱스 설정 필요
 
-            MeshData.Indices.Add(MeshData.Vertices.Num());
-            MeshData.Vertices.Add(vertex);
+            // 중복 검사 후 정점/인덱스 추가
+            if (int32* FoundIndex = VertexToIndex.Find(vertex))
+            {
+                MeshData.Indices.Add(*FoundIndex);
+            }
+            else
+            {
+                int32 NewIndex = MeshData.Vertices.Num();
+                MeshData.Vertices.Add(vertex);
+                MeshData.Indices.Add(NewIndex);
+                VertexToIndex.Add(vertex, NewIndex);
+            }
+
+            FString MeshName = Mesh->GetName();
+            if (MeshName.IsEmpty())
+            {
+                MeshName = TEXT("UnnamedMesh");
+            }
+
+            MeshData.ObjectName = MeshName.ToWideString();
         }
     }
 }

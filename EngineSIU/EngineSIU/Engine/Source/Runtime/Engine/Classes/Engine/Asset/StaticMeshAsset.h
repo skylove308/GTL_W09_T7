@@ -14,7 +14,30 @@ struct FStaticMeshVertex
     uint32 MaterialIndex;
 
     int32 ControlPointIndex = -1;
+    
+    bool operator==(const FStaticMeshVertex& Other) const
+    {
+        return X == Other.X && Y == Other.Y && Z == Other.Z &&
+            NormalX == Other.NormalX && NormalY == Other.NormalY && NormalZ == Other.NormalZ &&
+            U == Other.U && V == Other.V &&
+            MaterialIndex == Other.MaterialIndex;
+    }
 };
+
+namespace std
+{
+    template<>
+    struct hash<FStaticMeshVertex>
+    {
+        size_t operator()(const FStaticMeshVertex& V) const
+        {
+            size_t h1 = std::hash<float>()(V.X) ^ std::hash<float>()(V.Y) ^ std::hash<float>()(V.Z);
+            size_t h2 = std::hash<float>()(V.NormalX) ^ std::hash<float>()(V.NormalY) ^ std::hash<float>()(V.NormalZ);
+            size_t h3 = std::hash<float>()(V.U) ^ std::hash<float>()(V.V);
+            return h1 ^ (h2 << 1) ^ (h3 << 2);
+        }
+    };
+}
 
 struct FStaticMeshRenderData
 {
