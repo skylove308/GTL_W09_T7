@@ -28,6 +28,8 @@
 #include "UnrealEd/EditorViewportClient.h"
 #include "Components/Light/PointLightComponent.h"
 #include "Contents/Actors/Fish.h"
+#include "Components/Mesh/SkeletalMeshComponent.h"
+#include "Engine/Asset/SkeletalMeshAsset.h"
 
 
 FStaticMeshRenderPass::FStaticMeshRenderPass()
@@ -385,6 +387,66 @@ void FStaticMeshRenderPass::RenderAllStaticMeshes(const std::shared_ptr<FEditorV
 #pragma endregion W08
 
         RenderPrimitive(RenderData, Comp->GetStaticMesh()->GetMaterials(), Comp->GetOverrideMaterials(), Comp->GetselectedSubMeshIndex());
+
+        if (Viewport->GetShowFlag() & static_cast<uint64>(EEngineShowFlags::SF_AABB))
+        {
+            FEngineLoop::PrimitiveDrawBatch.AddAABBToBatch(Comp->GetBoundingBox(), Comp->GetWorldLocation(), WorldMatrix);
+        }
+    }
+}
+
+void FStaticMeshRenderPass::RenderAllSkeletalMeshes(const std::shared_ptr<FEditorViewportClient>& Viewport)
+{
+    for (USkeletalMeshComponent* Comp : SkeletalMeshComponents)
+    {
+        if (!Comp || !Comp->GetSkeletalMesh())
+        {
+            continue;
+        }
+
+        FSkeletalMeshRenderData* RenderData = Comp->GetSkeletalMesh()->GetRenderData();
+        if (RenderData == nullptr)
+        {
+            continue;
+        }
+
+        UEditorEngine* Engine = Cast<UEditorEngine>(GEngine);
+
+        USceneComponent* SelectedComponent = Engine->GetSelectedComponent();
+        AActor* SelectedActor = Engine->GetSelectedActor();
+
+        USceneComponent* TargetComponent = nullptr;
+
+        if (SelectedComponent != nullptr)
+        {
+            TargetComponent = SelectedComponent;
+        }
+        else if (SelectedActor != nullptr)
+        {
+            TargetComponent = SelectedActor->GetRootComponent();
+        }
+
+        FMatrix WorldMatrix = Comp->GetWorldMatrix();
+        FVector4 UUIDColor = Comp->EncodeUUID() / 255.0f;
+        const bool bIsSelected = (Engine && TargetComponent == Comp);
+
+        UpdateObjectConstant(WorldMatrix, UUIDColor, bIsSelected);
+
+#pragma region W08
+        FDiffuseMultiplier DM = {};
+        DM.DiffuseMultiplier = 0.f;
+        if (AFish* Fish = Cast<AFish>(Comp->GetOwner()))
+        {
+            if (!Fish->IsDead())
+            {
+                DM.DiffuseMultiplier = 1.f - Fish->GetHealthPercent();
+            }
+        }
+        DM.DiffuseOverrideColor = FVector(0.55f, 0.45f, 0.067f);
+        BufferManager->UpdateConstantBuffer(TEXT("FDiffuseMultiplier"), DM);
+#pragma endregion W08
+
+        RenderPrimitive(RenderData, Comp->GetSkeletalMesh()->GetMaterials(), Comp->GetOverrideMaterials(), Comp->GetselectedSubMeshIndex());
 
         if (Viewport->GetShowFlag() & static_cast<uint64>(EEngineShowFlags::SF_AABB))
         {

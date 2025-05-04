@@ -542,7 +542,6 @@ UStaticMesh* FFBXManager::CreateStaticMesh(const FString& filePath)
 {
     FFBXLoader::Initialize();
 
-
     StaticMeshRenderData = new FStaticMeshRenderData();
 
     if (!FFBXLoader::LoadFBX(filePath))
@@ -563,7 +562,19 @@ UStaticMesh* FFBXManager::GetStaticMesh(FWString name)
 
 USkeletalMesh* FFBXManager::CreateSkeletalMesh(const FString& filePath)
 {
-    return nullptr;
+    FFBXLoader::Initialize();
+
+    SkeletalMeshRenderData = new FSkeletalMeshRenderData();
+
+    if (!FFBXLoader::LoadFBX(filePath))
+    {
+        delete  SkeletalMeshRenderData;
+        return nullptr;
+    }
+
+    USkeletalMesh* SkeletalMesh = FObjectFactory::ConstructObject<USkeletalMesh>(nullptr);
+    SkeletalMesh->SetData(SkeletalMeshRenderData);
+    return SkeletalMesh;
 }
 
 USkeletalMesh* FFBXManager::GetSkeletalMesh(FWString name)

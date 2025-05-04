@@ -8,7 +8,7 @@ ASkeletalMeshActor::ASkeletalMeshActor()
     SkeletalMeshComponent = AddComponent<USkeletalMeshComponent>();
     RootComponent = SkeletalMeshComponent;
 
-    USkeletalMesh* DefaultMesh = FFBXManager::CreateSkeletalMesh("Contents/final_low_poly_character_rigged.fbx");
+    USkeletalMesh* DefaultMesh = FFBXManager::CreateSkeletalMesh("Contents/BaseHuman.fbx");
     if (DefaultMesh)
     {
         SkeletalMeshComponent->SetSkeletalMesh(DefaultMesh);
