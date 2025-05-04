@@ -14,7 +14,7 @@ ACube::ACube()
 {
     //StaticMeshComponent->SetStaticMesh(FObjManager::GetStaticMesh(L"Contents/Reference/Reference.obj"));
 
-    FString FBXPath = TEXT("Assets/FBX/Aurora.FBX");
+    FString FBXPath = TEXT("Assets/FBX/SKM_Quinn_Simple.FBX");
 
     // 2. 메시 데이터 구조체 생성
     FStaticMeshRenderData* RenderData = new FStaticMeshRenderData();

@@ -236,16 +236,33 @@ bool FFbxLoader::LoadScene(FString FilePath, FbxScene*& OutScene)
 
 void FFbxLoader::ProcessNode(FbxNode* Node, FStaticMeshRenderData& MeshData, bool bApplyCPUSkinning)
 {
+    FbxNodeAttribute* Attr = Node->GetNodeAttribute();
+    if (Attr && Attr->GetAttributeType() == FbxNodeAttribute::eLODGroup)
+    {
+        int LODCount = Node->GetChildCount();
+        for (int i = 0; i < LODCount; ++i)
+        {
+            FbxNode* LODNode = Node->GetChild(i);
+            if (FbxMesh* Mesh = LODNode->GetMesh())
+            {
+                FString LODNodeName = LODNode->GetName();
+                UE_LOG(ELogLevel::Display, TEXT("Using LOD %d Mesh: %s"), i, *LODNodeName);
+                if (i == 0) // LOD0만 사용
+                {
+                    ProcessMesh(Mesh, MeshData, bApplyCPUSkinning);
+                }
+            }
+        }
+        return; // LODGroup은 자식 노드만 처리하므로 여기서 종료
+    }
+
     if (FbxMesh* Mesh = Node->GetMesh())
     {
         FString NodeName = Node->GetName();
+        UE_LOG(ELogLevel::Display, TEXT("Using Mesh: %s"), *NodeName);
 
-        // 조건: 오직 LOD0만 처리
-        if (NodeName == TEXT("Aurora_LOD0"))
-        {
-            UE_LOG(ELogLevel::Display, TEXT("Using Mesh: %s"), *NodeName);
-            ProcessMesh(Mesh, MeshData, bApplyCPUSkinning);
-        }
+        ProcessMesh(Mesh, MeshData, bApplyCPUSkinning);
+
     }
 
     for (int i = 0; i < Node->GetChildCount(); ++i)
