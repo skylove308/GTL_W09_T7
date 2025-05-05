@@ -102,5 +102,9 @@ public:
 
     inline static FStaticMeshRenderData* StaticMeshRenderData = nullptr;
     inline static FSkeletalMeshRenderData* SkeletalMeshRenderData = nullptr;
+
+private:
+    inline static TMap<FString, USkeletalMesh*> SkeletalMeshMap;
+    inline static TMap<FString, UStaticMesh*> StaticMeshMap;
 };
 

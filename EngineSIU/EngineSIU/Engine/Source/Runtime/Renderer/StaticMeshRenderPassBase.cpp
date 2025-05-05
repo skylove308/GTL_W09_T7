@@ -19,7 +19,7 @@ FStaticMeshRenderPassBase::FStaticMeshRenderPassBase()
 
 FStaticMeshRenderPassBase::~FStaticMeshRenderPassBase()
 {
-    ReleaseShader();
+    FStaticMeshRenderPassBase::ReleaseShader();
 }
 
 void FStaticMeshRenderPassBase::Initialize(FDXDBufferManager* InBufferManager, FGraphicsDevice* InGraphics, FDXDShaderManager* InShaderManager)

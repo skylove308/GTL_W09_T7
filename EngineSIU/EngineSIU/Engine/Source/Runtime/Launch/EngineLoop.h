@@ -8,6 +8,7 @@
 #include "Stats/GPUTimingManager.h"
 
 
+class USkeletalMesh;
 class FImGuiSubWindow;
 class FSlateAppMessageHandler;
 class UnrealEd;
@@ -27,7 +28,7 @@ public:
 
     int32 PreInit();
     int32 Init(HINSTANCE hInstance);
-    void Render();
+    void Render(float DeltaTime);
     void RenderSubWindow() const;
     void Tick();
     void Exit();
@@ -35,13 +36,13 @@ public:
     void RequestShowWindow(bool bShow);
 
     void GetClientSize(uint32& OutWidth, uint32& OutHeight) const;
+    static void ToggleContentDrawer();
 
 private:
     void WindowInit(HINSTANCE hInstance);
     void SubWindowInit(HINSTANCE hInstance);
     static LRESULT CALLBACK AppWndProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
-    static LRESULT CALLBACK SubAppWndProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
-    
+
     void UpdateUI();
 
 public:
@@ -65,6 +66,7 @@ private:
     UImGuiManager* FUIManager;
     FImGuiSubWindow* SubUI;
     ImGuiContext* CurrentImGuiContext;
+    USkeletalMesh* SelectedSkeletalMesh;
     //TODO: Editor들 EditorEngine으로 넣기
 
     std::unique_ptr<FSlateAppMessageHandler> AppMessageHandler;
@@ -80,6 +82,8 @@ private:
 public:
     SLevelEditor* GetLevelEditor() const { return LevelEditor; }
     UnrealEd* GetUnrealEditor() const { return UnrealEditor; }
-
+    void SelectSkeletalMesh(USkeletalMesh* SkeletalMesh) { SelectedSkeletalMesh = SkeletalMesh; }
+    USkeletalMesh* GetSelectedSkeletalMesh() const { return SelectedSkeletalMesh; }
     FSlateAppMessageHandler* GetAppMessageHandler() const { return AppMessageHandler.get(); }
 };
+

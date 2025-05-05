@@ -605,6 +605,11 @@ void FFBXLoader::ComputeBoundingBox(const TArray<FStaticMeshVertex>& InVerts, FV
 
 UStaticMesh* FFBXManager::CreateStaticMesh(const FString& filePath)
 {
+    if (StaticMeshMap.Contains(filePath))
+    {
+        return StaticMeshMap[filePath];
+    }
+    
     FFBXLoader::Initialize();
 
     StaticMeshRenderData = new FStaticMeshRenderData();
@@ -617,11 +622,20 @@ UStaticMesh* FFBXManager::CreateStaticMesh(const FString& filePath)
 
     UStaticMesh* StaticMesh = FObjectFactory::ConstructObject<UStaticMesh>(nullptr);
     StaticMesh->SetData(StaticMeshRenderData);
+
+    StaticMeshMap.Add(filePath, StaticMesh);
+    
     return StaticMesh;
 }
 
 USkeletalMesh* FFBXManager::CreateSkeletalMesh(const FString& filePath)
 {
+    // Already exists skeletal mesh.
+    if (SkeletalMeshMap.Contains(filePath))
+    {
+        return SkeletalMeshMap[filePath];
+    }
+    
     FFBXLoader::Initialize();
 
     SkeletalMeshRenderData = new FSkeletalMeshRenderData();
@@ -631,8 +645,11 @@ USkeletalMesh* FFBXManager::CreateSkeletalMesh(const FString& filePath)
         delete SkeletalMeshRenderData;
         return nullptr;
     }
-
+    
     USkeletalMesh* SkeletalMesh = FObjectFactory::ConstructObject<USkeletalMesh>(nullptr);
     SkeletalMesh->SetData(SkeletalMeshRenderData);
+
+    SkeletalMeshMap.Add(filePath, SkeletalMesh);
+    
     return SkeletalMesh;
 }

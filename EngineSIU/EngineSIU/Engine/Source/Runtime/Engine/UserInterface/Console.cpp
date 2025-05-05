@@ -238,7 +238,7 @@ void FConsole::Draw() {
     // 창을 표시하고 닫힘 여부 확인
     Overlay.Render(FEngineLoop::GraphicDevice.DeviceContext, Width, Height);
 
-    bExpand = ImGui::Begin("Console", &bWasOpen);
+    bExpand = ImGui::Begin("Console", &bWasOpen, ImGuiWindowFlags_NoBringToFrontOnFocus);
     if (!bExpand)
     {
         // 창을 접었을 경우 UI를 표시하지 않음

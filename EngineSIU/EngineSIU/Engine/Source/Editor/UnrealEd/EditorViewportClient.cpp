@@ -283,7 +283,15 @@ void FEditorViewportClient::InputKey(const FKeyEvent& InKeyEvent)
         }
         case VK_SPACE:
         {
-            EdEngine->GetEditorPlayer()->AddControlMode();
+            if (InKeyEvent.IsLeftControlDown())
+            {
+                UE_LOG(ELogLevel::Display, "CTRL + Space");
+                GEngineLoop.ToggleContentDrawer();
+            }
+            else
+            {
+                EdEngine->GetEditorPlayer()->AddControlMode();
+            }
             break;
         }
         default:

@@ -14,6 +14,7 @@
 
 #include "SoundManager.h"
 #include "SubWindow/ImGuiSubWindow.h"
+#include "UserInterface/Drawer.h"
 
 extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
@@ -117,7 +118,7 @@ int32 FEngineLoop::Init(HINSTANCE hInstance)
     return 0;
 }
 
-void FEngineLoop::Render()
+void FEngineLoop::Render(float DeltaTime)
 {
     GraphicDevice.Prepare();
     
@@ -149,6 +150,7 @@ void FEngineLoop::Render()
     UnrealEditor->Render();
     
     FConsole::GetInstance().Draw();
+    FDrawer::GetInstance().Render(DeltaTime);
     EngineProfiler.Render(GraphicDevice.DeviceContext, GraphicDevice.ScreenWidth, GraphicDevice.ScreenHeight);
     
     FUIManager->EndFrame();
@@ -228,10 +230,10 @@ void FEngineLoop::Tick()
 
         GEngine->Tick(DeltaTime);
         LevelEditor->Tick(DeltaTime);
-
+        
         /** Main window render */
-        Render();
-
+        Render(DeltaTime);
+        
         /** Sub window render */
         RenderSubWindow();
 
@@ -239,6 +241,7 @@ void FEngineLoop::Tick()
         {
             ImGui::SetCurrentContext(CurrentImGuiContext);
         }
+
 
         // ImGui::SetCurrentContext(FUIManager->GetContext());
         // Pending 처리된 오브젝트 제거
@@ -363,7 +366,7 @@ void FEngineLoop::SubWindowInit(HINSTANCE hInstance)
     WNDCLASSEXW wcexSub = {}; // WNDCLASSEXW 사용 권장
     wcexSub.cbSize = sizeof(WNDCLASSEX);
     wcexSub.style = CS_HREDRAW | CS_VREDRAW; // | CS_DBLCLKS 등 필요시 추가
-    wcexSub.lpfnWndProc = SubAppWndProc; // 서브 윈도우 프로시저 지정
+    wcexSub.lpfnWndProc = AppWndProc; // 서브 윈도우 프로시저 지정
     wcexSub.cbClsExtra = 0;
     wcexSub.cbWndExtra = 0;
     wcexSub.hInstance = hInstance;
@@ -403,124 +406,110 @@ void FEngineLoop::SubWindowInit(HINSTANCE hInstance)
 
 LRESULT CALLBACK FEngineLoop::AppWndProc(HWND hWnd, uint32 Msg, WPARAM wParam, LPARAM lParam)
 {
-    if (GEngineLoop.FUIManager)
+
+    if (hWnd == GEngineLoop.AppWnd)
     {
-        if (ImGui::GetCurrentContext() == GEngineLoop.FUIManager->GetContext())
+        ImGui::SetCurrentContext(GEngineLoop.FUIManager->GetContext());
+        if (ImGui_ImplWin32_WndProcHandler(hWnd, Msg, wParam, lParam)) return true;
+    }
+    else if (hWnd == GEngineLoop.SubAppWnd)
+    {
+        ImGui::SetCurrentContext(GEngineLoop.SubUI->Context);
+        if (ImGui_ImplWin32_WndProcHandler(hWnd, Msg, wParam, lParam)) return true;
+
+        switch (Msg)
         {
-            if (ImGui_ImplWin32_WndProcHandler(hWnd, Msg, wParam, lParam))
+        case WM_SIZE:
+            if (wParam != SIZE_MINIMIZED)
             {
-                return true;
+                if (GEngineLoop.GetUnrealEditor())
+                {
+                    SubGraphicDevice.Resize(hWnd);
+                    GEngineLoop.GetUnrealEditor()->OnResize(hWnd, true);
+                }
             }
+            return 0;
+        case WM_CLOSE:
+            ShowWindow(hWnd, SW_HIDE);
+            break;
+        
+        case WM_ACTIVATE:
+            if (ImGui::GetCurrentContext() == nullptr) break; 
+            ImGui::SetCurrentContext(GEngineLoop.SubUI->Context);
+            GEngineLoop.CurrentImGuiContext = ImGui::GetCurrentContext();
+            break;
+        
+        default:
+            return DefWindowProc(hWnd, Msg, wParam, lParam);
         }
     }
-    
+
     switch (Msg)
-    {
-    case WM_DESTROY:
-        PostQuitMessage(0);
-        if (auto LevelEditor = GEngineLoop.GetLevelEditor())
         {
-            LevelEditor->SaveConfig();
-        }
-        /** Todo: 현재 PostQuitMessage의 종료 메시지가 정상적으로 수신되지 않아
-         *  `bIsExit`을 강제로 true로 만들어주었습니다. 나중에 수정이 필요합니다.
-         *
-         *  Todo: Currently PostQuitMessage's exit message is not responded to.
-         *  You can make `bIsExit` true by executing it. It will need to be fixed later.
-         */
-        GEngineLoop.bIsExit = true;
-        break;
-    case WM_SIZE:
-        if (wParam != SIZE_MINIMIZED)
-        {
+        case WM_DESTROY:
+            PostQuitMessage(0);
             if (auto LevelEditor = GEngineLoop.GetLevelEditor())
             {
-                FEngineLoop::GraphicDevice.Resize(hWnd);
-                // FEngineLoop::Renderer.DepthPrePass->ResizeDepthStencil();
+                LevelEditor->SaveConfig();
+            }
+            /** Todo: 현재 PostQuitMessage의 종료 메시지가 정상적으로 수신되지 않아
+             *  `bIsExit`을 강제로 true로 만들어주었습니다. 나중에 수정이 필요합니다.
+             *
+             *  Todo: Currently PostQuitMessage's exit message is not responded to.
+             *  You can make `bIsExit` true by executing it. It will need to be fixed later.
+             */
+            GEngineLoop.bIsExit = true;
+            break;
+        case WM_SIZE:
+            if (wParam != SIZE_MINIMIZED)
+            {
+                if (auto LevelEditor = GEngineLoop.GetLevelEditor())
+                {
+                    FEngineLoop::GraphicDevice.Resize(hWnd);
+                    // FEngineLoop::Renderer.DepthPrePass->ResizeDepthStencil();
                 
-                uint32 ClientWidth = 0;
-                uint32 ClientHeight = 0;
-                GEngineLoop.GetClientSize(ClientWidth, ClientHeight);
+                    uint32 ClientWidth = 0;
+                    uint32 ClientHeight = 0;
+                    GEngineLoop.GetClientSize(ClientWidth, ClientHeight);
             
-                LevelEditor->ResizeEditor(ClientWidth, ClientHeight);
-                FEngineLoop::Renderer.TileLightCullingPass->ResizeViewBuffers(
-                  static_cast<uint32>(LevelEditor->GetActiveViewportClient()->GetD3DViewport().Width),
-                    static_cast<uint32>(LevelEditor->GetActiveViewportClient()->GetD3DViewport().Height)
-                );
+                    LevelEditor->ResizeEditor(ClientWidth, ClientHeight);
+                    FEngineLoop::Renderer.TileLightCullingPass->ResizeViewBuffers(
+                      static_cast<uint32>(LevelEditor->GetActiveViewportClient()->GetD3DViewport().Width),
+                        static_cast<uint32>(LevelEditor->GetActiveViewportClient()->GetD3DViewport().Height)
+                    );
+                }
             }
+            GEngineLoop.UpdateUI();
+            break;
+        
+        case WM_ACTIVATE:
+            if (ImGui::GetCurrentContext() == nullptr) break;
+            ImGui::SetCurrentContext(GEngineLoop.FUIManager->GetContext());
+            GEngineLoop.CurrentImGuiContext = ImGui::GetCurrentContext();
+            break;
+        default:
+            if (hWnd == GEngineLoop.AppWnd && GEngineLoop.AppMessageHandler != nullptr)
+            {
+                GEngineLoop.AppMessageHandler->ProcessMessage(hWnd, Msg, wParam, lParam);
+            }
+            return DefWindowProc(hWnd, Msg, wParam, lParam);
         }
-        GEngineLoop.UpdateUI();
-        break;
-        
-    case WM_ACTIVATE:
-        if (ImGui::GetCurrentContext() == nullptr) break;
-        ImGui::SetCurrentContext(GEngineLoop.FUIManager->GetContext());
-        GEngineLoop.CurrentImGuiContext = ImGui::GetCurrentContext();
-        break;
-        
-    default:
-        GEngineLoop.AppMessageHandler->ProcessMessage(hWnd, Msg, wParam, lParam);
-        return DefWindowProc(hWnd, Msg, wParam, lParam);
-    }
-
+    
     return 0;
-}
-
-LRESULT FEngineLoop::SubAppWndProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
-{
-    if (GEngineLoop.SubUI)
-    {
-        if (ImGui::GetCurrentContext() == GEngineLoop.SubUI->Context)
-        {
-            if (ImGui_ImplWin32_WndProcHandler(hWnd, Msg, wParam, lParam))
-            {
-                return true;
-            }
-        }
-    }
-
-    switch (Msg)
-    {
-    case WM_SIZE:
-        if (wParam != SIZE_MINIMIZED)
-        {
-            // 서브 윈도우 크기 변경 시 리소스 리사이즈
-            // GEngineLoop.ResizeSubWindowResources();
-            if (GEngineLoop.GetUnrealEditor())
-            {
-                SubGraphicDevice.Resize(hWnd);
-                GEngineLoop.GetUnrealEditor()->OnResize(hWnd, true);
-            }
-        }
-        break;
-    case WM_CLOSE: // event close button
-        ShowWindow(hWnd, SW_HIDE); // window hide
-        return 0;
-    case WM_DESTROY:
-        // 실제 윈도우가 파괴될 때 (예: 앱 종료 시)
-        // GEngineLoop.CleanupSubWindow(); // Exit에서 일괄 처리하므로 여기서 호출 안 할 수도 있음
-        break;
-        
-    case WM_ACTIVATE:
-        if (ImGui::GetCurrentContext() == nullptr) break; 
-        ImGui::SetCurrentContext(GEngineLoop.SubUI->Context);
-        GEngineLoop.CurrentImGuiContext = ImGui::GetCurrentContext();
-        break;
-        
-    default:
-        // TODO: 서브 윈도우용 입력 처리 (카메라 제어 등)
-        // GEngineLoop.SubWindowMessageHandler->ProcessMessage(hWnd, Msg, wParam, lParam);
-        break;
-    }
-    return DefWindowProc(hWnd, Msg, wParam, lParam);
 }
 
 void FEngineLoop::UpdateUI()
 {
     FConsole::GetInstance().OnResize(AppWnd);
+    FDrawer::GetInstance().OnResize(AppWnd);
     if (GEngineLoop.GetUnrealEditor())
     {
         GEngineLoop.GetUnrealEditor()->OnResize(AppWnd);
     }
     ViewportTypePanel::GetInstance().OnResize(AppWnd);
+}
+
+void FEngineLoop::ToggleContentDrawer()
+{
+    FDrawer::GetInstance().Toggle();
 }

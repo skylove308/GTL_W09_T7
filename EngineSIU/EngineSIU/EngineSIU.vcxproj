@@ -321,6 +321,7 @@ xcopy /y /d "$(SolutionDir)$(ProjectName)\Engine\Source\ThirdParty\FBX\lib\x64\$
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Level.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\UnrealClient.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\UserInterface\Console.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Engine\UserInterface\Drawer.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\World\World.cpp" />
     <ClCompile Include="Engine\Source\Runtime\InputCore\InputCoreTypes.cpp" />
     <ClCompile Include="Engine\Source\Runtime\InteractiveToolsFramework\BaseGizmos\GizmoArrowComponent.cpp" />
@@ -614,6 +615,7 @@ xcopy /y /d "$(SolutionDir)$(ProjectName)\Engine\Source\ThirdParty\FBX\lib\x64\$
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Level.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\UnrealClient.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\UserInterface\Console.h" />
+    <ClInclude Include="Engine\Source\Runtime\Engine\UserInterface\Drawer.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\ViewportClient.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\World\World.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\World\WorldContext.h" />

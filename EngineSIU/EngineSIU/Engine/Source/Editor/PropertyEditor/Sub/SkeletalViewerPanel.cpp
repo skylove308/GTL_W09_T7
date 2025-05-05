@@ -1,5 +1,7 @@
 ﻿#include "SkeletalViewerPanel.h"
 
+#include "Components/Mesh/SkeletalMeshRenderData.h"
+
 void SkeletalViewerPanel::Render()
 {
     ImVec2 WinSize = ImVec2(Width, Height);
@@ -26,5 +28,9 @@ void SkeletalViewerPanel::OnResize(HWND hWnd)
 
 void SkeletalViewerPanel::CreateSkeletalTreeNode()
 {
+    USkeletalMesh* Selected = GEngineLoop.GetSelectedSkeletalMesh();
+
+    if (Selected == nullptr) return;
     
+    ImGui::Selectable(GetData(Selected->GetOjbectName()));
 }
