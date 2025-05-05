@@ -146,8 +146,6 @@ void FEngineLoop::Render()
 
 
     FUIManager->BeginFrame();
-
-    
     UnrealEditor->Render();
     
     FConsole::GetInstance().Draw();

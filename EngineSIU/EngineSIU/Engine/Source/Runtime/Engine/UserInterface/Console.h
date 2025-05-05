@@ -70,7 +70,9 @@ public:
     void SetGPUTimingManager(FGPUTimingManager* InGPUTimingManager);
     void Render(ID3D11DeviceContext* Context, UINT Width, UINT Height);
     void RegisterStatScope(const FString& DisplayName, const FName& CPUStatName, const FName& GPUStatName);
-
+    void ShowWindow() { bShowWindow = true; }
+    void HideWindow() { bShowWindow = false; }
+    
 private:
     FGPUTimingManager* GPUTimingManager = nullptr;
     TArray<FProfiledScope> TrackedScopes;
