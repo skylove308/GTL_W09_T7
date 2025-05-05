@@ -6,6 +6,7 @@
 #include "UObject/ObjectFactory.h"
 #include "Components/Mesh/StaticMeshRenderData.h"
 #include "Components/Mesh/SkeletalMeshRenderData.h"
+#include "FObjLoader.h"
 
 FFBXLoader::~FFBXLoader()
 {
@@ -40,30 +41,6 @@ FFBXLoader::~FFBXLoader()
     {
         Mesh->Destroy();
         Mesh = nullptr;
-    }
-    if (FFBXManager::StaticMeshMap.Num() > 0)
-    {
-        for (auto& Pair : FFBXManager::StaticMeshMap)
-        {
-            delete Pair.Value;
-        }
-        FFBXManager::StaticMeshMap.Empty();
-    }
-    if (FFBXManager::MaterialMap.Num() > 0)
-    {
-        for (auto& Pair : FFBXManager::MaterialMap)
-        {
-            delete Pair.Value;
-        }
-        FFBXManager::MaterialMap.Empty();
-    }
-    if (FFBXManager::FbxStaticMeshMap.Num() > 0)
-    {
-        for (auto& Pair : FFBXManager::FbxStaticMeshMap)
-        {
-            delete Pair.Value;
-        }
-        FFBXManager::FbxStaticMeshMap.Empty();
     }
 }
 
@@ -191,41 +168,8 @@ bool FFBXLoader::FindMesh(FbxNode* Node, const FString& FilePath)
             BuildSkeletalBones(Mesh, FFBXManager::SkeletalMeshRenderData->Bones);
             BuildBoneWeights(Mesh, FFBXManager::SkeletalMeshRenderData->BoneWeights);
             BuildSkeletalVertexBuffers(Mesh, FFBXManager::SkeletalMeshRenderData->Vertices, FFBXManager::SkeletalMeshRenderData->Indices);
-
-            CopyNormals(Mesh, FFBXManager::SkeletalMeshRenderData->Vertices);
-            CopyUVs(Mesh, FFBXManager::SkeletalMeshRenderData->Vertices);
-            CopyTangents(Mesh, FFBXManager::SkeletalMeshRenderData->Vertices);
-
             SetupMaterialSubsets(Mesh, FFBXManager::SkeletalMeshRenderData->MaterialSubsets);
-
-            int MaterialCount = Node->GetMaterialCount();
-            for (int m = 0; m < MaterialCount; ++m)
-            {
-                FbxSurfaceMaterial* Material = Node->GetMaterial(m);
-                FObjMaterialInfo MatInfo;
-
-                if (Material)
-                {
-                    MatInfo.MaterialName = Material->GetName();
-                    FbxProperty DiffuseProperty = Material->FindProperty(FbxSurfaceMaterial::sDiffuse);
-                    if (DiffuseProperty.IsValid())
-                    {
-                        int TextureCount = DiffuseProperty.GetSrcObjectCount<FbxFileTexture>();
-                        if (TextureCount > 0)
-                        {
-                            FbxFileTexture* Texture = DiffuseProperty.GetSrcObject<FbxFileTexture>(0);
-                            const uint32 SlotIdx = static_cast<uint32>(EMaterialTextureSlots::MTS_Diffuse);
-                            constexpr uint32 TexturesNum = static_cast<uint32>(EMaterialTextureSlots::MTS_MAX);
-                            MatInfo.TextureInfos.SetNum(TexturesNum);
-                            MatInfo.TextureInfos[SlotIdx].TexturePath = ((FString)Texture->GetFileName()).ToWideString();
-                        }
-                    }
-                }
-
-                FFBXManager::SkeletalMeshRenderData->Materials.Add(MatInfo);
-            }
-
-
+            LoadMaterialInfo(Node);
 
             //// Update skinning matrices
             //TArray<FMatrix> GlobalBoneTransforms;
@@ -254,33 +198,7 @@ bool FFBXLoader::FindMesh(FbxNode* Node, const FString& FilePath)
 
             // 4) 머티리얼 서브셋 설정
             SetupMaterialSubsets(Mesh, FFBXManager::StaticMeshRenderData->MaterialSubsets);
-
-            int MaterialCount = Node->GetMaterialCount();
-            for (int m = 0; m < MaterialCount; ++m)
-            {
-                FbxSurfaceMaterial * Material = Node->GetMaterial(m);
-                FObjMaterialInfo MatInfo;
-
-                if (Material)
-                {
-                    MatInfo.MaterialName = Material->GetName();
-                    FbxProperty DiffuseProperty = Material->FindProperty(FbxSurfaceMaterial::sDiffuse);
-                    if (DiffuseProperty.IsValid())
-                    {
-                        int TextureCount = DiffuseProperty.GetSrcObjectCount<FbxFileTexture>();
-                        if (TextureCount > 0)
-                        {
-                            FbxFileTexture* Texture = DiffuseProperty.GetSrcObject<FbxFileTexture>(0);
-                            const uint32 SlotIdx = static_cast<uint32>(EMaterialTextureSlots::MTS_Diffuse);
-                            constexpr uint32 TexturesNum = static_cast<uint32>(EMaterialTextureSlots::MTS_MAX);
-                            MatInfo.TextureInfos.SetNum(TexturesNum);
-                            MatInfo.TextureInfos[SlotIdx].TexturePath = ((FString)Texture->GetFileName()).ToWideString();
-                        }
-                    }
-                }
-
-               FFBXManager::StaticMeshRenderData->Materials.Add(MatInfo);
-            }
+            LoadMaterialInfo(Node);
 
             // 5) 바운딩 박스 계산
             ComputeBoundingBox(
@@ -391,27 +309,104 @@ void FFBXLoader::BuildBoneWeights(FbxMesh* Mesh, TArray<FSkeletalMeshBoneWeight>
 //-----------------------------------------------------------------------------
 void FFBXLoader::BuildSkeletalVertexBuffers(FbxMesh* Mesh, TArray<FSkeletalMeshVertex>& OutVerts, TArray<uint32>& OutIndices)
 {
-    int ctrlCount = Mesh->GetControlPointsCount();
-    OutVerts.SetNum(ctrlCount);
+    OutVerts.Empty();
+    OutIndices.Empty();
 
-    // 컨트롤 포인트 → 버텍스 포지션
-    for (int i = 0; i < ctrlCount; ++i)
+    // UV 세트 이름 가져오기
+    FbxStringList uvSetNames;
+    Mesh->GetUVSetNames(uvSetNames);
+    const char* uvSetName = nullptr;
+    if (uvSetNames.GetCount() > 0)
     {
-        auto P = Mesh->GetControlPointAt(i);
-        OutVerts[i].X = (float)P[0];
-        OutVerts[i].Y = (float)P[1];
-        OutVerts[i].Z = (float)P[2];
-        // 나머지(노말·UV·본가중치)는 BuildBoneWeights 후 셰이더에서 활용
+        uvSetName = uvSetNames.GetStringAt(0);
     }
 
-    // 폴리곤 → 인덱스 리스트
+    // 컨트롤 포인트별 본 웨이트 추출
+    //TArray<TArray<FSkeletalMeshBoneWeight>> VertexBoneWeights;
+    //ExtractSkinning(Mesh, VertexBoneWeights);
+
+    // 탄젠트 레이어 가져오기 (있다면)
+    FbxGeometryElementTangent* TanElem = nullptr;
+    if (Mesh->GetElementTangentCount() > 0)
+        TanElem = Mesh->GetElementTangent(0);
+
     int polyCount = Mesh->GetPolygonCount();
+    int vertexCounter = 0; // DirectArray 인덱스용(탄젠트, 노말, UV 모두 ByPolygonVertex/direct 가정)
+
+    // 각 폴리곤의 각 코너(버텍스)마다 고유한 FSkeletalMeshVertex를 생성
     for (int p = 0; p < polyCount; ++p)
     {
-        for (int v = 0; v < Mesh->GetPolygonSize(p); ++v)
+        int polySize = Mesh->GetPolygonSize(p);
+        for (int v = 0; v < polySize; ++v)
         {
-            int idx = Mesh->GetPolygonVertex(p, v);
-            OutIndices.Add(idx);
+            // 새 인덱스
+            uint32 newIdx = OutVerts.Num();
+            // 기본값으로 초기화된 정점 구조체 추가
+            OutVerts.Add(FSkeletalMeshVertex());
+            FSkeletalMeshVertex& Vert = OutVerts[newIdx];
+
+            // 1) 위치
+            int cpIndex = Mesh->GetPolygonVertex(p, v);
+            FbxVector4 P = Mesh->GetControlPointAt(cpIndex);
+            Vert.X = static_cast<float>(P[0]);
+            Vert.Y = static_cast<float>(P[1]);
+            Vert.Z = static_cast<float>(P[2]);
+
+            // 2) 노말
+            FbxVector4 N;
+            Mesh->GetPolygonVertexNormal(p, v, N);
+            Vert.NormalX = static_cast<float>(N[0]);
+            Vert.NormalY = static_cast<float>(N[1]);
+            Vert.NormalZ = static_cast<float>(N[2]);
+
+            // 3) UV
+            if (uvSetName)
+            {
+                FbxVector2 UV;
+                bool unmapped = false;
+                Mesh->GetPolygonVertexUV(p, v, uvSetName, UV, unmapped);
+                Vert.U = static_cast<float>(UV[0]);
+                Vert.V = 1.0f - static_cast<float>(UV[1]);
+            }
+
+
+            // e) 탄젠트 (NormalMap 용)
+            if (TanElem &&
+                TanElem->GetMappingMode() == FbxGeometryElement::eByPolygonVertex &&
+                TanElem->GetReferenceMode() == FbxGeometryElement::eDirect)
+            {
+                auto T = TanElem->GetDirectArray().GetAt(vertexCounter);
+                Vert.TangentX = (float)T[0];
+                Vert.TangentY = (float)T[1];
+                Vert.TangentZ = (float)T[2];
+                // W 성분(역정규화) 필요하면 T[3] 사용
+                Vert.TangentW = (float)T[3];
+            }
+
+            // 본 웨이트
+            //if (cpIndex < VertexBoneWeights.Num())
+            //{
+            //    const TArray<FBoneWeight>& Weights = VertexBoneWeights[cpIndex];
+            //    int wCount = FMath::Min(Weights.Num(), 4);
+            //    float total = 0.0f;
+            //    for (int w = 0; w < wCount; ++w)
+            //    {
+            //        Vert.BoneIndices[w] = Weights[w].BoneIndex;
+            //        Vert.BoneWeights[w] = Weights[w].Weight;
+            //        total += Weights[w].Weight;
+            //    }
+            //    // 정규화
+            //    if (total > 0.0f)
+            //    {
+            //        for (int w = 0; w < wCount; ++w)
+            //            Vert.BoneWeights[w] /= total;
+            //    }
+            //}
+
+
+
+            // 인덱스 추가
+            OutIndices.Add(newIdx);
         }
     }
 }
@@ -445,6 +440,39 @@ void FFBXLoader::SetupMaterialSubsets(FbxMesh* Mesh, TArray<FMaterialSubset>& Ou
     OutSubsets.Empty();
     for (auto& Pair : subsetMap)
         OutSubsets.Add(Pair.Value);
+}
+
+void FFBXLoader::LoadMaterialInfo(FbxNode* Node)
+{
+    int MaterialCount = Node->GetMaterialCount();
+    for (int m = 0; m < MaterialCount; ++m)
+    {
+        FbxSurfaceMaterial* Material = Node->GetMaterial(m);
+        FObjMaterialInfo MatInfo;
+
+        if (Material)
+        {
+            MatInfo.MaterialName = Material->GetName();
+            FbxProperty DiffuseProperty = Material->FindProperty(FbxSurfaceMaterial::sDiffuse);
+            if (DiffuseProperty.IsValid())
+            {
+                int TextureCount = DiffuseProperty.GetSrcObjectCount<FbxFileTexture>();
+                if (TextureCount > 0)
+                {
+                    FbxFileTexture* Texture = DiffuseProperty.GetSrcObject<FbxFileTexture>(0);
+                    const uint32 SlotIdx = static_cast<uint32>(EMaterialTextureSlots::MTS_Diffuse);
+                    constexpr uint32 TexturesNum = static_cast<uint32>(EMaterialTextureSlots::MTS_MAX);
+                    MatInfo.TextureInfos.SetNum(TexturesNum);
+                    MatInfo.TextureInfos[SlotIdx].TexturePath = ((FString)Texture->GetFileName()).ToWideString();
+                    if (FObjLoader::CreateTextureFromFile(MatInfo.TextureInfos[SlotIdx].TexturePath, true))
+                    {
+                        MatInfo.TextureFlag |= static_cast<uint16>(EMaterialTextureFlags::MTF_Diffuse);
+                    }
+                }
+            }
+        }
+        FFBXManager::SkeletalMeshRenderData->Materials.Add(MatInfo);
+    }
 }
 
 //-----------------------------------------------------------------------------
@@ -587,104 +615,6 @@ void FFBXLoader::ComputeBoundingBox(const TArray<FStaticMeshVertex>& InVerts, FV
     }
 }
 
-
-void FFBXLoader::CopyNormals(FbxMesh* Mesh, TArray<FSkeletalMeshVertex>& OutVerts) 
-{
-    if (Mesh->GetElementNormalCount() < 1) return;
-    auto* NormalElem = Mesh->GetElementNormal(0);
-    if (NormalElem->GetMappingMode() == FbxGeometryElement::eByPolygonVertex &&
-        NormalElem->GetReferenceMode() == FbxGeometryElement::eDirect)
-    {
-        int32 VertexCounter = 0;
-        int32 PolygonCount = Mesh->GetPolygonCount();
-        for (int32 PolyIndex = 0; PolyIndex < PolygonCount; ++PolyIndex)
-        {
-            int32 PolySize = Mesh->GetPolygonSize(PolyIndex);
-            for (int32 Corner = 0; Corner < PolySize; ++Corner, ++VertexCounter)
-            {
-                int32 CPI = Mesh->GetPolygonVertex(PolyIndex, Corner);
-                FbxVector4 N = NormalElem->GetDirectArray().GetAt(VertexCounter);
-                OutVerts[CPI].NormalX = static_cast<float>(N[0]);
-                OutVerts[CPI].NormalY = static_cast<float>(N[1]);
-                OutVerts[CPI].NormalZ = static_cast<float>(N[2]);
-            }
-        }
-    }
-}
-
-void FFBXLoader::CopyUVs(FbxMesh* Mesh, TArray<FSkeletalMeshVertex>& OutVerts) 
-{
-    if (Mesh->GetElementUVCount() < 1) return;
-    auto* UVElem = Mesh->GetElementUV(0);
-    if (UVElem->GetMappingMode() == FbxGeometryElement::eByPolygonVertex &&
-        (UVElem->GetReferenceMode() == FbxGeometryElement::eDirect ||
-            UVElem->GetReferenceMode() == FbxGeometryElement::eIndexToDirect))
-    {
-        int32 VertexCounter = 0;
-        int32 PolygonCount = Mesh->GetPolygonCount();
-        for (int32 PolyIndex = 0; PolyIndex < PolygonCount; ++PolyIndex)
-        {
-            int32 PolySize = Mesh->GetPolygonSize(PolyIndex);
-            for (int32 Corner = 0; Corner < PolySize; ++Corner, ++VertexCounter)
-            {
-                int32 UVIndex = (UVElem->GetReferenceMode() == FbxGeometryElement::eDirect)
-                    ? VertexCounter
-                    : UVElem->GetIndexArray().GetAt(VertexCounter);
-                FbxVector2 UV = UVElem->GetDirectArray().GetAt(UVIndex);
-                int32 CPI = Mesh->GetPolygonVertex(PolyIndex, Corner);
-                OutVerts[CPI].U = static_cast<float>(UV[0]);
-                OutVerts[CPI].V = static_cast<float>(UV[1]);
-            }
-        }
-    }
-}
-
-void FFBXLoader::CopyTangents(FbxMesh* Mesh, TArray<FSkeletalMeshVertex>& OutVerts) 
-{
-    if (Mesh->GetElementTangentCount() < 1) return;
-    auto* TanElem = Mesh->GetElementTangent(0);
-    if (TanElem->GetMappingMode() == FbxGeometryElement::eByPolygonVertex &&
-        TanElem->GetReferenceMode() == FbxGeometryElement::eDirect)
-    {
-        int32 VertexCounter = 0;
-        int32 PolygonCount = Mesh->GetPolygonCount();
-        for (int32 PolyIndex = 0; PolyIndex < PolygonCount; ++PolyIndex)
-        {
-            int32 PolySize = Mesh->GetPolygonSize(PolyIndex);
-            for (int32 Corner = 0; Corner < PolySize; ++Corner, ++VertexCounter)
-            {
-                int32 CPI = Mesh->GetPolygonVertex(PolyIndex, Corner);
-                FbxVector4 T = TanElem->GetDirectArray().GetAt(VertexCounter);
-                OutVerts[CPI].TangentX = static_cast<float>(T[0]);
-                OutVerts[CPI].TangentY = static_cast<float>(T[1]);
-                OutVerts[CPI].TangentZ = static_cast<float>(T[2]);
-                OutVerts[CPI].TangentW = static_cast<float>(T[3]);
-            }
-        }
-    }
-}
-
-void FFBXLoader::ComputeBoundingBox(const TArray<FSkeletalMeshVertex>& InVerts, FVector& OutMin, FVector& OutMax)
-{
-    if (InVerts.Num() == 0)
-    {
-        OutMin = OutMax = FVector::ZeroVector;
-        return;
-    }
-    const auto& First = InVerts[0];
-    OutMin = OutMax = FVector(First.X, First.Y, First.Z);
-    for (int32 i = 1; i < InVerts.Num(); ++i)
-    {
-        const auto& V = InVerts[i];
-        OutMin.X = FMath::Min(OutMin.X, V.X);
-        OutMin.Y = FMath::Min(OutMin.Y, V.Y);
-        OutMin.Z = FMath::Min(OutMin.Z, V.Z);
-        OutMax.X = FMath::Max(OutMax.X, V.X);
-        OutMax.Y = FMath::Max(OutMax.Y, V.Y);
-        OutMax.Z = FMath::Max(OutMax.Z, V.Z);
-    }
-}
-
 UStaticMesh* FFBXManager::CreateStaticMesh(const FString& filePath)
 {
     FFBXLoader::Initialize();
@@ -702,11 +632,6 @@ UStaticMesh* FFBXManager::CreateStaticMesh(const FString& filePath)
     return StaticMesh;
 }
 
-UStaticMesh* FFBXManager::GetStaticMesh(FWString name)
-{
-    return StaticMeshMap[name];
-}
-
 USkeletalMesh* FFBXManager::CreateSkeletalMesh(const FString& filePath)
 {
     FFBXLoader::Initialize();
@@ -722,9 +647,4 @@ USkeletalMesh* FFBXManager::CreateSkeletalMesh(const FString& filePath)
     USkeletalMesh* SkeletalMesh = FObjectFactory::ConstructObject<USkeletalMesh>(nullptr);
     SkeletalMesh->SetData(SkeletalMeshRenderData);
     return SkeletalMesh;
-}
-
-USkeletalMesh* FFBXManager::GetSkeletalMesh(FWString name)
-{
-    return nullptr;
 }

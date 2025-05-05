@@ -449,14 +449,6 @@ void FStaticMeshRenderPass::RenderAllStaticMeshes(const std::shared_ptr<FEditorV
         {
             FEngineLoop::PrimitiveDrawBatch.AddAABBToBatch(Comp->GetBoundingBox(), Comp->GetWorldLocation(), WorldMatrix);
         }
-
-        ID3D11InfoQueue* infoQ = nullptr;
-        if (SUCCEEDED(Graphics->Device->QueryInterface(__uuidof(ID3D11InfoQueue), (void**)&infoQ)))
-        {
-            UINT64 count = infoQ->GetNumStoredMessagesAllowedByRetrievalFilter();
-            UE_LOG(ELogLevel::Display, TEXT("D3D11 info queue size = %llu"), count);
-            infoQ->Release();
-        }
     }
 }
 
@@ -553,6 +545,7 @@ void FStaticMeshRenderPass::Render(const std::shared_ptr<FEditorViewportClient>&
 void FStaticMeshRenderPass::ClearRenderArr()
 {
     StaticMeshComponents.Empty();
+    SkeletalMeshComponents.Empty();
 }
 
 
