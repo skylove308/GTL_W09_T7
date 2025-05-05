@@ -32,6 +32,7 @@ public:
     void Tick();
     void Exit();
     void CleanupSubWindow();
+    void RequestShowWindow(bool bShow);
 
     void GetClientSize(uint32& OutWidth, uint32& OutHeight) const;
 
@@ -72,6 +73,7 @@ private:
     FDXDBufferManager* BufferManager; //TODO: UEngine으로 옮겨야함.
 
     bool bIsExit = false;
+    bool bIsShowSubWindow = false;
     // @todo Option으로 선택 가능하도록
     int32 TargetFPS = 999;
 

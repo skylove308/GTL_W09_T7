@@ -92,7 +92,7 @@ int32 FEngineLoop::Init(HINSTANCE hInstance)
     FUIManager->Initialize(AppWnd, GraphicDevice.Device, GraphicDevice.DeviceContext);
     ResourceManager.Initialize(&Renderer, &GraphicDevice);
     
-    if (SubAppWnd && SubGraphicDevice.Device)
+    if (SubAppWnd && SubGraphicDevice.Device) 
     {
         SubUI = new FImGuiSubWindow(SubAppWnd, SubGraphicDevice.Device, SubGraphicDevice.DeviceContext);
         UImGuiManager::ApplySharedStyle(FUIManager->GetContext(), SubUI->Context);
@@ -159,12 +159,13 @@ void FEngineLoop::RenderSubWindow() const
     if (SubAppWnd && IsWindowVisible(SubAppWnd) && SubGraphicDevice.Device)
     {
         SubGraphicDevice.Prepare();
+        SubGraphicDevice.DeviceContext->OMSetRenderTargets(1, &SubGraphicDevice.BackBufferRTV, nullptr);
 
         // Sub window rendering
         SubUI->BeginFrame();
-        ImGui::Begin("SubWindow");
-        ImGui::Text("Hello from subwindow");
-        ImGui::End();
+
+        UnrealEditor->RenderSubWindowPanel();
+        
         SubUI->EndFrame();
         
         // Sub swap
@@ -250,6 +251,17 @@ void FEngineLoop::Tick()
         
         // Main swap
         GraphicDevice.SwapBuffer();
+
+
+        /** Sub Window Flag */
+        if (bIsShowSubWindow)
+        {
+            if (SubAppWnd)
+            {
+                ::ShowWindow(SubAppWnd, SW_SHOW);
+            }
+            bIsShowSubWindow = false;
+        }
         
         do
         {
@@ -317,6 +329,11 @@ void FEngineLoop::CleanupSubWindow()
     }
 }
 
+void FEngineLoop::RequestShowWindow(bool bShow)
+{
+    bIsShowSubWindow = bShow;
+}
+
 void FEngineLoop::WindowInit(HINSTANCE hInstance)
 {
     WCHAR WindowClass[] = L"JungleWindowClass";
@@ -379,7 +396,7 @@ void FEngineLoop::SubWindowInit(HINSTANCE hInstance)
     else
     {
         // 필요할 때
-        ShowWindow(SubAppWnd, SW_SHOW);
+        // ShowWindow(SubAppWnd, SW_SHOW);
         // 호출하여 표시
     }
 }
@@ -471,13 +488,14 @@ LRESULT FEngineLoop::SubAppWndProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lP
             // GEngineLoop.ResizeSubWindowResources();
             if (GEngineLoop.GetUnrealEditor())
             {
-                GEngineLoop.GetUnrealEditor()->OnResize(GEngineLoop.SubAppWnd, true);
+                SubGraphicDevice.Resize(hWnd);
+                GEngineLoop.GetUnrealEditor()->OnResize(hWnd, true);
             }
         }
         break;
     case WM_CLOSE: // event close button
         ShowWindow(hWnd, SW_HIDE); // window hide
-        break;
+        return 0;
     case WM_DESTROY:
         // 실제 윈도우가 파괴될 때 (예: 앱 종료 시)
         // GEngineLoop.CleanupSubWindow(); // Exit에서 일괄 처리하므로 여기서 호출 안 할 수도 있음

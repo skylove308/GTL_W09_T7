@@ -88,7 +88,7 @@ void ControlEditorPanel::Render()
 
         if (ImGui::BeginMenu("Demo"))
         {
-            if (ImGui::Button("ImGui Demo Window"))
+            if (ImGui::MenuItem("ImGui Demo Window"))
             {
                 bShowImGuiDemoWindow = !bShowImGuiDemoWindow;
             }
@@ -99,6 +99,16 @@ void ControlEditorPanel::Render()
             }
             ImGui::EndMenu();
         }
+
+        if (ImGui::BeginMenu("View"))
+        {
+            if (ImGui::MenuItem("Skeletal Mesh Viewer"))
+            {
+                GEngineLoop.RequestShowWindow(true);
+            }
+            ImGui::EndMenu();
+        }
+        
         ImGui::EndMenuBar();
     }
 

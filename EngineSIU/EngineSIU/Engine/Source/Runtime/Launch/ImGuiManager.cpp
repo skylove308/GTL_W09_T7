@@ -137,10 +137,8 @@ void UImGuiManager::ApplySharedStyle(::ImGuiContext* Context1, ::ImGuiContext* C
 {
     ImGui::SetCurrentContext(Context1);
     ImGuiStyle& Style = ImGui::GetStyle();
-    ImFont* Font = ImGui::GetIO().FontDefault;
 
     ImGui::SetCurrentContext(Context2);
     ImGui::GetStyle() = Style;
-    ImGui::GetIO().FontDefault = Font;
 }
 
