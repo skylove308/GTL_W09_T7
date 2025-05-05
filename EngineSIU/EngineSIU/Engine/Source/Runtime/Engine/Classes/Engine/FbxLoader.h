@@ -77,6 +77,7 @@ public:
     static void SetupMaterialSubsets(FbxMesh* Mesh, TArray<FMaterialSubset>& OutSubsets);
     static void LoadMaterialInfo(FbxNode* Node);
     static void UpdateSkinningMatrices(const TArray<FMatrix>& GlobalBoneTransforms, TArray<FBone>& Bones);
+    //static void SkinVertexPosition(const )
 
     static void CopyControlPoints(FbxMesh* Mesh,TArray<FStaticMeshVertex>& OutVerts);
     static void BuildStaticIndexBuffer(FbxMesh* Mesh, TArray<uint32>& OutIndices);
@@ -84,8 +85,6 @@ public:
     static void CopyUVs(FbxMesh* Mesh, TArray<FStaticMeshVertex>& OutVerts);
     static void CopyTangents(FbxMesh* Mesh, TArray<FStaticMeshVertex>& OutVerts);
     static void ComputeBoundingBox(const TArray<FStaticMeshVertex>& InVerts, FVector& OutMin, FVector& OutMax);
-
-    static void ComputeBoundingBox(const TArray<FSkeletalMeshVertex>& InVerts, FVector& OutMin, FVector& OutMax);
 
 private:
     inline static FbxManager* Manager = nullptr;

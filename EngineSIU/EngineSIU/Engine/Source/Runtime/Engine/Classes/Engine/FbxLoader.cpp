@@ -302,6 +302,18 @@ void FFBXLoader::BuildBoneWeights(FbxMesh* Mesh, TArray<FSkeletalMeshBoneWeight>
             }
         }
     }
+
+    for (auto& BW : OutWeights)
+    {
+        float total = BW.Weights[0] + BW.Weights[1] + BW.Weights[2] + BW.Weights[3];
+        if (total > 0.0f)
+        {
+            BW.Weights[0] /= total;
+            BW.Weights[1] /= total;
+            BW.Weights[2] /= total;
+            BW.Weights[3] /= total;
+        }
+    }
 }
 
 //-----------------------------------------------------------------------------
@@ -321,14 +333,12 @@ void FFBXLoader::BuildSkeletalVertexBuffers(FbxMesh* Mesh, TArray<FSkeletalMeshV
         uvSetName = uvSetNames.GetStringAt(0);
     }
 
-    // 컨트롤 포인트별 본 웨이트 추출
-    //TArray<TArray<FSkeletalMeshBoneWeight>> VertexBoneWeights;
-    //ExtractSkinning(Mesh, VertexBoneWeights);
-
     // 탄젠트 레이어 가져오기 (있다면)
     FbxGeometryElementTangent* TanElem = nullptr;
     if (Mesh->GetElementTangentCount() > 0)
         TanElem = Mesh->GetElementTangent(0);
+
+    TArray<FSkeletalMeshBoneWeight> const& BoneWeights = FFBXManager::SkeletalMeshRenderData->BoneWeights;
 
     int polyCount = Mesh->GetPolygonCount();
     int vertexCounter = 0; // DirectArray 인덱스용(탄젠트, 노말, UV 모두 ByPolygonVertex/direct 가정)
@@ -382,28 +392,6 @@ void FFBXLoader::BuildSkeletalVertexBuffers(FbxMesh* Mesh, TArray<FSkeletalMeshV
                 // W 성분(역정규화) 필요하면 T[3] 사용
                 Vert.TangentW = (float)T[3];
             }
-
-            // 본 웨이트
-            //if (cpIndex < VertexBoneWeights.Num())
-            //{
-            //    const TArray<FBoneWeight>& Weights = VertexBoneWeights[cpIndex];
-            //    int wCount = FMath::Min(Weights.Num(), 4);
-            //    float total = 0.0f;
-            //    for (int w = 0; w < wCount; ++w)
-            //    {
-            //        Vert.BoneIndices[w] = Weights[w].BoneIndex;
-            //        Vert.BoneWeights[w] = Weights[w].Weight;
-            //        total += Weights[w].Weight;
-            //    }
-            //    // 정규화
-            //    if (total > 0.0f)
-            //    {
-            //        for (int w = 0; w < wCount; ++w)
-            //            Vert.BoneWeights[w] /= total;
-            //    }
-            //}
-
-
 
             // 인덱스 추가
             OutIndices.Add(newIdx);
