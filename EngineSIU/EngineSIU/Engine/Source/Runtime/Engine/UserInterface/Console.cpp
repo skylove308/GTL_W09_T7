@@ -39,6 +39,14 @@ void FStatOverlay::ToggleStat(const std::string& Command)
         // 모든 Flag 끄기
         StatFlags = 0x00;
     }
+    else if (Command == "stat 1")
+    {
+        GEngineLoop.EngineProfiler.ShowWindow();
+    }
+    else if (Command == "stat 0")
+    {
+        GEngineLoop.EngineProfiler.HideWindow();
+    }
 }
 
 void FStatOverlay::Render(ID3D11DeviceContext* Context, UINT Width, UINT Height) const
@@ -108,7 +116,7 @@ void FEngineProfiler::Render(ID3D11DeviceContext* Context, UINT Width, UINT Heig
     ImGui::SetNextWindowPos(ImVec2(10, 10), ImGuiCond_FirstUseEver);
     ImGui::SetNextWindowSize(ImVec2(350, 400), ImGuiCond_FirstUseEver);
 
-    if (!ImGui::Begin("Engine Profiler", &bShowWindow))
+    if (!ImGui::Begin("Engine Profiler", &bShowWindow, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse))
     {
         ImGui::End();
         return;
@@ -351,6 +359,8 @@ void FConsole::ExecuteCommand(const std::string& Command)
         AddLog(ELogLevel::Display, " - stat fps: Toggle FPS display");
         AddLog(ELogLevel::Display, " - stat memory: Toggle Memory display");
         AddLog(ELogLevel::Display, " - stat none: Hide all stat overlays");
+        AddLog(ELogLevel::Display, " - stat 1: Show Engine Profiler");
+        AddLog(ELogLevel::Display, " - stat 0: Hide Engine Profiler");
     }
     else if (Command.starts_with("stat "))
     {
