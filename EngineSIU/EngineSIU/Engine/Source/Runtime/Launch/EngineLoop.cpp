@@ -10,16 +10,15 @@
 #include "UnrealEd/EditorViewportClient.h"
 #include "UnrealEd/UnrealEd.h"
 #include "World/World.h"
-
-#include "Engine/EditorEngine.h"
-#include "Renderer/DepthPrePass.h"
 #include "Renderer/TileLightCullingPass.h"
 
 #include "SoundManager.h"
+#include "SubWindow/ImGuiSubWindow.h"
 
 extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 FGraphicsDevice FEngineLoop::GraphicDevice;
+FGraphicsDevice FEngineLoop::SubGraphicDevice;
 FRenderer FEngineLoop::Renderer;
 UPrimitiveDrawBatch FEngineLoop::PrimitiveDrawBatch;
 FResourceMgr FEngineLoop::ResourceManager;
@@ -28,10 +27,12 @@ uint32 FEngineLoop::TotalAllocationCount = 0;
 
 FEngineLoop::FEngineLoop()
     : AppWnd(nullptr)
-    , UIMgr(nullptr)
+    , SubAppWnd(nullptr)
+    , FUIManager(nullptr)
     , LevelEditor(nullptr)
     , UnrealEditor(nullptr)
     , BufferManager(nullptr)
+    , CurrentImGuiContext(nullptr)
 {
 }
 
@@ -46,16 +47,22 @@ int32 FEngineLoop::Init(HINSTANCE hInstance)
 
     /* must be initialized before window. */
     WindowInit(hInstance);
+    SubWindowInit(hInstance);
 
     UnrealEditor = new UnrealEd();
     BufferManager = new FDXDBufferManager();
-    UIMgr = new UImGuiManager;
+    FUIManager = new UImGuiManager;
     AppMessageHandler = std::make_unique<FSlateAppMessageHandler>();
     LevelEditor = new SLevelEditor();
 
     UnrealEditor->Initialize();
     GraphicDevice.Initialize(AppWnd);
 
+    if (SubAppWnd)
+    {
+        SubGraphicDevice.Initialize(SubAppWnd);
+    }
+    
     if (!GPUTimingManager.Initialize(GraphicDevice.Device, GraphicDevice.DeviceContext))
     {
         UE_LOG(ELogLevel::Error, TEXT("Failed to initialize GPU Timing Manager!"));
@@ -82,8 +89,14 @@ int32 FEngineLoop::Init(HINSTANCE hInstance)
     BufferManager->Initialize(GraphicDevice.Device, GraphicDevice.DeviceContext);
     Renderer.Initialize(&GraphicDevice, BufferManager, &GPUTimingManager);
     PrimitiveDrawBatch.Initialize(&GraphicDevice);
-    UIMgr->Initialize(AppWnd, GraphicDevice.Device, GraphicDevice.DeviceContext);
+    FUIManager->Initialize(AppWnd, GraphicDevice.Device, GraphicDevice.DeviceContext);
     ResourceManager.Initialize(&Renderer, &GraphicDevice);
+    
+    if (SubAppWnd && SubGraphicDevice.Device)
+    {
+        SubUI = new FImGuiSubWindow(SubAppWnd, SubGraphicDevice.Device, SubGraphicDevice.DeviceContext);
+        UImGuiManager::ApplySharedStyle(FUIManager->GetContext(), SubUI->Context);
+    }
     
     uint32 ClientWidth = 0;
     uint32 ClientHeight = 0;
@@ -104,7 +117,7 @@ int32 FEngineLoop::Init(HINSTANCE hInstance)
     return 0;
 }
 
-void FEngineLoop::Render() const
+void FEngineLoop::Render()
 {
     GraphicDevice.Prepare();
     
@@ -130,7 +143,35 @@ void FEngineLoop::Render() const
         
         Renderer.RenderViewport(LevelEditor->GetActiveViewportClient());
     }
+
+
+    FUIManager->BeginFrame();
+
     
+    UnrealEditor->Render();
+    
+    FConsole::GetInstance().Draw();
+    EngineProfiler.Render(GraphicDevice.DeviceContext, GraphicDevice.ScreenWidth, GraphicDevice.ScreenHeight);
+    
+    FUIManager->EndFrame();
+}
+
+void FEngineLoop::RenderSubWindow() const
+{
+    if (SubAppWnd && IsWindowVisible(SubAppWnd) && SubGraphicDevice.Device)
+    {
+        SubGraphicDevice.Prepare();
+
+        // Sub window rendering
+        SubUI->BeginFrame();
+        ImGui::Begin("SubWindow");
+        ImGui::Text("Hello from subwindow");
+        ImGui::End();
+        SubUI->EndFrame();
+        
+        // Sub swap
+        SubGraphicDevice.SwapBuffer();
+    }
 }
 
 void FEngineLoop::Tick()
@@ -154,7 +195,7 @@ void FEngineLoop::Tick()
         QueryPerformanceCounter(&StartTime);
 
         MSG Msg;
-        while (PeekMessage(&Msg, nullptr, 0, 0, PM_REMOVE))
+        while (PeekMessage(&Msg, AppWnd, 0, 0, PM_REMOVE))
         {
             TranslateMessage(&Msg); // 키보드 입력 메시지를 문자메시지로 변경
             DispatchMessage(&Msg);  // 메시지를 WndProc에 전달
@@ -166,19 +207,41 @@ void FEngineLoop::Tick()
             }
         }
 
+        // Sub window message proc
+        if (!bIsExit && SubAppWnd && IsWindowVisible(SubAppWnd))
+        {
+            while (PeekMessage(&Msg, SubAppWnd, 0, 0, PM_REMOVE))
+            {
+                TranslateMessage(&Msg);
+                DispatchMessage(&Msg);
+
+                if (Msg.message == WM_QUIT)
+                {
+                    bIsExit = true;
+                    break;
+                }
+            }
+        }
+        // Engine loop Break
+        if (bIsExit) break;
+
         const float DeltaTime = static_cast<float>(ElapsedTime / 1000.f);
 
         GEngine->Tick(DeltaTime);
         LevelEditor->Tick(DeltaTime);
+
+        /** Main window render */
         Render();
-        UIMgr->BeginFrame();
-        UnrealEditor->Render();
 
-        FConsole::GetInstance().Draw();
-        EngineProfiler.Render(GraphicDevice.DeviceContext, GraphicDevice.ScreenWidth, GraphicDevice.ScreenHeight);
+        /** Sub window render */
+        RenderSubWindow();
 
-        UIMgr->EndFrame();
+        if (CurrentImGuiContext != nullptr)
+        {
+            ImGui::SetCurrentContext(CurrentImGuiContext);
+        }
 
+        // ImGui::SetCurrentContext(FUIManager->GetContext());
         // Pending 처리된 오브젝트 제거
         GUObjectArray.ProcessPendingDestroyObjects();
 
@@ -186,8 +249,10 @@ void FEngineLoop::Tick()
         {
             GPUTimingManager.EndFrame();        // End GPU frame timing
         }
-
+        
+        // Main swap
         GraphicDevice.SwapBuffer();
+        
         do
         {
             Sleep(0);
@@ -208,18 +273,50 @@ void FEngineLoop::GetClientSize(uint32& OutWidth, uint32& OutHeight) const
 
 void FEngineLoop::Exit()
 {
+    if (SubGraphicDevice.Device)
+    {
+        SubGraphicDevice.Release();
+    }
+    CleanupSubWindow();
+
+    if (FUIManager)
+    {
+        FUIManager->Shutdown();
+        delete FUIManager;
+        FUIManager = nullptr;
+    }
+
+    if (SubUI)
+    {
+        SubUI->Shutdown();
+        delete SubUI;
+        SubUI = nullptr;
+    }
+    
     LevelEditor->Release();
-    UIMgr->Shutdown();
     ResourceManager.Release(&Renderer);
     Renderer.Release();
     GraphicDevice.Release();
-    
     GEngine->Release();
 
     delete UnrealEditor;
     delete BufferManager;
-    delete UIMgr;
     delete LevelEditor;
+}
+
+void FEngineLoop::CleanupSubWindow()
+{
+    // 서브 윈도우 리소스 해제
+    if (SubGraphicDevice.Device)
+    {
+        SubGraphicDevice.Release();
+    }
+    
+    if (SubAppWnd && IsWindow(SubAppWnd))
+    {
+        DestroyWindow(SubAppWnd);
+        SubAppWnd = nullptr;
+    }
 }
 
 void FEngineLoop::WindowInit(HINSTANCE hInstance)
@@ -243,13 +340,65 @@ void FEngineLoop::WindowInit(HINSTANCE hInstance)
     );
 }
 
-LRESULT CALLBACK FEngineLoop::AppWndProc(HWND hWnd, uint32 Msg, WPARAM wParam, LPARAM lParam)
+void FEngineLoop::SubWindowInit(HINSTANCE hInstance)
 {
-    if (ImGui_ImplWin32_WndProcHandler(hWnd, Msg, wParam, lParam))
+    WCHAR SubWindowClass[] = L"JungleSubWindowClass";
+    WCHAR SubTitle[] = L"Skeleton Mesh Viewer";
+
+    WNDCLASSEXW wcexSub = {}; // WNDCLASSEXW 사용 권장
+    wcexSub.cbSize = sizeof(WNDCLASSEX);
+    wcexSub.style = CS_HREDRAW | CS_VREDRAW; // | CS_DBLCLKS 등 필요시 추가
+    wcexSub.lpfnWndProc = SubAppWndProc; // 서브 윈도우 프로시저 지정
+    wcexSub.cbClsExtra = 0;
+    wcexSub.cbWndExtra = 0;
+    wcexSub.hInstance = hInstance;
+    wcexSub.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
+    wcexSub.lpszMenuName = nullptr;
+    wcexSub.lpszClassName = SubWindowClass;
+
+    if (!RegisterClassExW(&wcexSub))
     {
-        return true;
+        // 오류 처리
+        UE_LOG(ELogLevel::Error, TEXT("Failed to register sub window class!"));
+        return;
     }
 
+    // 서브 윈도우 생성 (크기, 위치, 스타일 조정 필요)
+    // WS_OVERLAPPEDWINDOW 는 타이틀 바, 메뉴, 크기 조절 등이 포함된 일반적인 창
+    // WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME 등으로 커스텀 가능
+    SubAppWnd = CreateWindowExW(
+        0, SubWindowClass, SubTitle, WS_OVERLAPPEDWINDOW, // WS_VISIBLE 제거 (초기에는 숨김)
+        CW_USEDEFAULT, CW_USEDEFAULT, 800, 600, // 원하는 크기
+        AppWnd, // 부모 윈도우를 메인 윈도우로 설정 (선택 사항)
+        nullptr, hInstance, nullptr
+    );
+
+    if (!SubAppWnd)
+    {
+        // 오류 처리
+        UE_LOG(ELogLevel::Error, TEXT("Failed to create sub window!"));
+    }
+    else
+    {
+        // 필요할 때
+        ShowWindow(SubAppWnd, SW_SHOW);
+        // 호출하여 표시
+    }
+}
+
+LRESULT CALLBACK FEngineLoop::AppWndProc(HWND hWnd, uint32 Msg, WPARAM wParam, LPARAM lParam)
+{
+    if (GEngineLoop.FUIManager)
+    {
+        if (ImGui::GetCurrentContext() == GEngineLoop.FUIManager->GetContext())
+        {
+            if (ImGui_ImplWin32_WndProcHandler(hWnd, Msg, wParam, lParam))
+            {
+                return true;
+            }
+        }
+    }
+    
     switch (Msg)
     {
     case WM_DESTROY:
@@ -258,6 +407,13 @@ LRESULT CALLBACK FEngineLoop::AppWndProc(HWND hWnd, uint32 Msg, WPARAM wParam, L
         {
             LevelEditor->SaveConfig();
         }
+        /** Todo: 현재 PostQuitMessage의 종료 메시지가 정상적으로 수신되지 않아
+         *  `bIsExit`을 강제로 true로 만들어주었습니다. 나중에 수정이 필요합니다.
+         *
+         *  Todo: Currently PostQuitMessage's exit message is not responded to.
+         *  You can make `bIsExit` true by executing it. It will need to be fixed later.
+         */
+        GEngineLoop.bIsExit = true;
         break;
     case WM_SIZE:
         if (wParam != SIZE_MINIMIZED)
@@ -280,12 +436,67 @@ LRESULT CALLBACK FEngineLoop::AppWndProc(HWND hWnd, uint32 Msg, WPARAM wParam, L
         }
         GEngineLoop.UpdateUI();
         break;
+        
+    case WM_ACTIVATE:
+        if (ImGui::GetCurrentContext() == nullptr) break;
+        ImGui::SetCurrentContext(GEngineLoop.FUIManager->GetContext());
+        GEngineLoop.CurrentImGuiContext = ImGui::GetCurrentContext();
+        break;
+        
     default:
         GEngineLoop.AppMessageHandler->ProcessMessage(hWnd, Msg, wParam, lParam);
         return DefWindowProc(hWnd, Msg, wParam, lParam);
     }
 
     return 0;
+}
+
+LRESULT FEngineLoop::SubAppWndProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
+{
+    if (GEngineLoop.SubUI)
+    {
+        if (ImGui::GetCurrentContext() == GEngineLoop.SubUI->Context)
+        {
+            if (ImGui_ImplWin32_WndProcHandler(hWnd, Msg, wParam, lParam))
+            {
+                return true;
+            }
+        }
+    }
+
+    switch (Msg)
+    {
+    case WM_SIZE:
+        if (wParam != SIZE_MINIMIZED)
+        {
+            // 서브 윈도우 크기 변경 시 리소스 리사이즈
+            // GEngineLoop.ResizeSubWindowResources();
+            if (GEngineLoop.GetUnrealEditor())
+            {
+                GEngineLoop.GetUnrealEditor()->OnResize(GEngineLoop.SubAppWnd, true);
+            }
+        }
+        break;
+    case WM_CLOSE: // event close button
+        ShowWindow(hWnd, SW_HIDE); // window hide
+        break;
+    case WM_DESTROY:
+        // 실제 윈도우가 파괴될 때 (예: 앱 종료 시)
+        // GEngineLoop.CleanupSubWindow(); // Exit에서 일괄 처리하므로 여기서 호출 안 할 수도 있음
+        break;
+        
+    case WM_ACTIVATE:
+        if (ImGui::GetCurrentContext() == nullptr) break; 
+        ImGui::SetCurrentContext(GEngineLoop.SubUI->Context);
+        GEngineLoop.CurrentImGuiContext = ImGui::GetCurrentContext();
+        break;
+        
+    default:
+        // TODO: 서브 윈도우용 입력 처리 (카메라 제어 등)
+        // GEngineLoop.SubWindowMessageHandler->ProcessMessage(hWnd, Msg, wParam, lParam);
+        break;
+    }
+    return DefWindowProc(hWnd, Msg, wParam, lParam);
 }
 
 void FEngineLoop::UpdateUI()

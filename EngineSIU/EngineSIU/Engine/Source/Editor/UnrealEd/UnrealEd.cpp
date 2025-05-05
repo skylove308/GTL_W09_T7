@@ -30,11 +30,16 @@ void UnrealEd::AddEditorPanel(const FString& PanelId, const std::shared_ptr<UEdi
     Panels[PanelId] = EditorPanel;
 }
 
-void UnrealEd::OnResize(HWND hWnd) const
+void UnrealEd::OnResize(HWND hWnd, bool bSubWindow) const
 {
     for (auto& Panel : Panels)
     {
-        Panel.Value->OnResize(hWnd);
+        const bool bIsSub = (Panel.Value->WindowType == WT_Sub);
+
+        if (bSubWindow == bIsSub)
+        {
+            Panel.Value->OnResize(hWnd);
+        }
     }
 }
 

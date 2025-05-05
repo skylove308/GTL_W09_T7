@@ -46,7 +46,7 @@ void ControlEditorPanel::Render()
 {
     /* Pre Setup */
     const ImGuiIO& IO = ImGui::GetIO();
-    ImFont* IconFont = IO.Fonts->Fonts[FEATHER_FONT];
+    ImFont* IconFont = IO.Fonts->Fonts.size() == 1 ? IO.FontDefault : IO.Fonts->Fonts[FEATHER_FONT];
     constexpr ImVec2 IconSize = ImVec2(32, 32);
 
     const float PanelWidth = (Width) * 0.8f;

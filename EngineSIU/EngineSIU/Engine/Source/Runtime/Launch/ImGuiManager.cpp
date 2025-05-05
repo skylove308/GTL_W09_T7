@@ -7,13 +7,16 @@
 
 void UImGuiManager::Initialize(HWND hWnd, ID3D11Device* device, ID3D11DeviceContext* deviceContext)
 {
-    IMGUI_CHECKVERSION();
-    ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO();
+    ImGuiContext = ImGui::CreateContext();
     ImGui_ImplWin32_Init(hWnd);
     ImGui_ImplDX11_Init(device, deviceContext);
-    io.Fonts->AddFontFromFileTTF(R"(C:\Windows\Fonts\malgun.ttf)", 18.0f, nullptr, io.Fonts->GetGlyphRangesKorean());
+    ImGuiIO& io = ImGui::GetIO();
+    SharedFont = io.Fonts->AddFontFromFileTTF(R"(C:\Windows\Fonts\malgun.ttf)", 18.0f, nullptr, io.Fonts->GetGlyphRangesKorean());
 
+    unsigned char* pixels;
+    int w, h;
+    io.Fonts->GetTexDataAsRGBA32(&pixels, &w, &h); // 여기서 atlas 생성됨
+    
     ImFontConfig FeatherFontConfig;
     FeatherFontConfig.PixelSnapH = true;
     FeatherFontConfig.FontDataOwnedByAtlas = false;
@@ -41,8 +44,9 @@ void UImGuiManager::Initialize(HWND hWnd, ID3D11Device* device, ID3D11DeviceCont
 
 void UImGuiManager::BeginFrame() const
 {
-    ImGui_ImplDX11_NewFrame();
+    ImGui::SetCurrentContext(ImGuiContext);
     ImGui_ImplWin32_NewFrame();
+    ImGui_ImplDX11_NewFrame();
     ImGui::NewFrame();
 }
 
@@ -53,7 +57,7 @@ void UImGuiManager::EndFrame() const
 }
 
 /* GUI Style Preference */
-void UImGuiManager::PreferenceStyle() const
+void UImGuiManager::PreferenceStyle()
 {
     ImGuiStyle& Style = ImGui::GetStyle();
 
@@ -116,10 +120,27 @@ void UImGuiManager::PreferenceStyle() const
     ImGui::GetStyle().Colors[ImGuiCol_TabUnfocusedActive] = ImVec4{ 0.0f, 0.0f, 0.0f, 0.15f };
 }
 
+ImGuiContext* UImGuiManager::GetContext() const
+{
+    return ImGuiContext;
+}
+
 void UImGuiManager::Shutdown()
 {
+    ImGui::SetCurrentContext(ImGuiContext);
     ImGui_ImplDX11_Shutdown();
     ImGui_ImplWin32_Shutdown();
-    ImGui::DestroyContext();
+    ImGui::DestroyContext(ImGuiContext);
+}
+
+void UImGuiManager::ApplySharedStyle(::ImGuiContext* Context1, ::ImGuiContext* Context2)
+{
+    ImGui::SetCurrentContext(Context1);
+    ImGuiStyle& Style = ImGui::GetStyle();
+    ImFont* Font = ImGui::GetIO().FontDefault;
+
+    ImGui::SetCurrentContext(Context2);
+    ImGui::GetStyle() = Style;
+    ImGui::GetIO().FontDefault = Font;
 }
 
