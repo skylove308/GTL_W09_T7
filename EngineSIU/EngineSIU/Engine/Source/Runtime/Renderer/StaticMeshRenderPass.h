@@ -7,6 +7,7 @@
 #include "Components/Light/PointLightComponent.h"
 
 struct FStaticMeshRenderData;
+struct FSkeletalMeshRenderData;
 class FShadowManager;
 class FDXDShaderManager;
 class UWorld;
@@ -45,7 +46,7 @@ public:
     void UpdateLitUnlitConstant(int32 isLit) const;
 
     void RenderPrimitive(FStaticMeshRenderData* RenderData, TArray<FStaticMaterial*> Materials, TArray<UMaterial*> OverrideMaterials, int SelectedSubMeshIndex) const;
-    
+    void RenderPrimitive(FSkeletalMeshRenderData* RenderData, TArray<FStaticMaterial*> Materials, TArray<UMaterial*> OverrideMaterials, int SelectedSubMeshIndex) const;
     void RenderPrimitive(ID3D11Buffer* pBuffer, UINT numVertices) const;
 
     void RenderPrimitive(ID3D11Buffer* pVertexBuffer, UINT numVertices, ID3D11Buffer* pIndexBuffer, UINT numIndices) const;

@@ -60,10 +60,13 @@ static FMatrix FbxAMatrixToFMatrix(const FbxAMatrix& InM)
 struct FFBXLoader
 {
 public:
+    FFBXLoader() = default;
+    ~FFBXLoader();
+
     static bool Initialize();
     static bool LoadFBX(const FString& FilePath);
     static void DumpAllMeshes(FbxNode* node);
-    static bool FindMesh(FbxNode* Node);
+    static bool FindMesh(FbxNode* Node, const FString& FilePath);
 
     static bool IsStaticMesh(FbxMesh* Mesh);
     static bool IsSkeletalMesh(FbxMesh* Mesh);

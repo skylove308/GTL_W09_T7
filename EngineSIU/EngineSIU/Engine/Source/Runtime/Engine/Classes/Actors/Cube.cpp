@@ -12,9 +12,9 @@
 
 ACube::ACube()
 {
-    StaticMeshComponent->SetStaticMesh(FObjManager::GetStaticMesh(L"Contents/Reference/Reference.obj"));
-    //UStaticMesh* StaticMesh = FFBXManager::CreateStaticMesh("Contents/teamugfbx.fbx");
-    //StaticMeshComponent->SetStaticMesh(StaticMesh);
+    //StaticMeshComponent->SetStaticMesh(FObjManager::GetStaticMesh(L"Contents/Reference/Reference.obj"));
+    UStaticMesh* StaticMesh = FFBXManager::CreateStaticMesh("Contents/teamugfbx.fbx");
+    StaticMeshComponent->SetStaticMesh(StaticMesh);
     
 }
 

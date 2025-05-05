@@ -7,6 +7,66 @@
 #include "Components/Mesh/StaticMeshRenderData.h"
 #include "Components/Mesh/SkeletalMeshRenderData.h"
 
+FFBXLoader::~FFBXLoader()
+{
+    if (FFBXManager::SkeletalMeshRenderData)
+    {
+        delete FFBXManager::SkeletalMeshRenderData;
+        FFBXManager::SkeletalMeshRenderData = nullptr;
+    }
+
+    if (FFBXManager::StaticMeshRenderData)
+    {
+        delete FFBXManager::StaticMeshRenderData;
+        FFBXManager::StaticMeshRenderData = nullptr;
+    }
+
+    if (Manager)
+    {
+        Manager->Destroy();
+        Manager = nullptr;
+    }
+    if (Importer)
+    {
+        Importer->Destroy();
+        Importer = nullptr;
+    }
+    if (Scene)
+    {
+        Scene->Destroy();
+        Scene = nullptr;
+    }
+    if (Mesh)
+    {
+        Mesh->Destroy();
+        Mesh = nullptr;
+    }
+    if (FFBXManager::StaticMeshMap.Num() > 0)
+    {
+        for (auto& Pair : FFBXManager::StaticMeshMap)
+        {
+            delete Pair.Value;
+        }
+        FFBXManager::StaticMeshMap.Empty();
+    }
+    if (FFBXManager::MaterialMap.Num() > 0)
+    {
+        for (auto& Pair : FFBXManager::MaterialMap)
+        {
+            delete Pair.Value;
+        }
+        FFBXManager::MaterialMap.Empty();
+    }
+    if (FFBXManager::FbxStaticMeshMap.Num() > 0)
+    {
+        for (auto& Pair : FFBXManager::FbxStaticMeshMap)
+        {
+            delete Pair.Value;
+        }
+        FFBXManager::FbxStaticMeshMap.Empty();
+    }
+}
+
 bool FFBXLoader::Initialize()
 {
     // Initialize the FBX SDK manager
@@ -74,7 +134,7 @@ bool FFBXLoader::LoadFBX(const FString& FilePath)
    Converter.Triangulate(Scene, true);
 
    DumpAllMeshes(Scene->GetRootNode());
-   if (!FindMesh(Scene->GetRootNode()))
+   if (!FindMesh(Scene->GetRootNode(), FilePath))
    {
        UE_LOG(ELogLevel::Error, TEXT("Failed to find Mesh in FBX scene"));
        Importer->Destroy();
@@ -85,7 +145,8 @@ bool FFBXLoader::LoadFBX(const FString& FilePath)
 
    // Cleanup
    Importer->Destroy();
-
+   Scene->Destroy();
+   Manager->Destroy();
 
    UE_LOG(ELogLevel::Display, TEXT("FBX file loaded successfully: %s"), *FilePath);
 
@@ -112,7 +173,7 @@ void FFBXLoader::DumpAllMeshes(FbxNode* node)
         DumpAllMeshes(node->GetChild(i));
 }
 
-bool FFBXLoader::FindMesh(FbxNode* Node)
+bool FFBXLoader::FindMesh(FbxNode* Node, const FString& FilePath)
 {
     if (!Node) return false;
 
@@ -125,6 +186,7 @@ bool FFBXLoader::FindMesh(FbxNode* Node)
         // Skeletal Mesh
         if (IsSkeletalMesh(Mesh))
         {
+            FFBXManager::SkeletalMeshRenderData->ObjectName = FilePath.ToWideString();
             // Build bones and weights
             BuildSkeletalBones(Mesh, FFBXManager::SkeletalMeshRenderData->Bones);
             BuildBoneWeights(Mesh, FFBXManager::SkeletalMeshRenderData->BoneWeights);
@@ -153,6 +215,8 @@ bool FFBXLoader::FindMesh(FbxNode* Node)
                         {
                             FbxFileTexture* Texture = DiffuseProperty.GetSrcObject<FbxFileTexture>(0);
                             const uint32 SlotIdx = static_cast<uint32>(EMaterialTextureSlots::MTS_Diffuse);
+                            constexpr uint32 TexturesNum = static_cast<uint32>(EMaterialTextureSlots::MTS_MAX);
+                            MatInfo.TextureInfos.SetNum(TexturesNum);
                             MatInfo.TextureInfos[SlotIdx].TexturePath = ((FString)Texture->GetFileName()).ToWideString();
                         }
                     }
@@ -163,19 +227,20 @@ bool FFBXLoader::FindMesh(FbxNode* Node)
 
 
 
-            // Update skinning matrices
-            TArray<FMatrix> GlobalBoneTransforms;
-            for (int i = 0; i < FFBXManager::SkeletalMeshRenderData->Bones.Num(); ++i)
-            {
-                FbxAMatrix GlobalTransform = Node->EvaluateGlobalTransform();
-                GlobalBoneTransforms.Add(FbxAMatrixToFMatrix(GlobalTransform));
-            }
-            UpdateSkinningMatrices(GlobalBoneTransforms, FFBXManager::SkeletalMeshRenderData->Bones);
+            //// Update skinning matrices
+            //TArray<FMatrix> GlobalBoneTransforms;
+            //for (int i = 0; i < FFBXManager::SkeletalMeshRenderData->Bones.Num(); ++i)
+            //{
+            //    FbxAMatrix GlobalTransform = Node->EvaluateGlobalTransform();
+            //    GlobalBoneTransforms.Add(FbxAMatrixToFMatrix(GlobalTransform));
+            //}
+            //UpdateSkinningMatrices(GlobalBoneTransforms, FFBXManager::SkeletalMeshRenderData->Bones);
 
         }
         // Static Mesh
         else
         {
+            FFBXManager::StaticMeshRenderData->ObjectName = FilePath.ToWideString();
             // 1) 컨트롤 포인트(버텍스 위치) 복사
             CopyControlPoints(Mesh, FFBXManager::StaticMeshRenderData->Vertices);
 
@@ -207,6 +272,8 @@ bool FFBXLoader::FindMesh(FbxNode* Node)
                         {
                             FbxFileTexture* Texture = DiffuseProperty.GetSrcObject<FbxFileTexture>(0);
                             const uint32 SlotIdx = static_cast<uint32>(EMaterialTextureSlots::MTS_Diffuse);
+                            constexpr uint32 TexturesNum = static_cast<uint32>(EMaterialTextureSlots::MTS_MAX);
+                            MatInfo.TextureInfos.SetNum(TexturesNum);
                             MatInfo.TextureInfos[SlotIdx].TexturePath = ((FString)Texture->GetFileName()).ToWideString();
                         }
                     }
@@ -230,7 +297,7 @@ bool FFBXLoader::FindMesh(FbxNode* Node)
 
     for (int i = 0; i < Node->GetChildCount(); i++)
     {
-        if (FindMesh(Node->GetChild(i)))
+        if (FindMesh(Node->GetChild(i), FilePath))
         {
             return true;
         }
@@ -521,21 +588,101 @@ void FFBXLoader::ComputeBoundingBox(const TArray<FStaticMeshVertex>& InVerts, FV
 }
 
 
-void FFBXLoader::CopyNormals(FbxMesh* Mesh, TArray<FSkeletalMeshVertex>& OutVerts) {
-    FFBXLoader::CopyNormals(Mesh, reinterpret_cast<TArray<FStaticMeshVertex>&>(OutVerts));
+void FFBXLoader::CopyNormals(FbxMesh* Mesh, TArray<FSkeletalMeshVertex>& OutVerts) 
+{
+    if (Mesh->GetElementNormalCount() < 1) return;
+    auto* NormalElem = Mesh->GetElementNormal(0);
+    if (NormalElem->GetMappingMode() == FbxGeometryElement::eByPolygonVertex &&
+        NormalElem->GetReferenceMode() == FbxGeometryElement::eDirect)
+    {
+        int32 VertexCounter = 0;
+        int32 PolygonCount = Mesh->GetPolygonCount();
+        for (int32 PolyIndex = 0; PolyIndex < PolygonCount; ++PolyIndex)
+        {
+            int32 PolySize = Mesh->GetPolygonSize(PolyIndex);
+            for (int32 Corner = 0; Corner < PolySize; ++Corner, ++VertexCounter)
+            {
+                int32 CPI = Mesh->GetPolygonVertex(PolyIndex, Corner);
+                FbxVector4 N = NormalElem->GetDirectArray().GetAt(VertexCounter);
+                OutVerts[CPI].NormalX = static_cast<float>(N[0]);
+                OutVerts[CPI].NormalY = static_cast<float>(N[1]);
+                OutVerts[CPI].NormalZ = static_cast<float>(N[2]);
+            }
+        }
+    }
 }
 
-void FFBXLoader::CopyUVs(FbxMesh* Mesh, TArray<FSkeletalMeshVertex>& OutVerts) {
-    FFBXLoader::CopyUVs(Mesh, reinterpret_cast<TArray<FStaticMeshVertex>&>(OutVerts));
+void FFBXLoader::CopyUVs(FbxMesh* Mesh, TArray<FSkeletalMeshVertex>& OutVerts) 
+{
+    if (Mesh->GetElementUVCount() < 1) return;
+    auto* UVElem = Mesh->GetElementUV(0);
+    if (UVElem->GetMappingMode() == FbxGeometryElement::eByPolygonVertex &&
+        (UVElem->GetReferenceMode() == FbxGeometryElement::eDirect ||
+            UVElem->GetReferenceMode() == FbxGeometryElement::eIndexToDirect))
+    {
+        int32 VertexCounter = 0;
+        int32 PolygonCount = Mesh->GetPolygonCount();
+        for (int32 PolyIndex = 0; PolyIndex < PolygonCount; ++PolyIndex)
+        {
+            int32 PolySize = Mesh->GetPolygonSize(PolyIndex);
+            for (int32 Corner = 0; Corner < PolySize; ++Corner, ++VertexCounter)
+            {
+                int32 UVIndex = (UVElem->GetReferenceMode() == FbxGeometryElement::eDirect)
+                    ? VertexCounter
+                    : UVElem->GetIndexArray().GetAt(VertexCounter);
+                FbxVector2 UV = UVElem->GetDirectArray().GetAt(UVIndex);
+                int32 CPI = Mesh->GetPolygonVertex(PolyIndex, Corner);
+                OutVerts[CPI].U = static_cast<float>(UV[0]);
+                OutVerts[CPI].V = static_cast<float>(UV[1]);
+            }
+        }
+    }
 }
 
-void FFBXLoader::CopyTangents(FbxMesh* Mesh, TArray<FSkeletalMeshVertex>& OutVerts) {
-    FFBXLoader::CopyTangents(Mesh, reinterpret_cast<TArray<FStaticMeshVertex>&>(OutVerts));
+void FFBXLoader::CopyTangents(FbxMesh* Mesh, TArray<FSkeletalMeshVertex>& OutVerts) 
+{
+    if (Mesh->GetElementTangentCount() < 1) return;
+    auto* TanElem = Mesh->GetElementTangent(0);
+    if (TanElem->GetMappingMode() == FbxGeometryElement::eByPolygonVertex &&
+        TanElem->GetReferenceMode() == FbxGeometryElement::eDirect)
+    {
+        int32 VertexCounter = 0;
+        int32 PolygonCount = Mesh->GetPolygonCount();
+        for (int32 PolyIndex = 0; PolyIndex < PolygonCount; ++PolyIndex)
+        {
+            int32 PolySize = Mesh->GetPolygonSize(PolyIndex);
+            for (int32 Corner = 0; Corner < PolySize; ++Corner, ++VertexCounter)
+            {
+                int32 CPI = Mesh->GetPolygonVertex(PolyIndex, Corner);
+                FbxVector4 T = TanElem->GetDirectArray().GetAt(VertexCounter);
+                OutVerts[CPI].TangentX = static_cast<float>(T[0]);
+                OutVerts[CPI].TangentY = static_cast<float>(T[1]);
+                OutVerts[CPI].TangentZ = static_cast<float>(T[2]);
+                OutVerts[CPI].TangentW = static_cast<float>(T[3]);
+            }
+        }
+    }
 }
 
 void FFBXLoader::ComputeBoundingBox(const TArray<FSkeletalMeshVertex>& InVerts, FVector& OutMin, FVector& OutMax)
 {
-    FFBXLoader::ComputeBoundingBox(reinterpret_cast<const TArray<FStaticMeshVertex>&>(InVerts), OutMin, OutMax);
+    if (InVerts.Num() == 0)
+    {
+        OutMin = OutMax = FVector::ZeroVector;
+        return;
+    }
+    const auto& First = InVerts[0];
+    OutMin = OutMax = FVector(First.X, First.Y, First.Z);
+    for (int32 i = 1; i < InVerts.Num(); ++i)
+    {
+        const auto& V = InVerts[i];
+        OutMin.X = FMath::Min(OutMin.X, V.X);
+        OutMin.Y = FMath::Min(OutMin.Y, V.Y);
+        OutMin.Z = FMath::Min(OutMin.Z, V.Z);
+        OutMax.X = FMath::Max(OutMax.X, V.X);
+        OutMax.Y = FMath::Max(OutMax.Y, V.Y);
+        OutMax.Z = FMath::Max(OutMax.Z, V.Z);
+    }
 }
 
 UStaticMesh* FFBXManager::CreateStaticMesh(const FString& filePath)
@@ -568,7 +715,7 @@ USkeletalMesh* FFBXManager::CreateSkeletalMesh(const FString& filePath)
 
     if (!FFBXLoader::LoadFBX(filePath))
     {
-        delete  SkeletalMeshRenderData;
+        delete SkeletalMeshRenderData;
         return nullptr;
     }
 
