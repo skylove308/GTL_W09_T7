@@ -75,7 +75,8 @@
 #ifdef STBRP_STATIC
 #define STBRP_DEF static
 #else
-#define STBRP_DEF extern
+#define STBRP_DEF 
+
 #endif
 
 #ifdef __cplusplus
