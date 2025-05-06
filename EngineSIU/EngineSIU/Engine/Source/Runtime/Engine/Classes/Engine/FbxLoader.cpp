@@ -7,6 +7,7 @@
 #include "Components/Mesh/StaticMeshRenderData.h"
 #include "Components/Mesh/SkeletalMeshRenderData.h"
 #include "FObjLoader.h"
+#include "Math/JungleMath.h"
 
 FFBXLoader::~FFBXLoader()
 {
@@ -176,14 +177,23 @@ bool FFBXLoader::FindMesh(FbxNode* Node, const FString& FilePath)
             SetupMaterialSubsets(Mesh, FFBXManager::SkeletalMeshRenderData->MaterialSubsets);
             LoadMaterialInfo(Node);
 
-            int32 LeftArmIndex = FindBoneByName(FFBXManager::Bones, "mixamorig:Spine");
-            if (LeftArmIndex != INDEX_NONE)
-            {
-                RotateBones(FFBXManager::Bones, LeftArmIndex, FbxVector4(0, 90, 0)); // Z축으로 30도 회전
-                ReskinVerticesCPU(Mesh,
-                    FFBXManager::Bones,
-                    FFBXManager::SkeletalMeshRenderData->Vertices);
-            }
+            //int32 LeftArmIndex = FindBoneByName(FFBXManager::Bones, "mixamorig:Spine");
+            //if (LeftArmIndex != INDEX_NONE)
+            //{
+            //    RotateBones(FFBXManager::Bones, LeftArmIndex, FbxVector4(90, 0, 0)); // Z축으로 30도 회전
+            //    ReskinVerticesCPU(Mesh,
+            //        FFBXManager::Bones,
+            //        FFBXManager::SkeletalMeshRenderData->Vertices);
+            //}
+
+            //int32 LeftUpLegIndex = FindBoneByName(FFBXManager::Bones, "mixamorig:RightHand");
+            //if (LeftUpLegIndex != INDEX_NONE)
+            //{
+            //    RotateBones(FFBXManager::Bones, LeftUpLegIndex, FbxVector4(30, 0, 0)); // Z축으로 30도 회전
+            //    ReskinVerticesCPU(Mesh,
+            //        FFBXManager::Bones,
+            //        FFBXManager::SkeletalMeshRenderData->Vertices);
+            //}
 
             //// Update skinning matrices
             //TArray<FMatrix> GlobalBoneTransforms;
@@ -511,16 +521,17 @@ void FFBXLoader::ExtractSkeleton(FbxMesh* Mesh, TArray<FSkeletonBone>& OutBones)
 
         FSkeletonBone Bone;
         Bone.Name = BoneNode->GetName();
-        Bone.Node = BoneNode;
-        Bone.LocalBindPose = BoneNode->EvaluateLocalTransform();
-        Bone.GlobalPose.SetIdentity(); // 초기화
+        Bone.LocalBindPose = FbxAMatrixToFMatrix(BoneNode->EvaluateLocalTransform());
+        Bone.GlobalPose = FMatrix::Identity; // 초기화
 
         // Find parent index
         FbxNode* Parent = BoneNode->GetParent();
+        FString ParentName = Parent ? Parent->GetName() : TEXT("");
+
         Bone.ParentIndex = -1;
         for (int i = 0; i < OutBones.Num(); ++i)
         {
-            if (OutBones[i].Node == Parent)
+            if (OutBones[i].Name == ParentName)
             {
                 Bone.ParentIndex = i;
                 break;
@@ -554,12 +565,13 @@ void FFBXLoader::RotateBones(TArray<FSkeletonBone>& Bones, int32 BoneIndex, cons
 
     FSkeletonBone& Bone = Bones[BoneIndex];
 
-    FbxAMatrix RotationMatrix;
-    RotationMatrix.SetIdentity();
-    RotationMatrix.SetR(EulerDegrees); // XYZ Euler 회전값 적용 (도 단위)
+    FMatrix Rotation = JungleMath::CreateRotationMatrix(FVector(
+        (float)EulerDegrees[0],
+        (float)EulerDegrees[1],
+        (float)EulerDegrees[2]));
 
     // 기존 로컬 바인드 포즈에 회전 적용
-    Bone.LocalBindPose = RotationMatrix * Bone.LocalBindPose;
+    Bone.LocalBindPose = Rotation * Bone.LocalBindPose;
 
     // 회전 후 글로벌 포즈 갱신
     RecalculateGlobalPoses(Bones);
@@ -586,7 +598,8 @@ void FFBXLoader::ReskinVerticesCPU(FbxMesh* Mesh, const TArray<FSkeletonBone>& B
         int Count = Cluster->GetControlPointIndicesCount();
 
         FbxNode* BoneNode = Cluster->GetLink();
-        int BoneIndex = Bones.IndexOfByPredicate([&](const FSkeletonBone& B) { return B.Node == BoneNode; });
+        FString BoneName = BoneNode->GetName();
+        int BoneIndex = Bones.IndexOfByPredicate([&](const FSkeletonBone& B) { return B.Name == BoneName; });
         if (BoneIndex == INDEX_NONE) continue;
 
         FbxAMatrix TransformMatrix, ReferenceMatrix;
@@ -594,7 +607,7 @@ void FFBXLoader::ReskinVerticesCPU(FbxMesh* Mesh, const TArray<FSkeletonBone>& B
         Cluster->GetTransformLinkMatrix(ReferenceMatrix);
 
         FbxAMatrix BoneOffsetMatrix = ReferenceMatrix.Inverse() * TransformMatrix;
-        FbxAMatrix FinalMatrix = Bones[BoneIndex].GlobalPose * BoneOffsetMatrix;
+        FbxAMatrix FinalMatrix = FMatrixToFbxAMatrix(Bones[BoneIndex].GlobalPose) * BoneOffsetMatrix;
 
         for (int i = 0; i < Count; ++i)
         {
@@ -610,7 +623,7 @@ void FFBXLoader::ReskinVerticesCPU(FbxMesh* Mesh, const TArray<FSkeletonBone>& B
 
     for (auto& V : Vertices)
     {
-        if ((int)V.MaterialIndex < ControlPointsCount)
+        if ((int)V.ControlPointIndex < ControlPointsCount)
         {
             //FVector Pos = FVector((float)Skinned[V.MaterialIndex][0], (float)Skinned[V.MaterialIndex][1], (float)Skinned[V.MaterialIndex][2]);
             //V.X = Pos.X;

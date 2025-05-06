@@ -30,38 +30,36 @@ struct FSkeletonBone
 {
     FString Name;
     int32 ParentIndex;
-    FbxNode* Node;
-    FbxAMatrix LocalBindPose;
-    FbxAMatrix GlobalPose;
+    FMatrix LocalBindPose;
+    FMatrix GlobalPose;
 };
 
 static FMatrix FbxAMatrixToFMatrix(const FbxAMatrix& InM)
 {
     FMatrix Out;
 
-    // Row 0
-    Out.M[0][0] = (float)InM.mData[0][0];
-    Out.M[0][1] = (float)InM.mData[0][1];
-    Out.M[0][2] = (float)InM.mData[0][2];
-    Out.M[0][3] = (float)InM.mData[0][3];
+    for (int Row = 0; Row < 4; ++Row)
+    {
+        for (int Col = 0; Col < 4; ++Col)
+        {
+            Out.M[Row][Col] = static_cast<float>(InM.Get(Col, Row));
+        }
+    }
 
-    // Row 1
-    Out.M[1][0] = (float)InM.mData[1][0];
-    Out.M[1][1] = (float)InM.mData[1][1];
-    Out.M[1][2] = (float)InM.mData[1][2];
-    Out.M[1][3] = (float)InM.mData[1][3];
+    return Out;
+}
 
-    // Row 2
-    Out.M[2][0] = (float)InM.mData[2][0];
-    Out.M[2][1] = (float)InM.mData[2][1];
-    Out.M[2][2] = (float)InM.mData[2][2];
-    Out.M[2][3] = (float)InM.mData[2][3];
+static FbxAMatrix FMatrixToFbxAMatrix(const FMatrix& InM)
+{
+    FbxAMatrix Out;
 
-    // Row 3
-    Out.M[3][0] = (float)InM.mData[3][0];
-    Out.M[3][1] = (float)InM.mData[3][1];
-    Out.M[3][2] = (float)InM.mData[3][2];
-    Out.M[3][3] = (float)InM.mData[3][3];
+    for (int Row = 0; Row < 4; ++Row)
+    {
+        for (int Col = 0; Col < 4; ++Col)
+        {
+            Out.mData[Col][Row] = static_cast<double>(InM.M[Row][Col]); // transpose
+        }
+    }
 
     return Out;
 }

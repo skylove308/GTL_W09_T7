@@ -35,6 +35,8 @@
 #include "LuaScripts/LuaScriptFileUtils.h"
 #include "imgui/imgui_bezier.h"
 #include "imgui/imgui_curve.h"
+#include "Components/Mesh/SkeletalMeshComponent.h"
+#include "Engine/Asset/SkeletalMeshAsset.h"
 
 void PropertyEditorPanel::Render()
 {
@@ -43,10 +45,10 @@ void PropertyEditorPanel::Render()
     {
         return;
     }
-    
+
     /* Pre Setup */
     float PanelWidth = (Width) * 0.2f - 3.0f;
-    float PanelHeight = (Height) - ((Height) * 0.3f + 10.0f) - 32.0f;
+    float PanelHeight = (Height)-((Height) * 0.3f + 10.0f) - 32.0f;
 
     float PanelPosX = (Width) * 0.8f + 2.0f;
     float PanelPosY = (Height) * 0.3f + 10.0f;
@@ -72,7 +74,7 @@ void PropertyEditorPanel::Render()
         TargetComponent = SelectedComponent;
     }
     else if (SelectedActor != nullptr)
-    {        
+    {
         TargetComponent = SelectedActor->GetRootComponent();
     }
 
@@ -86,7 +88,7 @@ void PropertyEditorPanel::Render()
     {
         RenderForActor(SelectedActor, TargetComponent);
     }
-    
+
     if (UAmbientLightComponent* LightComponent = GetTargetComponent<UAmbientLightComponent>(SelectedActor, SelectedComponent))
     {
         RenderForAmbientLightComponent(LightComponent);
@@ -125,7 +127,7 @@ void PropertyEditorPanel::Render()
     {
         RenderForCameraComponent(CameraComponent);
     }
-  
+
     if (UShapeComponent* ShapeComponent = GetTargetComponent<UShapeComponent>(SelectedActor, SelectedComponent))
     {
         RenderForShapeComponent(ShapeComponent);
@@ -134,6 +136,11 @@ void PropertyEditorPanel::Render()
     if (USpringArmComponent* SpringArmComponent = GetTargetComponent<USpringArmComponent>(SelectedActor, SelectedComponent))
     {
         RenderForSpringArmComponent(SpringArmComponent);
+    }
+
+    if (USkeletalMeshComponent* SkeletalMeshComponent = GetTargetComponent<USkeletalMeshComponent>(SelectedActor,SelectedComponent))
+    {
+        RenderForSkeletalComponent(SkeletalMeshComponent);
     }
 
     ImGui::End();
@@ -919,6 +926,30 @@ void PropertyEditorPanel::RenderForSpringArmComponent(USpringArmComponent* Sprin
 
         ImGui::TreePop();
     }
+}
+
+void PropertyEditorPanel::RenderForSkeletalComponent(USkeletalMeshComponent* SkeletalMeshComponent) const
+{
+    ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.1f, 0.1f, 0.1f, 1.0f));
+    if (ImGui::TreeNodeEx("Skeletal Mesh", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_DefaultOpen)) // 트리 노드 생성
+    {
+        ImGui::Text("Skeletal Mesh");
+        ImGui::SameLine();
+
+        FString PreviewName = FString("None");
+        if (USkeletalMesh* SkeletalMesh = SkeletalMeshComponent->GetSkeletalMesh())
+        {
+            if (FSkeletalMeshRenderData* RenderData = SkeletalMesh->GetRenderData())
+            {
+                PreviewName = RenderData->DisplayName;
+            }
+        }
+
+        
+
+        ImGui::TreePop();
+    }
+    ImGui::PopStyleColor();
 }
 
 void PropertyEditorPanel::RenderForMaterial(UStaticMeshComponent* StaticMeshComp)
