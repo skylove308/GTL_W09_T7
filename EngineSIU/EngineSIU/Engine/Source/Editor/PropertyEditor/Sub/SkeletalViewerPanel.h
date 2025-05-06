@@ -2,6 +2,8 @@
 #include "Components/ActorComponent.h"
 #include "UnrealEd/EditorPanel.h"
 
+struct FSkeletalHierarchyData;
+
 class SkeletalViewerPanel : public UEditorPanel
 {
 public:
@@ -11,6 +13,8 @@ public:
 private:
     void CreateSkeletalTreeNode();
 
+    void RenderSkeletalTreeNode(const FSkeletalHierarchyData& Node);
+    
 private:
     float Width = 800, Height = 600;
 };

@@ -109,7 +109,7 @@ bool FFBXLoader::LoadFBX(const FString& FilePath)
    // 삼각형화할 수 있는 노드를 삼각형화 시키기
    FbxGeometryConverter Converter(Manager);
    Converter.Triangulate(Scene, true);
-
+    
    DumpAllMeshes(Scene->GetRootNode());
    if (!FindMesh(Scene->GetRootNode(), FilePath))
    {
@@ -119,7 +119,13 @@ bool FFBXLoader::LoadFBX(const FString& FilePath)
        Manager->Destroy();
        return false;
    }
-
+    
+    // --- FNodeHierarchyData (또는 FSkeletalHierarchyData) 구축 시작 ---
+    if (FFBXManager::SkeletalMeshRenderData) // 스켈레탈 메시 데이터가 할당된 경우에만
+    {
+        BuildNodeHierarchyRecursive(Scene->GetRootNode(), FFBXManager::SkeletalMeshRenderData->RootSkeletal);
+    }
+    
    // Cleanup
    Importer->Destroy();
    Scene->Destroy();
@@ -475,6 +481,42 @@ void FFBXLoader::UpdateSkinningMatrices(const TArray<FMatrix>& GlobalBoneTransfo
         // 최종 skinningMatrix = GlobalTransform * inverseBindPose
         Bones[i].SkinningMatrix = GlobalBoneTransforms[i] * Bones[i].SkinningMatrix;
     }
+}
+
+void FFBXLoader::BuildNodeHierarchyRecursive(const FbxNode* Node, FSkeletalHierarchyData& OutHierarchyData)
+{
+    if (!Node)
+    {
+        return;
+    }
+
+    OutHierarchyData.NodeName = Node->GetName();
+    OutHierarchyData.Children.Empty(); // 자식 배열을 초기화합니다.
+
+    // 현재 노드의 자식들을 순회합니다.
+    for (int32 i = 0; i < Node->GetChildCount(); ++i)
+    {
+        if (const FbxNode* ChildNode = Node->GetChild(i))
+        {
+            const FbxNodeAttribute* ChildNodeAttribute = ChildNode->GetNodeAttribute();
+
+            // 자식 노드가 스켈레톤 타입인 경우에만 처리합니다.
+            if (ChildNodeAttribute && ChildNodeAttribute->GetAttributeType() == FbxNodeAttribute::eSkeleton)
+            {
+                // 1. Children 배열에 FSkeletalHierarchyData를 기본 생성자로 추가하고 인덱스를 받습니다.
+                // FSkeletalHierarchyData()는 임시 기본 생성 객체입니다.
+                // 또는 그냥 Emplace()를 호출해도 기본 생성자가 호출됩니다.
+                TArray<FSkeletalHierarchyData>::SizeType NewChildIndex = OutHierarchyData.Children.Emplace(); 
+                
+                // 2. 해당 인덱스를 사용하여 새로 추가된 요소의 참조를 얻습니다.
+                FSkeletalHierarchyData& NewChildData = OutHierarchyData.Children[NewChildIndex];
+                
+                // 3. 재귀 호출
+                BuildNodeHierarchyRecursive(ChildNode, NewChildData);
+            }
+        }
+    }
+
 }
 
 void FFBXLoader::CopyControlPoints(FbxMesh* Mesh, TArray<FStaticMeshVertex>& OutVerts)

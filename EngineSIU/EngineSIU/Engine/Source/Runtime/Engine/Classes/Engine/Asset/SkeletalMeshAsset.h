@@ -25,6 +25,12 @@ struct FBone
     FMatrix SkinningMatrix;
 };
 
+struct FSkeletalHierarchyData
+{
+    FString NodeName;
+    TArray<FSkeletalHierarchyData> Children;
+};
+
 struct FSkeletalMeshRenderData 
 {
     FWString ObjectName;
@@ -41,4 +47,6 @@ struct FSkeletalMeshRenderData
 
     TArray<FBone> Bones;
     TArray<FSkeletalMeshBoneWeight> BoneWeights;
+
+    FSkeletalHierarchyData RootSkeletal;
 };

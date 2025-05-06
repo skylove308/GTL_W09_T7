@@ -8,6 +8,7 @@
 #include "fbxsdk.h"
 
 
+struct FSkeletalHierarchyData;
 // Explicitly qualify FbxAxisSystem to resolve ambiguity
 inline fbxsdk::FbxAxisSystem unrealAxis(
     fbxsdk::FbxAxisSystem::eZAxis,      // UpVector = Z axis
@@ -77,7 +78,7 @@ public:
     static void SetupMaterialSubsets(FbxMesh* Mesh, TArray<FMaterialSubset>& OutSubsets);
     static void LoadMaterialInfo(FbxNode* Node);
     static void UpdateSkinningMatrices(const TArray<FMatrix>& GlobalBoneTransforms, TArray<FBone>& Bones);
-    //static void SkinVertexPosition(const )
+    static void BuildNodeHierarchyRecursive(const FbxNode* Node, FSkeletalHierarchyData& OutHierarchyData);
 
     static void CopyControlPoints(FbxMesh* Mesh,TArray<FStaticMeshVertex>& OutVerts);
     static void BuildStaticIndexBuffer(FbxMesh* Mesh, TArray<uint32>& OutIndices);
