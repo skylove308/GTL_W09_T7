@@ -176,33 +176,6 @@ bool FFBXLoader::FindMesh(FbxNode* Node, const FString& FilePath)
             SetupMaterialSubsets(Mesh, FFBXManager::SkeletalMeshRenderData->MaterialSubsets);
             LoadMaterialInfo(Node);
 
-            //int32 LeftArmIndex = FindBoneByName(Bones, "mixamorig:Spine");
-            //if (LeftArmIndex != INDEX_NONE)
-            //{
-            //    RotateBones(Bones, LeftArmIndex, FbxVector4(90, 0, 0)); // Z축으로 30도 회전
-            //    ReskinVerticesCPU(Mesh,
-            //        Bones,
-            //        FFBXManager::SkeletalMeshRenderData->Vertices);
-            //}
-
-            //int32 LeftUpLegIndex = FindBoneByName(Bones, "mixamorig:RightHand");
-            //if (LeftUpLegIndex != INDEX_NONE)
-            //{
-            //    RotateBones(Bones, LeftUpLegIndex, FbxVector4(30, 0, 0)); // Z축으로 30도 회전
-            //    ReskinVerticesCPU(Mesh,
-            //        Bones,
-            //        FFBXManager::SkeletalMeshRenderData->Vertices);
-            //}
-
-            //// Update skinning matrices
-            //TArray<FMatrix> GlobalBoneTransforms;
-            //for (int i = 0; i < FFBXManager::SkeletalMeshRenderData->Bones.Num(); ++i)
-            //{
-            //    FbxAMatrix GlobalTransform = Node->EvaluateGlobalTransform();
-            //    GlobalBoneTransforms.Add(FbxAMatrixToFMatrix(GlobalTransform));
-            //}
-            //UpdateSkinningMatrices(GlobalBoneTransforms, FFBXManager::SkeletalMeshRenderData->Bones);
-
         }
         // Static Mesh
         else
