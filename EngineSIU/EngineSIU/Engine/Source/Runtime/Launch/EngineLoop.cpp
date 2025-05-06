@@ -215,12 +215,6 @@ void FEngineLoop::Tick()
             {
                 TranslateMessage(&Msg);
                 DispatchMessage(&Msg);
-
-                if (Msg.message == WM_QUIT)
-                {
-                    bIsExit = true;
-                    break;
-                }
             }
         }
         // Engine loop Break
@@ -241,8 +235,7 @@ void FEngineLoop::Tick()
         {
             ImGui::SetCurrentContext(CurrentImGuiContext);
         }
-
-
+        
         // ImGui::SetCurrentContext(FUIManager->GetContext());
         // Pending 처리된 오브젝트 제거
         GUObjectArray.ProcessPendingDestroyObjects();
@@ -406,7 +399,6 @@ void FEngineLoop::SubWindowInit(HINSTANCE hInstance)
 
 LRESULT CALLBACK FEngineLoop::AppWndProc(HWND hWnd, uint32 Msg, WPARAM wParam, LPARAM lParam)
 {
-
     if (hWnd == GEngineLoop.AppWnd)
     {
         ImGui::SetCurrentContext(GEngineLoop.FUIManager->GetContext());
@@ -430,15 +422,15 @@ LRESULT CALLBACK FEngineLoop::AppWndProc(HWND hWnd, uint32 Msg, WPARAM wParam, L
             }
             return 0;
         case WM_CLOSE:
-            ShowWindow(hWnd, SW_HIDE);
-            break;
+            GEngineLoop.SelectSkeletalMesh(nullptr);
+            ::ShowWindow(hWnd, SW_HIDE);
+            return 0;
         
         case WM_ACTIVATE:
             if (ImGui::GetCurrentContext() == nullptr) break; 
             ImGui::SetCurrentContext(GEngineLoop.SubUI->Context);
             GEngineLoop.CurrentImGuiContext = ImGui::GetCurrentContext();
-            break;
-        
+            return 0;
         default:
             return DefWindowProc(hWnd, Msg, wParam, lParam);
         }
