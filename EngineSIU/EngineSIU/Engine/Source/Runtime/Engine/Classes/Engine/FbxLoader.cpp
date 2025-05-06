@@ -105,7 +105,7 @@ bool FFBXLoader::LoadFBX(const FString& FilePath)
    }
 
    // 언리얼 좌표계로 변경
-   unrealAxis.ConvertScene(Scene);
+   /*unrealAxis.ConvertScene(Scene);*/
 
    // 삼각형화할 수 있는 노드를 삼각형화 시키기
    FbxGeometryConverter Converter(Manager);
@@ -165,33 +165,34 @@ bool FFBXLoader::FindMesh(FbxNode* Node, const FString& FilePath)
         if (IsSkeletalMesh(Mesh))
         {
             FFBXManager::SkeletalMeshRenderData->ObjectName = FilePath.ToWideString();
+            TArray<FSkeletonBone>& Bones = FFBXManager::SkeletalMeshRenderData->SkeletonBones;
             // Build bones and weights
             //BuildSkeletalBones(Mesh, FFBXManager::SkeletalMeshRenderData->Bones);
-            ExtractSkeleton(Mesh, FFBXManager::Bones);
-            RecalculateGlobalPoses(FFBXManager::Bones);
+            ExtractSkeleton(Mesh, Bones);
+            RecalculateGlobalPoses(Bones);
             //BuildBoneWeights(Mesh, FFBXManager::SkeletalMeshRenderData->BoneWeights);
             BuildSkeletalVertexBuffers(Mesh, FFBXManager::SkeletalMeshRenderData->Vertices, FFBXManager::SkeletalMeshRenderData->Indices);
             ReskinVerticesCPU(Mesh,
-                FFBXManager::Bones,
+                Bones,
                 FFBXManager::SkeletalMeshRenderData->Vertices);
             SetupMaterialSubsets(Mesh, FFBXManager::SkeletalMeshRenderData->MaterialSubsets);
             LoadMaterialInfo(Node);
 
-            //int32 LeftArmIndex = FindBoneByName(FFBXManager::Bones, "mixamorig:Spine");
+            //int32 LeftArmIndex = FindBoneByName(Bones, "mixamorig:Spine");
             //if (LeftArmIndex != INDEX_NONE)
             //{
-            //    RotateBones(FFBXManager::Bones, LeftArmIndex, FbxVector4(90, 0, 0)); // Z축으로 30도 회전
+            //    RotateBones(Bones, LeftArmIndex, FbxVector4(90, 0, 0)); // Z축으로 30도 회전
             //    ReskinVerticesCPU(Mesh,
-            //        FFBXManager::Bones,
+            //        Bones,
             //        FFBXManager::SkeletalMeshRenderData->Vertices);
             //}
 
-            //int32 LeftUpLegIndex = FindBoneByName(FFBXManager::Bones, "mixamorig:RightHand");
+            //int32 LeftUpLegIndex = FindBoneByName(Bones, "mixamorig:RightHand");
             //if (LeftUpLegIndex != INDEX_NONE)
             //{
-            //    RotateBones(FFBXManager::Bones, LeftUpLegIndex, FbxVector4(30, 0, 0)); // Z축으로 30도 회전
+            //    RotateBones(Bones, LeftUpLegIndex, FbxVector4(30, 0, 0)); // Z축으로 30도 회전
             //    ReskinVerticesCPU(Mesh,
-            //        FFBXManager::Bones,
+            //        Bones,
             //        FFBXManager::SkeletalMeshRenderData->Vertices);
             //}
 

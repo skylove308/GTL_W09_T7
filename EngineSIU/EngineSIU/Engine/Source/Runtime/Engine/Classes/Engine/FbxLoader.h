@@ -6,7 +6,7 @@
 #include "Math/Plane.h"
 #include "Container/Map.h"
 #include "fbxsdk.h"
-
+#include "Engine/Asset/SkeletalMeshAsset.h"
 
 // Explicitly qualify FbxAxisSystem to resolve ambiguity
 inline fbxsdk::FbxAxisSystem unrealAxis(
@@ -26,13 +26,6 @@ class UStaticMesh;
 class USkeletalMesh;
 class UMaterial;
 
-struct FSkeletonBone
-{
-    FString Name;
-    int32 ParentIndex;
-    FMatrix LocalBindPose;
-    FMatrix GlobalPose;
-};
 
 static FMatrix FbxAMatrixToFMatrix(const FbxAMatrix& InM)
 {
@@ -115,6 +108,5 @@ public:
 
     inline static FStaticMeshRenderData* StaticMeshRenderData = nullptr;
     inline static FSkeletalMeshRenderData* SkeletalMeshRenderData = nullptr;
-    inline static TArray<FSkeletonBone> Bones;
 };
 

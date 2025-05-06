@@ -17,7 +17,8 @@ public:
     virtual void SetProperties(const TMap<FString, FString>& InProperties) override;
 
     virtual int CheckRayIntersection(const FVector& InRayOrigin, const FVector& InRayDirection, float& OutHitDistance) const override;
-
+public:
+    void RotateBone(FString BoneName, FRotator DeltaRotation);
 protected:
     int selectedSubMeshIndex = -1;
 };

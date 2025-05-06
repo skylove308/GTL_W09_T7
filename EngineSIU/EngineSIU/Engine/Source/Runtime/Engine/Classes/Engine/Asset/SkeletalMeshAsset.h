@@ -26,6 +26,14 @@ struct FBone
     FMatrix SkinningMatrix;
 };
 
+struct FSkeletonBone
+{
+    FString Name;
+    int32 ParentIndex;
+    FMatrix LocalBindPose;
+    FMatrix GlobalPose;
+};
+
 struct FSkeletalMeshRenderData 
 {
     FWString ObjectName;
@@ -41,5 +49,6 @@ struct FSkeletalMeshRenderData
     FVector BoundingBoxMax;
 
     TArray<FBone> Bones;
+    TArray<FSkeletonBone> SkeletonBones;
     TArray<FSkeletalMeshBoneWeight> BoneWeights;
 };
