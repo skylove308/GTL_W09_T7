@@ -87,12 +87,12 @@ public:
     static void CopyUVs(FbxMesh* Mesh, TArray<FStaticMeshVertex>& OutVerts);
     static void CopyTangents(FbxMesh* Mesh, TArray<FStaticMeshVertex>& OutVerts);
     static void ComputeBoundingBox(const TArray<FStaticMeshVertex>& InVerts, FVector& OutMin, FVector& OutMax);
-
+    
+    inline static FbxMesh* Mesh = nullptr;
 private:
     inline static FbxManager* Manager = nullptr;
     inline static FbxImporter* Importer = nullptr;
     inline static FbxScene* Scene = nullptr;
-    inline static FbxMesh* Mesh = nullptr;
 
 };
 

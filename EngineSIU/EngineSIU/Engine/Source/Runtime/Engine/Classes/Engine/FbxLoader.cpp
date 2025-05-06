@@ -105,7 +105,7 @@ bool FFBXLoader::LoadFBX(const FString& FilePath)
    }
 
    // 언리얼 좌표계로 변경
-   /*unrealAxis.ConvertScene(Scene);*/
+   //unrealAxis.ConvertScene(Scene);
 
    // 삼각형화할 수 있는 노드를 삼각형화 시키기
    FbxGeometryConverter Converter(Manager);
@@ -123,8 +123,6 @@ bool FFBXLoader::LoadFBX(const FString& FilePath)
 
    // Cleanup
    Importer->Destroy();
-   Scene->Destroy();
-   Manager->Destroy();
 
    UE_LOG(ELogLevel::Display, TEXT("FBX file loaded successfully: %s"), *FilePath);
 

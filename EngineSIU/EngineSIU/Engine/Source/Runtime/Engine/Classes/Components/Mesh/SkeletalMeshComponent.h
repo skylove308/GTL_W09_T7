@@ -18,7 +18,7 @@ public:
 
     virtual int CheckRayIntersection(const FVector& InRayOrigin, const FVector& InRayDirection, float& OutHitDistance) const override;
 public:
-    void RotateBone(FString BoneName, FRotator DeltaRotation);
+    void RotateBone(FString BoneName, FRotator Rotation);
 protected:
     int selectedSubMeshIndex = -1;
 };

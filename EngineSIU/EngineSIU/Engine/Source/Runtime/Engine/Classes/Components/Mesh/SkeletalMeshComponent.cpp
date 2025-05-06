@@ -79,7 +79,7 @@ int USkeletalMeshComponent::CheckRayIntersection(const FVector& InRayOrigin, con
     return HitCount;
 }
 
-void USkeletalMeshComponent::RotateBone(FString BoneName, FRotator DeltaRotation)
+void USkeletalMeshComponent::RotateBone(FString BoneName, FRotator Rotation)
 {
     if (!SkeletalMesh) return;
 
@@ -106,9 +106,17 @@ void USkeletalMeshComponent::RotateBone(FString BoneName, FRotator DeltaRotation
     FSkeletonBone& Bone = RenderData->SkeletonBones[BoneIndex];
 
     // 2. 회전 행렬 생성
-    FMatrix DeltaRotMatrix = DeltaRotation.ToMatrix();
+    FMatrix RotMatrix = Rotation.ToMatrix();
     // 3. 기존 로컬 바인드 포즈에 회전 적용
-    Bone.LocalBindPose = DeltaRotMatrix * Bone.LocalBindPose;
+    FVector Position = FVector(
+        Bone.LocalBindPose.M[3][0],
+        Bone.LocalBindPose.M[3][1],
+        Bone.LocalBindPose.M[3][2]);
+
+    Bone.LocalBindPose = RotMatrix;
+    Bone.LocalBindPose.M[3][0] = Position.X;
+    Bone.LocalBindPose.M[3][1] = Position.Y;
+    Bone.LocalBindPose.M[3][2] = Position.Z;
 
     // 4. GlobalPose 재계산
     //for (int32 i = 0; i < RenderData->SkeletonBones.Num(); ++i)
@@ -135,7 +143,7 @@ void USkeletalMeshComponent::RotateBone(FString BoneName, FRotator DeltaRotation
 
     // 스킨 다시 계산
     FFBXLoader::ReskinVerticesCPU(
-        /* Mesh */ nullptr, // 필요시 원본 FbxMesh 포인터 보존 필요
+        FFBXLoader::Mesh, // 필요시 원본 FbxMesh 포인터 보존 필요
         RenderData->SkeletonBones,
         RenderData->Vertices
     );
