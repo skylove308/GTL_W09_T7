@@ -409,6 +409,7 @@ LRESULT CALLBACK FEngineLoop::AppWndProc(HWND hWnd, uint32 Msg, WPARAM wParam, L
         ImGui::SetCurrentContext(GEngineLoop.SubUI->Context);
         if (ImGui_ImplWin32_WndProcHandler(hWnd, Msg, wParam, lParam)) return true;
 
+        /** SubWindow Msg */
         switch (Msg)
         {
         case WM_SIZE:
@@ -436,6 +437,7 @@ LRESULT CALLBACK FEngineLoop::AppWndProc(HWND hWnd, uint32 Msg, WPARAM wParam, L
         }
     }
 
+    /** Main Window Msg */
     switch (Msg)
         {
         case WM_DESTROY:

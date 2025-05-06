@@ -68,7 +68,7 @@ void FDrawer::RenderContentDrawer()
 {
     for (auto Obj : TObjectRange<USkeletalMesh>())
     {
-        ImGui::Selectable(GetData(Obj->GetOjbectName()));
+        ImGui::Selectable(GetData(Obj->GetObjectName()));
         
         if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
         {

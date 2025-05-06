@@ -21,7 +21,7 @@ public:
     FSkeletalMeshRenderData* GetRenderData() const { return RenderData; }
 
     //ObjectName은 경로까지 포함
-    FWString GetOjbectName() const;
+    FWString GetObjectName() const;
 
     void SetData(FSkeletalMeshRenderData* InRenderData);
 

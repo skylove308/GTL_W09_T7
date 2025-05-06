@@ -31,7 +31,7 @@ void USkeletalMesh::GetUsedMaterials(TArray<UMaterial*>& OutMaterial) const
     }
 }
 
-FWString USkeletalMesh::GetOjbectName() const
+FWString USkeletalMesh::GetObjectName() const
 {
     return RenderData->ObjectName;
 }
