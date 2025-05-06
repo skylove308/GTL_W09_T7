@@ -48,7 +48,6 @@ struct FSkeletalMeshRenderData
     FVector BoundingBoxMin;
     FVector BoundingBoxMax;
 
-    TArray<FBone> Bones;
     TArray<FSkeletonBone> SkeletonBones;
     TArray<FSkeletalMeshBoneWeight> BoneWeights;
 };

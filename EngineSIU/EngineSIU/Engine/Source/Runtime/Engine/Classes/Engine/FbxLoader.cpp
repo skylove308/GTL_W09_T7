@@ -259,91 +259,8 @@ bool FFBXLoader::IsSkeletalMesh(FbxMesh* Mesh)
     return Mesh->GetDeformerCount(FbxDeformer::eSkin) > 0;
 }
 
-//-----------------------------------------------------------------------------
-// 1) 본 배열 채우기: FbxSkin → FbxCluster 순회, inverse bind pose 계산해서 Bones[i].skinningMatrix 에 저장
-//-----------------------------------------------------------------------------
-void FFBXLoader::BuildSkeletalBones(FbxMesh* Mesh, TArray<FBone>& OutBones)
-{
-    // 스킨 디포머가 없으면 패스
-    if (Mesh->GetDeformerCount(FbxDeformer::eSkin) == 0)
-        return;
 
-    // 보통 한 개의 Skin deformer만 처리
-    FbxSkin* skin = static_cast<FbxSkin*>(Mesh->GetDeformer(0, FbxDeformer::eSkin));
-    int clusterCount = skin->GetClusterCount();
-
-    OutBones.SetNum(clusterCount);
-    for (int c = 0; c < clusterCount; ++c)
-    {
-        FbxCluster* cluster = skin->GetCluster(c);
-
-        // 메시 바인드(TransformMatrix)와 본 바인드(TransformLinkMatrix)
-        FbxAMatrix MeshBind, boneBind;
-        cluster->GetTransformMatrix(MeshBind);
-        cluster->GetTransformLinkMatrix(boneBind);
-        FbxAMatrix invBindPose = boneBind.Inverse() * MeshBind;
-
-        // Matrix4x4 로 변환해서 초기 skinningMatrix 로 저장
-        OutBones[c].SkinningMatrix = FbxAMatrixToFMatrix(invBindPose);
-    }
-}
-
-//-----------------------------------------------------------------------------
-// 2) 정점당 본 가중치 채우기: FbxCluster → BoneWeights
-//-----------------------------------------------------------------------------
-void FFBXLoader::BuildBoneWeights(FbxMesh* Mesh, TArray<FSkeletalMeshBoneWeight>& OutWeights)
-{
-    int ctrlCount = Mesh->GetControlPointsCount();
-    OutWeights.SetNum(ctrlCount);
-
-    if (Mesh->GetDeformerCount(FbxDeformer::eSkin) == 0)
-        return;
-
-    FbxSkin* skin = static_cast<FbxSkin*>(Mesh->GetDeformer(0, FbxDeformer::eSkin));
-    int clusterCount = skin->GetClusterCount();
-
-    for (int c = 0; c < clusterCount; ++c)
-    {
-        FbxCluster* cluster = skin->GetCluster(c);
-        const auto& indices = cluster->GetControlPointIndices();
-        const auto& weights = cluster->GetControlPointWeights();
-        int count = cluster->GetControlPointIndicesCount();
-
-        for (int i = 0; i < count; ++i)
-        {
-            int vertID = indices[i];
-            float w = weights[i];
-
-            // 최대 4개 슬롯에 채우기
-            auto& BW = OutWeights[vertID];
-            for (int k = 0; k < 4; ++k)
-            {
-                if (BW.Weights[k] == 0.0f)
-                {
-                    BW.BoneIndices[k] = c;
-                    BW.Weights[k] = w;
-                    break;
-                }
-            }
-        }
-    }
-
-    for (auto& BW : OutWeights)
-    {
-        float total = BW.Weights[0] + BW.Weights[1] + BW.Weights[2] + BW.Weights[3];
-        if (total > 0.0f)
-        {
-            BW.Weights[0] /= total;
-            BW.Weights[1] /= total;
-            BW.Weights[2] /= total;
-            BW.Weights[3] /= total;
-        }
-    }
-}
-
-//-----------------------------------------------------------------------------
-// 3) 정점·인덱스 버퍼 채우기 (버텍스 포지션만 예시, 쉐이딩 데이터는 필요시 추가)
-//-----------------------------------------------------------------------------
+// 정점·인덱스 버퍼 채우기 (버텍스 포지션만 예시, 쉐이딩 데이터는 필요시 추가)
 void FFBXLoader::BuildSkeletalVertexBuffers(FbxMesh* Mesh, TArray<FSkeletalMeshVertex>& OutVerts, TArray<uint32>& OutIndices)
 {
     OutVerts.Empty();
@@ -425,9 +342,7 @@ void FFBXLoader::BuildSkeletalVertexBuffers(FbxMesh* Mesh, TArray<FSkeletalMeshV
     }
 }
 
-//-----------------------------------------------------------------------------
-// 4) 머티리얼 서브셋 설정 (FbxGeometryElementMaterial)
-//-----------------------------------------------------------------------------
+// 머티리얼 서브셋 설정 (FbxGeometryElementMaterial)
 void FFBXLoader::SetupMaterialSubsets(FbxMesh* Mesh, TArray<FMaterialSubset>& OutSubsets)
 {
     auto* MatElem = Mesh->GetElementMaterial();
@@ -486,20 +401,6 @@ void FFBXLoader::LoadMaterialInfo(FbxNode* Node)
             }
         }
         FFBXManager::SkeletalMeshRenderData->Materials.Add(MatInfo);
-    }
-}
-
-//-----------------------------------------------------------------------------
-// 5) 스킨닝 매트릭스 매 프레임 갱신
-//    GlobalBoneTransforms[i] 는 애니메이션 시스템이 계산한 월드 본 트랜스폼
-//-----------------------------------------------------------------------------
-void FFBXLoader::UpdateSkinningMatrices(const TArray<FMatrix>& GlobalBoneTransforms, TArray<FBone>& Bones)
-{
-    int count = FMath::Min(GlobalBoneTransforms.Num(), Bones.Num());
-    for (int i = 0; i < count; ++i)
-    {
-        // 최종 skinningMatrix = GlobalTransform * inverseBindPose
-        Bones[i].SkinningMatrix = GlobalBoneTransforms[i] * Bones[i].SkinningMatrix;
     }
 }
 
@@ -626,10 +527,6 @@ void FFBXLoader::ReskinVerticesCPU(FbxMesh* Mesh, const TArray<FSkeletonBone>& B
     {
         if ((int)V.ControlPointIndex < ControlPointsCount)
         {
-            //FVector Pos = FVector((float)Skinned[V.MaterialIndex][0], (float)Skinned[V.MaterialIndex][1], (float)Skinned[V.MaterialIndex][2]);
-            //V.X = Pos.X;
-            //V.Y = Pos.Y;
-            //V.Z = Pos.Z;
             FbxVector4 P = Skinned[V.ControlPointIndex];
             V.X = (float)P[0];
             V.Y = (float)P[1];

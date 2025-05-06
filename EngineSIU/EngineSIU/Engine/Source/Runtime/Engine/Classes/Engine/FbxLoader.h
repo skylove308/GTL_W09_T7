@@ -71,19 +71,15 @@ public:
     static bool IsStaticMesh(FbxMesh* Mesh);
     static bool IsSkeletalMesh(FbxMesh* Mesh);
 
-    static void BuildSkeletalBones(FbxMesh* Mesh, TArray<FBone>& OutBones);
-    static void BuildBoneWeights(FbxMesh* Mesh, TArray<FSkeletalMeshBoneWeight>& OutWeights);
     static void BuildSkeletalVertexBuffers(FbxMesh* Mesh, TArray<FSkeletalMeshVertex>& OutVerts, TArray<uint32>& OutIndices);
     static void SetupMaterialSubsets(FbxMesh* Mesh, TArray<FMaterialSubset>& OutSubsets);
     static void LoadMaterialInfo(FbxNode* Node);
-    static void UpdateSkinningMatrices(const TArray<FMatrix>& GlobalBoneTransforms, TArray<FBone>& Bones);
-    //static void SkinVertexPosition(const )
-public:
     static void ExtractSkeleton(FbxMesh* Mesh, TArray<FSkeletonBone>& OutBones);
     static void RecalculateGlobalPoses(TArray<FSkeletonBone>& Bones);
     static void RotateBones(TArray<FSkeletonBone>& Bones, int32 BoneIndex, const FbxVector4& EulerDegrees);
     static void ReskinVerticesCPU(FbxMesh* Mesh, const TArray<FSkeletonBone>& Bones, TArray<FSkeletalMeshVertex>& Vertices);
     static int32 FindBoneByName(const TArray<FSkeletonBone>& Bones, const FString& Name);
+
 public:
     static void CopyControlPoints(FbxMesh* Mesh,TArray<FStaticMeshVertex>& OutVerts);
     static void BuildStaticIndexBuffer(FbxMesh* Mesh, TArray<uint32>& OutIndices);
