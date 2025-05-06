@@ -12,6 +12,7 @@ struct FSkeletalMeshVertex
     float TangentX, TangentY, TangentZ, TangentW;
     float U = 0, V = 0;
     uint32 MaterialIndex;
+    int32 ControlPointIndex = -1;
 };
 
 struct FSkeletalMeshBoneWeight

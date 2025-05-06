@@ -26,6 +26,15 @@ class UStaticMesh;
 class USkeletalMesh;
 class UMaterial;
 
+struct FSkeletonBone
+{
+    FString Name;
+    int32 ParentIndex;
+    FbxNode* Node;
+    FbxAMatrix LocalBindPose;
+    FbxAMatrix GlobalPose;
+};
+
 static FMatrix FbxAMatrixToFMatrix(const FbxAMatrix& InM)
 {
     FMatrix Out;
@@ -78,7 +87,13 @@ public:
     static void LoadMaterialInfo(FbxNode* Node);
     static void UpdateSkinningMatrices(const TArray<FMatrix>& GlobalBoneTransforms, TArray<FBone>& Bones);
     //static void SkinVertexPosition(const )
-
+public:
+    static void ExtractSkeleton(FbxMesh* Mesh, TArray<FSkeletonBone>& OutBones);
+    static void RecalculateGlobalPoses(TArray<FSkeletonBone>& Bones);
+    static void RotateBones(TArray<FSkeletonBone>& Bones, int32 BoneIndex, const FbxVector4& EulerDegrees);
+    static void ReskinVerticesCPU(FbxMesh* Mesh, const TArray<FSkeletonBone>& Bones, TArray<FSkeletalMeshVertex>& Vertices);
+    static int32 FindBoneByName(const TArray<FSkeletonBone>& Bones, const FString& Name);
+public:
     static void CopyControlPoints(FbxMesh* Mesh,TArray<FStaticMeshVertex>& OutVerts);
     static void BuildStaticIndexBuffer(FbxMesh* Mesh, TArray<uint32>& OutIndices);
     static void CopyNormals(FbxMesh* Mesh, TArray<FStaticMeshVertex>& OutVerts);
@@ -102,5 +117,6 @@ public:
 
     inline static FStaticMeshRenderData* StaticMeshRenderData = nullptr;
     inline static FSkeletalMeshRenderData* SkeletalMeshRenderData = nullptr;
+    inline static TArray<FSkeletonBone> Bones;
 };
 
