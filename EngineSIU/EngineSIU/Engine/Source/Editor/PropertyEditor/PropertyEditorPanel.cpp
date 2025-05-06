@@ -949,12 +949,12 @@ void PropertyEditorPanel::RenderForSkeletalComponent(USkeletalMeshComponent* Ske
         static float RotationEuler[3] = { 0.f, 0.f, 0.f }; // Pitch, Yaw, Roll
 
         ImGui::InputText("Bone Name", BoneNameBuffer, IM_ARRAYSIZE(BoneNameBuffer));
-        ImGui::InputFloat3("Rotation (Pitch, Yaw, Roll)", RotationEuler);
+        ImGui::InputFloat3("Rotation X, Y, Z", RotationEuler);
 
         if (ImGui::Button("Apply Bone Rotation"))
         {
             FString BoneName(BoneNameBuffer);
-            FRotator NewRotation(RotationEuler[0], RotationEuler[1], RotationEuler[2]);
+            FRotator NewRotation(-RotationEuler[1], -RotationEuler[2], -RotationEuler[0]);
             SkeletalMeshComponent->RotateBone(BoneName, NewRotation);
         }
         
