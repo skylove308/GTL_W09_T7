@@ -6,7 +6,7 @@
 #include "Math/Plane.h"
 #include "Container/Map.h"
 #include "fbxsdk.h"
-
+#include "Engine/Asset/SkeletalMeshAsset.h"
 
 struct FSkeletalHierarchyData;
 // Explicitly qualify FbxAxisSystem to resolve ambiguity
@@ -27,33 +27,33 @@ class UStaticMesh;
 class USkeletalMesh;
 class UMaterial;
 
+
 static FMatrix FbxAMatrixToFMatrix(const FbxAMatrix& InM)
 {
     FMatrix Out;
 
-    // Row 0
-    Out.M[0][0] = (float)InM.mData[0][0];
-    Out.M[0][1] = (float)InM.mData[0][1];
-    Out.M[0][2] = (float)InM.mData[0][2];
-    Out.M[0][3] = (float)InM.mData[0][3];
+    for (int Row = 0; Row < 4; ++Row)
+    {
+        for (int Col = 0; Col < 4; ++Col)
+        {
+            Out.M[Row][Col] = static_cast<float>(InM.Get(Row, Col));
+        }
+    }
 
-    // Row 1
-    Out.M[1][0] = (float)InM.mData[1][0];
-    Out.M[1][1] = (float)InM.mData[1][1];
-    Out.M[1][2] = (float)InM.mData[1][2];
-    Out.M[1][3] = (float)InM.mData[1][3];
+    return Out;
+}
 
-    // Row 2
-    Out.M[2][0] = (float)InM.mData[2][0];
-    Out.M[2][1] = (float)InM.mData[2][1];
-    Out.M[2][2] = (float)InM.mData[2][2];
-    Out.M[2][3] = (float)InM.mData[2][3];
+static FbxAMatrix FMatrixToFbxAMatrix(const FMatrix& InM)
+{
+    FbxAMatrix Out;
 
-    // Row 3
-    Out.M[3][0] = (float)InM.mData[3][0];
-    Out.M[3][1] = (float)InM.mData[3][1];
-    Out.M[3][2] = (float)InM.mData[3][2];
-    Out.M[3][3] = (float)InM.mData[3][3];
+    for (int Row = 0; Row < 4; ++Row)
+    {
+        for (int Col = 0; Col < 4; ++Col)
+        {
+            Out.mData[Row][Col] = static_cast<double>(InM.M[Row][Col]); // transpose
+        }
+    }
 
     return Out;
 }
@@ -72,14 +72,17 @@ public:
     static bool IsStaticMesh(FbxMesh* Mesh);
     static bool IsSkeletalMesh(FbxMesh* Mesh);
 
-    static void BuildSkeletalBones(FbxMesh* Mesh, TArray<FBone>& OutBones);
-    static void BuildBoneWeights(FbxMesh* Mesh, TArray<FSkeletalMeshBoneWeight>& OutWeights);
     static void BuildSkeletalVertexBuffers(FbxMesh* Mesh, TArray<FSkeletalMeshVertex>& OutVerts, TArray<uint32>& OutIndices);
     static void SetupMaterialSubsets(FbxMesh* Mesh, TArray<FMaterialSubset>& OutSubsets);
     static void LoadMaterialInfo(FbxNode* Node);
-    static void UpdateSkinningMatrices(const TArray<FMatrix>& GlobalBoneTransforms, TArray<FBone>& Bones);
+    static void ExtractSkeleton(FbxMesh* Mesh, TArray<FSkeletonBone>& OutBones);
+    static void RecalculateGlobalPoses(TArray<FSkeletonBone>& Bones);
+    static void RotateBones(TArray<FSkeletonBone>& Bones, int32 BoneIndex, const FbxVector4& EulerDegrees);
+    static void ReskinVerticesCPU(FbxMesh* Mesh, const TArray<FSkeletonBone>& Bones, TArray<FSkeletalMeshVertex>& Vertices);
+    static int32 FindBoneByName(const TArray<FSkeletonBone>& Bones, const FString& Name);
     static void BuildNodeHierarchyRecursive(const FbxNode* Node, FSkeletalHierarchyData& OutHierarchyData);
-
+    
+public:
     static void CopyControlPoints(FbxMesh* Mesh,TArray<FStaticMeshVertex>& OutVerts);
     static void BuildStaticIndexBuffer(FbxMesh* Mesh, TArray<uint32>& OutIndices);
     static void CopyNormals(FbxMesh* Mesh, TArray<FStaticMeshVertex>& OutVerts);
@@ -88,11 +91,12 @@ public:
     static void ComputeBoundingBox(const TArray<FStaticMeshVertex>& InVerts, FVector& OutMin, FVector& OutMax);
     static void ComputeBoundingBox(const TArray<FSkeletalMeshVertex>& InVerts, FVector& OutMin, FVector& OutMax);
 
+    
+    inline static FbxMesh* Mesh = nullptr;
 private:
     inline static FbxManager* Manager = nullptr;
     inline static FbxImporter* Importer = nullptr;
     inline static FbxScene* Scene = nullptr;
-    inline static FbxMesh* Mesh = nullptr;
 
 };
 

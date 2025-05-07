@@ -335,7 +335,8 @@ void FStaticMeshRenderPass::RenderPrimitive(FSkeletalMeshRenderData* RenderData,
     UINT Offset = 0;
 
     FVertexInfo VertexInfo;
-    BufferManager->CreateVertexBuffer(RenderData->ObjectName, RenderData->Vertices, VertexInfo);
+    BufferManager->CreateDynamicVertexBuffer(RenderData->ObjectName, RenderData->Vertices, VertexInfo);
+    BufferManager->UpdateDynamicVertexBuffer(RenderData->ObjectName, RenderData->Vertices);
 
     Graphics->DeviceContext->IASetVertexBuffers(0, 1, &VertexInfo.VertexBuffer, &Stride, &Offset);
 

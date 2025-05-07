@@ -21,6 +21,7 @@ class UTextComponent;
 class UHeightFogComponent;
 class AEditorPlayer;
 class UStaticMeshComponent;
+class USkeletalMeshComponent;
 
 // 헬퍼 함수 예시
 template<typename Getter, typename Setter>
@@ -81,6 +82,8 @@ private:
     void RenderForShapeComponent(UShapeComponent* ShapeComponent) const;
     void RenderForSpringArmComponent(USpringArmComponent* SpringArmComponent) const;
     
+    void RenderForSkeletalComponent(USkeletalMeshComponent* SkeletalMeshComponent) const;
+
     template<typename T>
         requires std::derived_from<T, UActorComponent>
     T* GetTargetComponent(AActor* SelectedActor, USceneComponent* SelectedComponent);
@@ -100,6 +103,7 @@ private:
     bool IsCreateMaterial;
 
     const FString TemplateFilePath = FString("LuaScripts/template.lua");
+    inline static FRotator SkeletalRotation = FRotator(0, 0, 0);
 };
 
 template <typename T> requires std::derived_from<T, UActorComponent>

@@ -1,4 +1,4 @@
-﻿#include "Matrix.h"
+#include "Matrix.h"
 
 #include "MathSSE.h"
 #include "MathUtility.h"
@@ -376,6 +376,29 @@ FVector FMatrix::GetScaleVector(float Tolerance) const
 FVector FMatrix::GetTranslationVector() const
 {
     return FVector(M[3][0], M[3][1], M[3][2]);
+}
+
+FRotator FMatrix::GetRotationVector() const
+{
+    // 스케일 제거를 위해 상단 3x3 부분을 정규화
+    FVector XAxis(M[0][0], M[0][1], M[0][2]);
+    FVector YAxis(M[1][0], M[1][1], M[1][2]);
+    FVector ZAxis(M[2][0], M[2][1], M[2][2]);
+
+    // 각 축을 정규화하여 스케일 제거
+    XAxis.Normalize();
+    YAxis.Normalize();
+    ZAxis.Normalize();
+
+    // 정규화된 축을 기반으로 회전 행렬 생성
+    FMatrix RotationMatrix;
+    RotationMatrix.M[0][0] = XAxis.X; RotationMatrix.M[0][1] = XAxis.Y; RotationMatrix.M[0][2] = XAxis.Z; RotationMatrix.M[0][3] = 0.0f;
+    RotationMatrix.M[1][0] = YAxis.X; RotationMatrix.M[1][1] = YAxis.Y; RotationMatrix.M[1][2] = YAxis.Z; RotationMatrix.M[1][3] = 0.0f;
+    RotationMatrix.M[2][0] = ZAxis.X; RotationMatrix.M[2][1] = ZAxis.Y; RotationMatrix.M[2][2] = ZAxis.Z; RotationMatrix.M[2][3] = 0.0f;
+    RotationMatrix.M[3][0] = 0.0f;    RotationMatrix.M[3][1] = 0.0f;    RotationMatrix.M[3][2] = 0.0f;    RotationMatrix.M[3][3] = 1.0f;
+
+    // 회전 행렬을 FRotator로 변환
+    return RotationMatrix.ToQuat().Rotator();
 }
 
 FMatrix FMatrix::GetMatrixWithoutScale(float Tolerance) const

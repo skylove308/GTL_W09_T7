@@ -1,6 +1,13 @@
 #include "SkeletalMeshComponent.h"
 #include "Engine/Asset/SkeletalMeshAsset.h"
 #include "Engine/FbxLoader.h"
+#include "Engine/SkeletalMeshActor.h"
+
+USkeletalMeshComponent::USkeletalMeshComponent()
+{
+    SkeletalMesh = nullptr;
+    selectedSubMeshIndex = -1;
+}
 
 UObject* USkeletalMeshComponent::Duplicate(UObject* InOuter)
 {
@@ -78,3 +85,41 @@ int USkeletalMeshComponent::CheckRayIntersection(const FVector& InRayOrigin, con
     }
     return HitCount;
 }
+
+void USkeletalMeshComponent::RotateBone(FString BoneName, FRotator Rotation)
+{
+    if (!SkeletalMesh) return;
+
+    FSkeletalMeshRenderData* RenderData = SkeletalMesh->GetRenderData();
+    if (!RenderData) return;
+
+    // 1. BoneName에 해당하는 인덱스 찾기
+    int32 BoneIndex = -1;
+    for (int32 i = 0; i < RenderData->SkeletonBones.Num(); ++i)
+    {
+        if (RenderData->SkeletonBones[i].Name == BoneName)
+        {
+            BoneIndex = i;
+            break;
+        }
+    }
+
+    if (BoneIndex == -1)
+    {
+        UE_LOG(ELogLevel::Warning, TEXT("Bone not found: %s"), *BoneName);
+        return;
+    }
+
+    /*Rotation = Cast<ASkeletalMeshActor>(GetOwner())->BoneGizmoSceneComponents[BoneIndex]->GetRelativeRotation();*/
+    FFBXLoader::RotateBones(RenderData->SkeletonBones, BoneIndex, FbxVector4(Rotation.Roll, Rotation.Pitch, Rotation.Yaw));
+
+    FFBXLoader::RecalculateGlobalPoses(RenderData->SkeletonBones);
+
+    // 스킨 다시 계산
+    FFBXLoader::ReskinVerticesCPU(
+        FFBXLoader::Mesh, // 필요시 원본 FbxMesh 포인터 보존 필요
+        RenderData->SkeletonBones,
+        RenderData->Vertices
+    );
+}
+

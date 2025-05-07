@@ -56,6 +56,8 @@ public:
 
     FVector GetTranslationVector() const;
 
+    FRotator GetRotationVector() const;
+
     FMatrix GetMatrixWithoutScale(float Tolerance = SMALL_NUMBER) const;
 
     void RemoveScaling(float Tolerance = SMALL_NUMBER);
