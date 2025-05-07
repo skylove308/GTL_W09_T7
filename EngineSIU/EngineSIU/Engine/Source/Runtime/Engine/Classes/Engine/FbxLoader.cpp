@@ -84,49 +84,49 @@ bool FFBXLoader::Initialize()
 
 bool FFBXLoader::LoadFBX(const FString& FilePath)
 {
-   // Initialize the importer with the file path
-   if (!Importer->Initialize(*FilePath, -1, Manager->GetIOSettings()))
-   {
-       UE_LOG(ELogLevel::Error, TEXT("Failed to initialize FBX importer: %s"), *FString(Importer->GetStatus().GetErrorString()));
-       Importer->Destroy();
-       Scene->Destroy();
-       Manager->Destroy();
-       return false;
-   }
+    // Initialize the importer with the file path
+    if (!Importer->Initialize(*FilePath, -1, Manager->GetIOSettings()))
+    {
+        UE_LOG(ELogLevel::Error, TEXT("Failed to initialize FBX importer: %s"), *FString(Importer->GetStatus().GetErrorString()));
+        Importer->Destroy();
+        Scene->Destroy();
+        Manager->Destroy();
+        return false;
+    }
 
-   // Import the scene from the file
-   if (!Importer->Import(Scene))
-   {
-       UE_LOG(ELogLevel::Error, TEXT("Failed to import FBX scene: %s"), *FString(Importer->GetStatus().GetErrorString()));
-       Importer->Destroy();
-       Scene->Destroy();
-       Manager->Destroy();
-       return false;
-   }
+    // Import the scene from the file
+    if (!Importer->Import(Scene))
+    {
+        UE_LOG(ELogLevel::Error, TEXT("Failed to import FBX scene: %s"), *FString(Importer->GetStatus().GetErrorString()));
+        Importer->Destroy();
+        Scene->Destroy();
+        Manager->Destroy();
+        return false;
+    }
 
-   // 언리얼 좌표계로 변경
-   //unrealAxis.ConvertScene(Scene);
+    // 언리얼 좌표계로 변경
+    //unrealAxis.ConvertScene(Scene);
 
-   // 삼각형화할 수 있는 노드를 삼각형화 시키기
-   FbxGeometryConverter Converter(Manager);
-   Converter.Triangulate(Scene, true);
+    // 삼각형화할 수 있는 노드를 삼각형화 시키기
+    FbxGeometryConverter Converter(Manager);
+    Converter.Triangulate(Scene, true);
 
-   DumpAllMeshes(Scene->GetRootNode());
-   if (!FindMesh(Scene->GetRootNode(), FilePath))
-   {
-       UE_LOG(ELogLevel::Error, TEXT("Failed to find Mesh in FBX scene"));
-       Importer->Destroy();
-       Scene->Destroy();
-       Manager->Destroy();
-       return false;
-   }
+    DumpAllMeshes(Scene->GetRootNode());
+    if (!FindMesh(Scene->GetRootNode(), FilePath))
+    {
+        UE_LOG(ELogLevel::Error, TEXT("Failed to find Mesh in FBX scene"));
+        Importer->Destroy();
+        Scene->Destroy();
+        Manager->Destroy();
+        return false;
+    }
 
-   // Cleanup
-   Importer->Destroy();
+    // Cleanup
+    Importer->Destroy();
 
-   UE_LOG(ELogLevel::Display, TEXT("FBX file loaded successfully: %s"), *FilePath);
+    UE_LOG(ELogLevel::Display, TEXT("FBX file loaded successfully: %s"), *FilePath);
 
-   return true;
+    return true;
 }
 
 void FFBXLoader::DumpAllMeshes(FbxNode* node)
@@ -205,7 +205,7 @@ bool FFBXLoader::FindMesh(FbxNode* Node, const FString& FilePath)
 
 
         }
-        
+
         return true;
     }
 

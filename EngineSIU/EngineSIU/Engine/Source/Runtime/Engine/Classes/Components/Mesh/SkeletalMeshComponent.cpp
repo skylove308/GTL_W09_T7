@@ -105,18 +105,26 @@ void USkeletalMeshComponent::RotateBone(FString BoneName, FRotator Rotation)
 
     FSkeletonBone& Bone = RenderData->SkeletonBones[BoneIndex];
 
-    // 2. 회전 행렬 생성
-    FMatrix RotMatrix = Rotation.ToMatrix();
-    // 3. 기존 로컬 바인드 포즈에 회전 적용
-    FVector Position = FVector(
-        Bone.LocalBindPose.M[3][0],
-        Bone.LocalBindPose.M[3][1],
-        Bone.LocalBindPose.M[3][2]);
+    //// 2. 회전 행렬 생성
+    //FMatrix RotMatrix = Rotation.ToMatrix();
+    //// 3. 기존 로컬 바인드 포즈에 회전 적용
+    //FVector Position = FVector(
+    //    Bone.LocalBindPose.M[3][0],
+    //    Bone.LocalBindPose.M[3][1],
+    //    Bone.LocalBindPose.M[3][2]);
 
-    Bone.LocalBindPose = RotMatrix;
-    Bone.LocalBindPose.M[3][0] = Position.X;
-    Bone.LocalBindPose.M[3][1] = Position.Y;
-    Bone.LocalBindPose.M[3][2] = Position.Z;
+    //// 새로운 회전 행렬 생성
+    //FMatrix RotationMatrix = Rotation.ToMatrix();
+
+    //// 기존 LocalBindPose는 회전만 교체, 위치는 유지
+    //Bone.LocalBindPose = RotationMatrix;
+
+    //// 위치 다시 설정
+    //Bone.LocalBindPose.M[3][0] = Position.X;
+    //Bone.LocalBindPose.M[3][1] = Position.Y;
+    //Bone.LocalBindPose.M[3][2] = Position.Z;
+    /*FVector rot = Rotation.ToVector();*/
+    FFBXLoader::RotateBones(RenderData->SkeletonBones, BoneIndex, FbxVector4(Rotation.Pitch, Rotation.Yaw, Rotation.Roll));
 
     // 4. GlobalPose 재계산
     //for (int32 i = 0; i < RenderData->SkeletonBones.Num(); ++i)

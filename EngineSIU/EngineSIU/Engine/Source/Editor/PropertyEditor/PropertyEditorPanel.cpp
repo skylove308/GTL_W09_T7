@@ -954,7 +954,7 @@ void PropertyEditorPanel::RenderForSkeletalComponent(USkeletalMeshComponent* Ske
         if (ImGui::Button("Apply Bone Rotation"))
         {
             FString BoneName(BoneNameBuffer);
-            FRotator NewRotation(-RotationEuler[1], -RotationEuler[2], -RotationEuler[0]);
+            FRotator NewRotation(RotationEuler[0], RotationEuler[1], RotationEuler[2]);
             SkeletalMeshComponent->RotateBone(BoneName, NewRotation);
         }
         
