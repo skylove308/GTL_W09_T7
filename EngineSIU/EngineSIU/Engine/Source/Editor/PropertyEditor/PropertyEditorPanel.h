@@ -103,6 +103,7 @@ private:
     bool IsCreateMaterial;
 
     const FString TemplateFilePath = FString("LuaScripts/template.lua");
+    inline static FRotator SkeletalRotation = FRotator(0, 0, 0);
 };
 
 template <typename T> requires std::derived_from<T, UActorComponent>

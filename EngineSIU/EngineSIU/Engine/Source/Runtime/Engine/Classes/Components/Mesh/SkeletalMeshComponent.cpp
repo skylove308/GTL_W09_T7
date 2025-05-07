@@ -103,49 +103,7 @@ void USkeletalMeshComponent::RotateBone(FString BoneName, FRotator Rotation)
         return;
     }
 
-    FSkeletonBone& Bone = RenderData->SkeletonBones[BoneIndex];
-
-    //// 2. 회전 행렬 생성
-    //FMatrix RotMatrix = Rotation.ToMatrix();
-    //// 3. 기존 로컬 바인드 포즈에 회전 적용
-    //FVector Position = FVector(
-    //    Bone.LocalBindPose.M[3][0],
-    //    Bone.LocalBindPose.M[3][1],
-    //    Bone.LocalBindPose.M[3][2]);
-
-    //// 새로운 회전 행렬 생성
-    //FMatrix RotationMatrix = Rotation.ToMatrix();
-
-    //// 기존 LocalBindPose는 회전만 교체, 위치는 유지
-    //Bone.LocalBindPose = RotationMatrix;
-
-    //// 위치 다시 설정
-    //Bone.LocalBindPose.M[3][0] = Position.X;
-    //Bone.LocalBindPose.M[3][1] = Position.Y;
-    //Bone.LocalBindPose.M[3][2] = Position.Z;
-    /*FVector rot = Rotation.ToVector();*/
-    FFBXLoader::RotateBones(RenderData->SkeletonBones, BoneIndex, FbxVector4(Rotation.Pitch, Rotation.Yaw, Rotation.Roll));
-
-    // 4. GlobalPose 재계산
-    //for (int32 i = 0; i < RenderData->SkeletonBones.Num(); ++i)
-    //{
-    //    FSkeletonBone& Bone = RenderData->SkeletonBones[i];
-    //    if (Bone.ParentIndex == -1)
-    //    {
-    //        Bone.GlobalPose = Bone.LocalBindPose;
-    //    }
-    //    else
-    //    {
-    //        Bone.GlobalPose = RenderData->SkeletonBones[Bone.ParentIndex].GlobalPose * Bone.LocalBindPose;
-    //    }
-    //}
-
-    //// 5. SkinningMatrix 갱신
-    //for (int32 i = 0; i < RenderData->Bones.Num(); ++i)
-    //{
-    //    RenderData->Bones[i].SkinningMatrix =
-    //        RenderData->SkeletonBones[i].GlobalPose * RenderData->Bones[i].SkinningMatrix; // 기존 inverse bind pose 포함되어 있어야 함
-    //}
+    FFBXLoader::RotateBones(RenderData->SkeletonBones, BoneIndex, FbxVector4(Rotation.Roll, Rotation.Pitch, Rotation.Yaw));
 
     FFBXLoader::RecalculateGlobalPoses(RenderData->SkeletonBones);
 
