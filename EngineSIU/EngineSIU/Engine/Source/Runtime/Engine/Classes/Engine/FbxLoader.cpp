@@ -427,7 +427,7 @@ void FFBXLoader::RecalculateGlobalPoses(TArray<FSkeletonBone>& Bones)
         }
         else
         {
-            Bone.GlobalPose = Bones[Bone.ParentIndex].GlobalPose * Bone.LocalBindPose;
+            Bone.GlobalPose = Bone.LocalBindPose * Bones[Bone.ParentIndex].GlobalPose;
         }
     }
 }
@@ -438,13 +438,15 @@ void FFBXLoader::RotateBones(TArray<FSkeletonBone>& Bones, int32 BoneIndex, cons
 
     FSkeletonBone& Bone = Bones[BoneIndex];
 
-    FMatrix Rotation = JungleMath::CreateRotationMatrix(FVector(
-        (float)EulerDegrees[0],
-        (float)EulerDegrees[1],
-        (float)EulerDegrees[2]));
+    FMatrix NewRotation = FMatrix::CreateRotationMatrix((float)EulerDegrees[0], (float)EulerDegrees[1], (float)EulerDegrees[2]);
+    //FMatrix NewRotation = JungleMath::CreateRotationMatrix(FVector(EulerDegrees[0], EulerDegrees[1], EulerDegrees[2]));
 
-    // 기존 로컬 바인드 포즈에 회전 적용
-    Bone.LocalBindPose = Rotation * Bone.LocalBindPose;
+    // 기존 로컬 바인드 포즈에서 위치와 스케일 분리
+    FVector Translation = Bone.LocalBindPose.GetTranslationVector();
+    FVector Scale = Bone.LocalBindPose.GetScaleVector();
+
+    // 새로운 로컬 바인드 포즈 생성 (위치와 스케일 유지, 회전만 대체)
+    Bone.LocalBindPose = FMatrix::GetScaleMatrix(Scale) * NewRotation * FMatrix::GetTranslationMatrix(Translation);
 
     // 회전 후 글로벌 포즈 갱신
     RecalculateGlobalPoses(Bones);
@@ -473,7 +475,7 @@ void FFBXLoader::ReskinVerticesCPU(FbxMesh* Mesh, const TArray<FSkeletonBone>& B
         FbxNode* BoneNode = Cluster->GetLink();
         FString BoneName = BoneNode->GetName();
         int BoneIndex = Bones.IndexOfByPredicate([&](const FSkeletonBone& B) { return B.Name == BoneName; });
-        if (BoneIndex == INDEX_NONE) continue;
+        if (BoneIndex == INDEX_NONE) continue; 
 
         FbxAMatrix TransformMatrix, ReferenceMatrix;
         Cluster->GetTransformMatrix(TransformMatrix);

@@ -946,16 +946,15 @@ void PropertyEditorPanel::RenderForSkeletalComponent(USkeletalMeshComponent* Ske
         }
 
         static char BoneNameBuffer[64] = "mixamorig:Spine";
-        static float RotationEuler[3] = { 0.f, 0.f, 0.f }; // Pitch, Yaw, Roll
 
         ImGui::InputText("Bone Name", BoneNameBuffer, IM_ARRAYSIZE(BoneNameBuffer));
-        ImGui::InputFloat3("Rotation X, Y, Z", RotationEuler);
+        FImGuiWidget::DrawRot3Control("Rotation", SkeletalRotation, 0, 85);
+        ImGui::Spacing(); 
 
         if (ImGui::Button("Apply Bone Rotation"))
         {
             FString BoneName(BoneNameBuffer);
-            FRotator NewRotation(RotationEuler[0], RotationEuler[1], RotationEuler[2]);
-            SkeletalMeshComponent->RotateBone(BoneName, NewRotation);
+            SkeletalMeshComponent->RotateBone(BoneName, SkeletalRotation);
         }
         
 

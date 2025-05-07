@@ -35,7 +35,7 @@ static FMatrix FbxAMatrixToFMatrix(const FbxAMatrix& InM)
     {
         for (int Col = 0; Col < 4; ++Col)
         {
-            Out.M[Row][Col] = static_cast<float>(InM.Get(Col, Row));
+            Out.M[Row][Col] = static_cast<float>(InM.Get(Row, Col));
         }
     }
 
@@ -50,7 +50,7 @@ static FbxAMatrix FMatrixToFbxAMatrix(const FMatrix& InM)
     {
         for (int Col = 0; Col < 4; ++Col)
         {
-            Out.mData[Col][Row] = static_cast<double>(InM.M[Row][Col]); // transpose
+            Out.mData[Row][Col] = static_cast<double>(InM.M[Row][Col]); // transpose
         }
     }
 
