@@ -5,53 +5,14 @@
 
 FSubCamera::FSubCamera(float Width, float Height)
 {
-    Pitch = 0.0f;
-    Yaw = 0.0f;
-    FOV = 90.0f;
-    
-    ViewMatrix = FMatrix::Identity;
-    ProjectionMatrix = FMatrix::Identity;
-
-    StartVector = DirectX::XMVectorZero();
-    InitialOrientation = DirectX::XMQuaternionIdentity();
-    Orientation = DirectX::XMQuaternionIdentity();
-
-    CameraLocation = FVector(0, 0, 10);
-    CameraNearClip = 0.1f;
-    CameraFarClip = 1000.0f;
-    
-    Rotate(0.0f, 0.0f);
+    Reset();
     UpdateCamera(Width, Height);
-}
-
-void FSubCamera::Rotate(float InPitch, float InYaw)
-{
-    Pitch += InPitch;
-    Yaw += InYaw;
-
-    // clamp in radians
-    constexpr float PitchLimitRad = DirectX::XMConvertToRadians(89.0f);
-    Pitch = std::clamp(Pitch, -PitchLimitRad, +PitchLimitRad);
-
-    const float Radius = CameraLocation.Z;
-    DirectX::XMMATRIX PitchMatrix = DirectX::XMMatrixRotationY(Pitch);
-    DirectX::XMMATRIX YawMatrix   = DirectX::XMMatrixRotationZ(Yaw);
-    
-    DirectX::XMMATRIX RotationMatrix = PitchMatrix * YawMatrix;
-    DirectX::XMVECTOR Offset = DirectX::XMVectorSet(0.0f, 0.0f, -Radius, 0.0f);
-    DirectX::XMVECTOR Position = DirectX::XMVector3TransformCoord(Offset, RotationMatrix);
-
-    DirectX::XMVECTOR at  = DirectX::XMVectorZero();
-    DirectX::XMVECTOR up  = DirectX::XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f); // Z-up
-    DirectX::XMVECTOR eye = Position;
-
-    DirectX::XMMATRIX TempView = DirectX::XMMatrixLookAtLH(eye, at, up);
-
-    ViewMatrix = FMatrix::FromXMMatrix(TempView);
 }
 
 void FSubCamera::UpdateCamera(float Width, float Height)
 {
+    LastWidth = Width;
+    LastHeight = Height;
     AspectRatio = Width / Height;
     CalculateProjection();
 }
@@ -162,6 +123,27 @@ float FSubCamera::GetCameraNearClip() const
 float FSubCamera::GetCameraFarClip() const
 {
     return CameraFarClip;
+}
+
+void FSubCamera::Reset()
+{
+    Pitch = 0.0f;
+    Yaw = 0.0f;
+    FOV = 90.0f;
+    
+    ViewMatrix = FMatrix::Identity;
+    ProjectionMatrix = FMatrix::Identity;
+
+    StartVector = DirectX::XMVectorZero();
+    InitialOrientation = DirectX::XMQuaternionIdentity();
+    Orientation = DirectX::XMQuaternionIdentity();
+
+    CameraLocation = FVector(0, 0, 10);
+    CameraNearClip = 0.1f;
+    CameraFarClip = 1000.0f;
+
+    UpdateViewMatrix();
+    UpdateCamera(LastWidth, LastHeight);
 }
 
 DirectX::XMVECTOR FSubCamera::MapToSphere(int X, int Y, HWND hWnd)

@@ -445,6 +445,7 @@ LRESULT CALLBACK FEngineLoop::AppWndProc(HWND hWnd, uint32 Msg, WPARAM wParam, L
             return 0;
         case WM_CLOSE:
             GEngineLoop.SelectSkeletalMesh(nullptr);
+            GEngineLoop.SubCamera->Reset();
             ::ShowWindow(hWnd, SW_HIDE);
             return 0;
         

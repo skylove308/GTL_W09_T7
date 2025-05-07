@@ -33,6 +33,8 @@ public:
     float GetCameraNearClip() const;
     float GetCameraFarClip() const;
 
+    void Reset();
+    
 private:
     FMatrix ViewMatrix;
     FMatrix ProjectionMatrix;
@@ -46,6 +48,8 @@ private:
     
     float Pitch, Yaw;
     float AspectRatio;
+    float LastWidth;
+    float LastHeight;
 
     bool bDrag = false;
     
