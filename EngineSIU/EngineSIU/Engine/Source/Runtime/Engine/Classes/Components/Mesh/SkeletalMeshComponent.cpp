@@ -1,6 +1,13 @@
 #include "SkeletalMeshComponent.h"
 #include "Engine/Asset/SkeletalMeshAsset.h"
 #include "Engine/FbxLoader.h"
+#include "Engine/SkeletalMeshActor.h"
+
+USkeletalMeshComponent::USkeletalMeshComponent()
+{
+    SkeletalMesh = nullptr;
+    selectedSubMeshIndex = -1;
+}
 
 UObject* USkeletalMeshComponent::Duplicate(UObject* InOuter)
 {
@@ -103,6 +110,7 @@ void USkeletalMeshComponent::RotateBone(FString BoneName, FRotator Rotation)
         return;
     }
 
+    /*Rotation = Cast<ASkeletalMeshActor>(GetOwner())->BoneGizmoSceneComponents[BoneIndex]->GetRelativeRotation();*/
     FFBXLoader::RotateBones(RenderData->SkeletonBones, BoneIndex, FbxVector4(Rotation.Roll, Rotation.Pitch, Rotation.Yaw));
 
     FFBXLoader::RecalculateGlobalPoses(RenderData->SkeletonBones);

@@ -6,7 +6,7 @@ class USkeletalMeshComponent : public USkinnedMeshComponent
     DECLARE_CLASS(USkeletalMeshComponent, USkinnedMeshComponent)
 
 public:
-    USkeletalMeshComponent() = default;
+    USkeletalMeshComponent();
 
     virtual UObject* Duplicate(UObject* InOuter) override;
 

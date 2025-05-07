@@ -7,6 +7,10 @@
 #include "Engine/EditorEngine.h"
 #include "World/World.h"
 #include "Engine/FObjLoader.h"
+#include "Components/Mesh/SkeletalMeshComponent.h"
+#include "Engine/Asset/SkeletalMeshAsset.h"
+#include "Engine/SkeletalMeshActor.h"
+#include "Engine/FbxLoader.h"
 
 ATransformGizmo::ATransformGizmo()
 {
@@ -118,6 +122,32 @@ void ATransformGizmo::Tick(float DeltaTime)
 
     if (TargetComponent)
     {
+        ASkeletalMeshActor* SkeletalMeshActor = Cast<ASkeletalMeshActor>(TargetComponent->GetOwner());
+        if (SkeletalMeshActor)
+        {
+            USkeletalMeshComponent* SkeletalMeshComp = Cast<USkeletalMeshComponent>(SkeletalMeshActor->GetRootComponent());
+
+            for (int32 i = 0; i < FFBXManager::SkeletalMeshRenderData->SkeletonBones.Num(); ++i)
+            {
+                if (FFBXManager::SkeletalMeshRenderData->SkeletonBones[i].ParentIndex == -1)
+                {
+                    FFBXManager::SkeletalMeshRenderData->SkeletonBones[i].LocalBindPose = Cast<ASkeletalMeshActor>(SkeletalMeshComp->GetOwner())->BoneGizmoSceneComponents[i]->GetRelativeModelMatrix();
+                    FFBXManager::SkeletalMeshRenderData->SkeletonBones[i].GlobalPose = FFBXManager::SkeletalMeshRenderData->SkeletonBones[i].LocalBindPose;
+                }
+                else
+                {
+                    FFBXManager::SkeletalMeshRenderData->SkeletonBones[i].LocalBindPose = Cast<ASkeletalMeshActor>(SkeletalMeshComp->GetOwner())->BoneGizmoSceneComponents[i]->GetRelativeModelMatrix();
+                    FFBXManager::SkeletalMeshRenderData->SkeletonBones[i].GlobalPose = FFBXManager::SkeletalMeshRenderData->SkeletonBones[i].LocalBindPose * FFBXManager::SkeletalMeshRenderData->SkeletonBones[FFBXManager::SkeletalMeshRenderData->SkeletonBones[i].ParentIndex].GlobalPose;
+                }
+            }
+
+            FFBXLoader::ReskinVerticesCPU(
+                FFBXLoader::Mesh, // 필요시 원본 FbxMesh 포인터 보존 필요
+                FFBXManager::SkeletalMeshRenderData->SkeletonBones,
+                FFBXManager::SkeletalMeshRenderData->Vertices
+            );
+        }
+
         SetActorLocation(TargetComponent->GetWorldLocation());
         if (EditorPlayer->GetCoordMode() == ECoordMode::CDM_LOCAL || EditorPlayer->GetControlMode() == EControlMode::CM_SCALE)
         {
