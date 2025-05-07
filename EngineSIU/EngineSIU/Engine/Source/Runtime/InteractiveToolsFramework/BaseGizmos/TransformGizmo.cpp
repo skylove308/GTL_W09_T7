@@ -126,25 +126,25 @@ void ATransformGizmo::Tick(float DeltaTime)
         if (SkeletalMeshActor)
         {
             USkeletalMeshComponent* SkeletalMeshComp = Cast<USkeletalMeshComponent>(SkeletalMeshActor->GetRootComponent());
-
-            for (int32 i = 0; i < FFBXManager::SkeletalMeshRenderData->SkeletonBones.Num(); ++i)
+            FSkeletalMeshRenderData* RenderData = SkeletalMeshComp->GetSkeletalMesh()->GetRenderData();
+            for (int32 i = 0; i < RenderData->SkeletonBones.Num(); ++i)
             {
-                if (FFBXManager::SkeletalMeshRenderData->SkeletonBones[i].ParentIndex == -1)
+                if (RenderData->SkeletonBones[i].ParentIndex == -1)
                 {
-                    FFBXManager::SkeletalMeshRenderData->SkeletonBones[i].LocalBindPose = Cast<ASkeletalMeshActor>(SkeletalMeshComp->GetOwner())->BoneGizmoSceneComponents[i]->GetRelativeModelMatrix();
-                    FFBXManager::SkeletalMeshRenderData->SkeletonBones[i].GlobalPose = FFBXManager::SkeletalMeshRenderData->SkeletonBones[i].LocalBindPose;
+                    RenderData->SkeletonBones[i].LocalBindPose = Cast<ASkeletalMeshActor>(SkeletalMeshComp->GetOwner())->BoneGizmoSceneComponents[i]->GetRelativeModelMatrix();
+                    RenderData->SkeletonBones[i].GlobalPose = RenderData->SkeletonBones[i].LocalBindPose;
                 }
                 else
                 {
-                    FFBXManager::SkeletalMeshRenderData->SkeletonBones[i].LocalBindPose = Cast<ASkeletalMeshActor>(SkeletalMeshComp->GetOwner())->BoneGizmoSceneComponents[i]->GetRelativeModelMatrix();
-                    FFBXManager::SkeletalMeshRenderData->SkeletonBones[i].GlobalPose = FFBXManager::SkeletalMeshRenderData->SkeletonBones[i].LocalBindPose * FFBXManager::SkeletalMeshRenderData->SkeletonBones[FFBXManager::SkeletalMeshRenderData->SkeletonBones[i].ParentIndex].GlobalPose;
+                    RenderData->SkeletonBones[i].LocalBindPose = Cast<ASkeletalMeshActor>(SkeletalMeshComp->GetOwner())->BoneGizmoSceneComponents[i]->GetRelativeModelMatrix();
+                    RenderData->SkeletonBones[i].GlobalPose = RenderData->SkeletonBones[i].LocalBindPose * FFBXManager::SkeletalMeshRenderData->SkeletonBones[RenderData->SkeletonBones[i].ParentIndex].GlobalPose;
                 }
             }
 
             FFBXLoader::ReskinVerticesCPU(
                 FFBXLoader::Mesh, // 필요시 원본 FbxMesh 포인터 보존 필요
-                FFBXManager::SkeletalMeshRenderData->SkeletonBones,
-                FFBXManager::SkeletalMeshRenderData->Vertices
+                RenderData->SkeletonBones,
+                RenderData->Vertices
             );
         }
 
