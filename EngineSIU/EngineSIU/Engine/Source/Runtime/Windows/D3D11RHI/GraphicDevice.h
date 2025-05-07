@@ -40,9 +40,10 @@ public:
 
     D3D11_VIEWPORT Viewport;
     
-    FLOAT ClearColor[4] = { 0.0f, 0.0f, 0.0f, 1.0f }; // 화면을 초기화(clear) 할 때 사용할 색상(RGBA)
+    FLOAT ClearColor[4] = { 0.025f, 0.025f, 0.025f, 1.0f }; // 화면을 초기화(clear) 할 때 사용할 색상(RGBA)
 
     void Initialize(HWND hWindow);
+    void Initialize(HWND hWindow, ID3D11Device* InDevice);
     
     void ChangeRasterizer(EViewModeIndex ViewModeIndex);
     void CreateRTV(ID3D11Texture2D*& OutTexture, ID3D11RenderTargetView*& OutRTV);
@@ -65,6 +66,7 @@ public:
     
 private:
     void CreateDeviceAndSwapChain(HWND hWindow);
+    void CreateSwapChain(HWND hWnd);
     void CreateBackBuffer();
     void CreateDepthStencilState();
     void CreateRasterizerState();

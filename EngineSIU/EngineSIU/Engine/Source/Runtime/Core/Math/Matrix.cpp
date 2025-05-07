@@ -230,6 +230,22 @@ FMatrix FMatrix::CreateTranslationMatrix(const FVector& position)
     return translationMatrix;
 }
 
+FMatrix FMatrix::FromXMMatrix(const DirectX::FXMMATRIX& Matrix)
+{
+    FMatrix Result;
+
+    // XMMatrix는 row-major이므로 그대로 복사 가능
+    for (int row = 0; row < 4; ++row)
+    {
+        Result.M[row][0] = Matrix.r[row].m128_f32[0];
+        Result.M[row][1] = Matrix.r[row].m128_f32[1];
+        Result.M[row][2] = Matrix.r[row].m128_f32[2];
+        Result.M[row][3] = Matrix.r[row].m128_f32[3];
+    }
+
+    return Result;
+}
+
 FVector FMatrix::TransformVector(const FVector& v, const FMatrix& m)
 {
     FVector result;

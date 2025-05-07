@@ -14,6 +14,8 @@
 
 #include "SoundManager.h"
 #include "SubWindow/ImGuiSubWindow.h"
+#include "SubWindow/SubCamera.h"
+#include "SubWindow/SubRenderer.h"
 #include "UserInterface/Drawer.h"
 
 extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
@@ -30,10 +32,13 @@ FEngineLoop::FEngineLoop()
     : AppWnd(nullptr)
     , SubAppWnd(nullptr)
     , FUIManager(nullptr)
+    , SubUI(nullptr)
+    , CurrentImGuiContext(nullptr)
+    , SelectedSkeletalMesh(nullptr)
     , LevelEditor(nullptr)
     , UnrealEditor(nullptr)
     , BufferManager(nullptr)
-    , CurrentImGuiContext(nullptr)
+    , SubRenderer(nullptr)
 {
 }
 
@@ -58,10 +63,11 @@ int32 FEngineLoop::Init(HINSTANCE hInstance)
 
     UnrealEditor->Initialize();
     GraphicDevice.Initialize(AppWnd);
+    SubRenderer = new FSubRenderer();
 
     if (SubAppWnd)
     {
-        SubGraphicDevice.Initialize(SubAppWnd);
+        SubGraphicDevice.Initialize(SubAppWnd, GraphicDevice.Device);
     }
     
     if (!GPUTimingManager.Initialize(GraphicDevice.Device, GraphicDevice.DeviceContext))
@@ -97,6 +103,8 @@ int32 FEngineLoop::Init(HINSTANCE hInstance)
     {
         SubUI = new FImGuiSubWindow(SubAppWnd, SubGraphicDevice.Device, SubGraphicDevice.DeviceContext);
         UImGuiManager::ApplySharedStyle(FUIManager->GetContext(), SubUI->Context);
+        SubRenderer->Initialize(&SubGraphicDevice, BufferManager);
+        SubCamera = new FSubCamera(800, 600);
     }
     
     uint32 ClientWidth = 0;
@@ -163,6 +171,10 @@ void FEngineLoop::RenderSubWindow() const
         SubGraphicDevice.Prepare();
         SubGraphicDevice.DeviceContext->OMSetRenderTargets(1, &SubGraphicDevice.BackBufferRTV, nullptr);
 
+        SubRenderer->PrepareRender(*SubCamera);
+        SubRenderer->Render();
+        SubRenderer->ClearRender();
+        
         // Sub window rendering
         SubUI->BeginFrame();
 
@@ -501,6 +513,15 @@ void FEngineLoop::UpdateUI()
         GEngineLoop.GetUnrealEditor()->OnResize(AppWnd);
     }
     ViewportTypePanel::GetInstance().OnResize(AppWnd);
+}
+
+void FEngineLoop::SelectSkeletalMesh(USkeletalMesh* SkeletalMesh)
+{
+    SelectedSkeletalMesh = SkeletalMesh;
+    if (SubRenderer)
+    {
+        SubRenderer->SetPreviewSkeletalMesh(SelectedSkeletalMesh);
+    }
 }
 
 void FEngineLoop::ToggleContentDrawer()

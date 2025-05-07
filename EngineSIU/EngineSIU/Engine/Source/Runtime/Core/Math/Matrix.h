@@ -1,4 +1,6 @@
 #pragma once
+#include <DirectXMath.h>
+
 #include "Serialization/Archive.h"
 
 struct FVector;
@@ -38,6 +40,7 @@ public:
     static FVector TransformVector(const FVector& v, const FMatrix& m);
     static FVector4 TransformVector(const FVector4& v, const FMatrix& m);
     static FMatrix CreateTranslationMatrix(const FVector& position);
+    static FMatrix FromXMMatrix(const DirectX::FXMMATRIX& Matrix);
 
     FVector4 TransformFVector4(const FVector4& vector) const;
     FVector TransformPosition(const FVector& vector) const;

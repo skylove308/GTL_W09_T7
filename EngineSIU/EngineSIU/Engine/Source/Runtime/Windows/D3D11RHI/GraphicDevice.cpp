@@ -15,6 +15,19 @@ void FGraphicsDevice::Initialize(HWND hWindow)
     CurrentRasterizer = RasterizerSolidBack;
 }
 
+void FGraphicsDevice::Initialize(HWND hWindow, ID3D11Device* InDevice)
+{
+    Device = InDevice;
+    Device->GetImmediateContext(&DeviceContext);
+
+    CreateSwapChain(hWindow);
+    CreateBackBuffer();
+    CreateDepthStencilState();
+    CreateRasterizerState();
+    CreateAlphaBlendState();
+    CurrentRasterizer = RasterizerSolidBack;
+}
+
 void FGraphicsDevice::CreateDeviceAndSwapChain(HWND hWindow)
 {
     // 지원하는 Direct3D 기능 레벨을 정의
@@ -60,6 +73,55 @@ void FGraphicsDevice::CreateDeviceAndSwapChain(HWND hWindow)
     Viewport.MaxDepth = 1.0f;
     Viewport.TopLeftX = 0;
     Viewport.TopLeftY = 0;
+}
+
+void FGraphicsDevice::CreateSwapChain(HWND hWnd)
+{
+    // 스왑 체인 설정 구조체 초기화
+    SwapchainDesc.BufferDesc.Width = 0;                           // 창 크기에 맞게 자동으로 설정
+    SwapchainDesc.BufferDesc.Height = 0;                          // 창 크기에 맞게 자동으로 설정
+    SwapchainDesc.BufferDesc.Format = BackBufferFormat; // 색상 포맷
+    SwapchainDesc.SampleDesc.Count = 1;                           // 멀티 샘플링 비활성화
+    SwapchainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;  // 렌더 타겟으로 사용
+    SwapchainDesc.BufferCount = 2;                                // 더블 버퍼링
+    SwapchainDesc.OutputWindow = hWnd;                         // 렌더링할 창 핸들
+    SwapchainDesc.Windowed = TRUE;                                // 창 모드
+    SwapchainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;     // 스왑 방식
+    
+    IDXGIFactory* DxgiFactory = nullptr;
+    {
+        IDXGIDevice* DxgiDevice = nullptr;
+        Device->QueryInterface(__uuidof(IDXGIDevice), (void**)&DxgiDevice);
+        IDXGIAdapter* Adapter = nullptr;
+        DxgiDevice->GetAdapter(&Adapter);
+        Adapter->GetParent(__uuidof(IDXGIFactory), (void**)&DxgiFactory);
+
+        if (Adapter) Adapter->Release();
+        if (DxgiDevice) DxgiDevice->Release();
+    }
+
+    // SwapChainDesc 설정 동일하게 진행
+    SwapchainDesc.OutputWindow = hWnd;
+
+    HRESULT hr = DxgiFactory->CreateSwapChain(Device, &SwapchainDesc, &SwapChain);
+    if (FAILED(hr))
+    {
+        MessageBox(hWnd, L"CreateSwapChain failed!", L"Error", MB_ICONERROR | MB_OK);
+    }
+
+    // 스왑 체인 정보 가져오기 (이후에 사용을 위해)
+    SwapChain->GetDesc(&SwapchainDesc);
+    ScreenWidth = SwapchainDesc.BufferDesc.Width;
+    ScreenHeight = SwapchainDesc.BufferDesc.Height;
+
+    Viewport.Width = ScreenWidth;
+    Viewport.Height = ScreenHeight;
+    Viewport.MinDepth = 0.0f;
+    Viewport.MaxDepth = 1.0f;
+    Viewport.TopLeftX = 0;
+    Viewport.TopLeftY = 0;
+
+    DxgiFactory->Release();
 }
 
 ID3D11Texture2D* FGraphicsDevice::CreateTexture2D(const D3D11_TEXTURE2D_DESC& Description, const void* InitialData)
@@ -175,6 +237,7 @@ void FGraphicsDevice::CreateBackBuffer()
     HRESULT hr = Device->CreateRenderTargetView(BackBufferTexture, &BackBufferRTVDesc, &BackBufferRTV);
     if (FAILED(hr))
     {
+        std::cout << "CreateBackBuffer failed!" << std::endl;
         return;
     }
 }

@@ -8,6 +8,8 @@
 #include "Stats/GPUTimingManager.h"
 
 
+class FSubCamera;
+class FSubRenderer;
 class USkeletalMesh;
 class FImGuiSubWindow;
 class FSlateAppMessageHandler;
@@ -74,6 +76,9 @@ private:
     UnrealEd* UnrealEditor;
     FDXDBufferManager* BufferManager; //TODO: UEngine으로 옮겨야함.
 
+    FSubRenderer* SubRenderer;
+    FSubCamera* SubCamera;
+    
     bool bIsExit = false;
     bool bIsShowSubWindow = false;
     // @todo Option으로 선택 가능하도록
@@ -82,7 +87,7 @@ private:
 public:
     SLevelEditor* GetLevelEditor() const { return LevelEditor; }
     UnrealEd* GetUnrealEditor() const { return UnrealEditor; }
-    void SelectSkeletalMesh(USkeletalMesh* SkeletalMesh) { SelectedSkeletalMesh = SkeletalMesh; }
+    void SelectSkeletalMesh(USkeletalMesh* SkeletalMesh);
     USkeletalMesh* GetSelectedSkeletalMesh() const { return SelectedSkeletalMesh; }
     FSlateAppMessageHandler* GetAppMessageHandler() const { return AppMessageHandler.get(); }
 };
