@@ -21,8 +21,8 @@ public:
 
     /** Render */
     void PrepareRender(const FSubCamera& Camera) const;
-    void Render() const;
-    void RenderMesh() const;
+    void Render(FSubCamera& Camera);
+    void RenderMesh(FSubCamera& Camera);
     void ClearRender() const;
 
     void UpdateObjectConstant(const FMatrix& WorldMatrix, const FVector4& UUIDColor, bool bIsSelected) const;
@@ -41,7 +41,9 @@ private:
     FDXDBufferManager* BufferManager;
     FDXDShaderManager* ShaderManager = nullptr;
     
-    FStaticMeshRenderPass* StaticMeshRenderPass = nullptr;
-
     USkeletalMesh* PreviewSkeletalMesh = nullptr;
+
+private:
+    /** TargetPos & MaxZ Offset */
+    bool bOnlyOnce = false;
 };

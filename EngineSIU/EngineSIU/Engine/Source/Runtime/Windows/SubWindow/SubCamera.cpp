@@ -11,10 +11,17 @@ FSubCamera::FSubCamera(float Width, float Height)
 
 void FSubCamera::UpdateCamera(float Width, float Height)
 {
-    LastWidth = Width;
-    LastHeight = Height;
-    AspectRatio = Width / Height;
-    CalculateProjection();
+    if (Width == 0 || Height == 0)
+    {
+        CalculateProjection();
+    }
+    else
+    {
+        LastWidth = Width;
+        LastHeight = Height;
+        AspectRatio = Width / Height;
+        CalculateProjection();
+    }
 }
 
 void FSubCamera::UpdateViewMatrix()
@@ -38,11 +45,16 @@ void FSubCamera::CalculateProjection()
     ProjectionMatrix = JungleMath::CreateProjectionMatrix(FOVRadian, AspectRatio, CameraNearClip, CameraFarClip);
 }
 
-void FSubCamera::UpdateFOV(float InFOV)
+void FSubCamera::SetTargetPosition(float X, float Y, float Z)
 {
-    FOV += InFOV;
-    FOV = std::clamp(FOV, 0.1f, 179.9f);
-    CalculateProjection();
+    Target.x = X;
+    Target.y = Y;
+    Target.z = Z;
+}
+
+void FSubCamera::SetTargetZOffset(float ZOffset)
+{
+    CameraLocation.Z = ZOffset;
 }
 
 void FSubCamera::OnMouseDownRight(int MouseX, int MouseY, HWND hWnd)

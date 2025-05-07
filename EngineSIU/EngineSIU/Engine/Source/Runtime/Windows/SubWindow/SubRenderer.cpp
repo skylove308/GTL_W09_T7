@@ -19,10 +19,7 @@ void FSubRenderer::Initialize(FGraphicsDevice* InGraphics, FDXDBufferManager* In
     BufferManager = InBufferManager;
 
     ShaderManager = new FDXDShaderManager(Graphics->Device);
-
-    StaticMeshRenderPass = new FStaticMeshRenderPass();
-    StaticMeshRenderPass->Initialize(BufferManager, Graphics, ShaderManager);
-
+    
     UINT MaterialBufferSize = sizeof(FMaterialConstants);
     BufferManager->CreateBufferGeneric<FMaterialConstants>("FMaterialConstants", nullptr, MaterialBufferSize, D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
 
@@ -75,12 +72,6 @@ void FSubRenderer::Release()
         delete ShaderManager;
         ShaderManager = nullptr;
     }
-
-    if (StaticMeshRenderPass)
-    {
-        delete StaticMeshRenderPass;
-        StaticMeshRenderPass = nullptr;
-    }
 }
 
 void FSubRenderer::PrepareRender(const FSubCamera& Camera) const
@@ -101,7 +92,7 @@ void FSubRenderer::PrepareRender(const FSubCamera& Camera) const
     Graphics->DeviceContext->ClearRenderTargetView(Graphics->BackBufferRTV, Graphics->ClearColor);
 }
 
-void FSubRenderer::Render() const
+void FSubRenderer::Render(FSubCamera& Camera)
 {
     if (PreviewSkeletalMesh == nullptr)
     {
@@ -127,13 +118,27 @@ void FSubRenderer::Render() const
 
     UpdateConstants();
 
-    RenderMesh();
+    RenderMesh(Camera);
 }
 
-void FSubRenderer::RenderMesh() const
+void FSubRenderer::RenderMesh(FSubCamera& Camera)
 {
     FSkeletalMeshRenderData* RenderData = PreviewSkeletalMesh->GetRenderData();
 
+    if (!bOnlyOnce)
+    {
+        FVector Target = (RenderData->BoundingBoxMax + RenderData->BoundingBoxMin) * 0.5f;
+        FVector Extent = RenderData->BoundingBoxMax - RenderData->BoundingBoxMin;
+        Camera.SetTargetPosition(Target.X, Target.Y, Target.Z);
+        
+        float MaxOff = std::max(std::max(Extent.X, Extent.Y), Extent.Z);
+        Camera.SetTargetZOffset(MaxOff);
+
+        Camera.UpdateViewMatrix();
+        Camera.UpdateCamera();
+        bOnlyOnce = true;
+    }
+    
     TArray<FStaticMaterial*> RenderMaterial = PreviewSkeletalMesh->GetMaterials();
     
     UINT Stride = sizeof(FSkeletalMeshVertex);
@@ -240,4 +245,5 @@ void FSubRenderer::UpdateViewCamera(const FSubCamera& Camera) const
 void FSubRenderer::SetPreviewSkeletalMesh(USkeletalMesh* InPreviewSkeletalMesh)
 {
     PreviewSkeletalMesh = InPreviewSkeletalMesh;
+    bOnlyOnce = false;
 }

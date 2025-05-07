@@ -176,6 +176,7 @@ bool FFBXLoader::FindMesh(FbxNode* Node, const FString& FilePath)
             BuildSkeletalVertexBuffers(Mesh, FFBXManager::SkeletalMeshRenderData->Vertices, FFBXManager::SkeletalMeshRenderData->Indices);
             SetupMaterialSubsets(Mesh, FFBXManager::SkeletalMeshRenderData->MaterialSubsets);
             LoadMaterialInfo(Node);
+            ComputeBoundingBox(FFBXManager::SkeletalMeshRenderData->Vertices, FFBXManager::SkeletalMeshRenderData->BoundingBoxMin, FFBXManager::SkeletalMeshRenderData->BoundingBoxMax);
 
             //// Update skinning matrices
             //TArray<FMatrix> GlobalBoneTransforms;
@@ -625,6 +626,27 @@ void FFBXLoader::CopyTangents(FbxMesh* Mesh, TArray<FStaticMeshVertex>& OutVerts
 }
 
 void FFBXLoader::ComputeBoundingBox(const TArray<FStaticMeshVertex>& InVerts, FVector& OutMin, FVector& OutMax)
+{
+    if (InVerts.Num() == 0)
+    {
+        OutMin = OutMax = FVector::ZeroVector;
+        return;
+    }
+    const auto& First = InVerts[0];
+    OutMin = OutMax = FVector(First.X, First.Y, First.Z);
+    for (int32 i = 1; i < InVerts.Num(); ++i)
+    {
+        const auto& V = InVerts[i];
+        OutMin.X = FMath::Min(OutMin.X, V.X);
+        OutMin.Y = FMath::Min(OutMin.Y, V.Y);
+        OutMin.Z = FMath::Min(OutMin.Z, V.Z);
+        OutMax.X = FMath::Max(OutMax.X, V.X);
+        OutMax.Y = FMath::Max(OutMax.Y, V.Y);
+        OutMax.Z = FMath::Max(OutMax.Z, V.Z);
+    }
+}
+
+void FFBXLoader::ComputeBoundingBox(const TArray<FSkeletalMeshVertex>& InVerts, FVector& OutMin, FVector& OutMax)
 {
     if (InVerts.Num() == 0)
     {

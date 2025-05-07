@@ -6,18 +6,17 @@ class FSubCamera
 public:
     FSubCamera(float Width, float Height);
     ~FSubCamera() = default;
-
-    /** Camera Rotation (Params. Radians) */
-    void Rotate(float InPitch, float InYaw);
-
+    
     /** Aspect Ratio */
-    void UpdateCamera(float Width, float Height);
+    void UpdateCamera(float Width = 0, float Height = 0);
 
     void UpdateViewMatrix();
     
     void CalculateProjection();
 
-    void UpdateFOV(float InFOV);
+    void SetTargetPosition(float X, float Y, float Z);
+
+    void SetTargetZOffset(float ZOffset);
 
 public:
     void OnMouseDownRight(int MouseX, int MouseY, HWND hWnd);
@@ -58,7 +57,7 @@ private:
     DirectX::XMVECTOR InitialOrientation;
     DirectX::XMVECTOR Orientation;
 
-    DirectX::XMFLOAT3 Target = { 0, 0,0 };
+    DirectX::XMFLOAT3 Target = { 0, 0, 0 };
 
     DirectX::XMVECTOR MapToSphere(int X, int Y, HWND hWnd);
 };

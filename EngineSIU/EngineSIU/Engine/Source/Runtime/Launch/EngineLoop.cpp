@@ -174,7 +174,7 @@ void FEngineLoop::RenderSubWindow() const
         SubGraphicDevice.Prepare();
         
         SubRenderer->PrepareRender(*SubCamera);
-        SubRenderer->Render();
+        SubRenderer->Render(*SubCamera);
         SubRenderer->ClearRender();
         
         // Sub window rendering
