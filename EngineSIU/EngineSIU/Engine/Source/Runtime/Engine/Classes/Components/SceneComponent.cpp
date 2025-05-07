@@ -195,6 +195,11 @@ void USceneComponent::AttachToComponent(USceneComponent* InParent)
     }
 }
 
+FMatrix USceneComponent::GetRelativeModelMatrix() const
+{
+    return FMatrix::GetScaleMatrix(RelativeScale3D) * FMatrix::GetRotationMatrix(RelativeRotation) * FMatrix::GetTranslationMatrix(RelativeLocation);
+}
+
 void USceneComponent::SetWorldLocation(const FVector& InLocation)
 {
     // TODO: 코드 최적화 방법 생각하기

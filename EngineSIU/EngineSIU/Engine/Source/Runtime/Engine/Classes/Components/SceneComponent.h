@@ -47,6 +47,7 @@ public:
     FVector GetRelativeLocation() const { return RelativeLocation; }
     FRotator GetRelativeRotation() const { return RelativeRotation; }
     FVector GetRelativeScale3D() const { return RelativeScale3D; }
+    FMatrix GetRelativeModelMatrix() const;
 
     void SetWorldLocation(const FVector& InLocation);
     void SetWorldRotation(const FRotator& InRotation);

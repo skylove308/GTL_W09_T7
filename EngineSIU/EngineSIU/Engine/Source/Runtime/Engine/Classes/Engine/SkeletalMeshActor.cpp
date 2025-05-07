@@ -12,6 +12,31 @@ ASkeletalMeshActor::ASkeletalMeshActor()
     if (DefaultMesh)
     {
         SkeletalMeshComponent->SetSkeletalMesh(DefaultMesh);
+
+        FSkeletalMeshRenderData* RenderData = DefaultMesh->GetRenderData();
+        if (!RenderData) return;
+
+        for (int32 i = 0; i < RenderData->SkeletonBones.Num(); ++i)
+        {
+            if (RenderData->SkeletonBones[i].ParentIndex == -1)
+            {
+                // Create a bone gizmo for the root bone
+                BoneGizmoSceneComponent = AddComponent<USceneComponent>(RenderData->SkeletonBones[i].Name);
+                BoneGizmoSceneComponents.Add(BoneGizmoSceneComponent);
+                BoneGizmoSceneComponent->SetupAttachment(RootComponent);
+                BoneGizmoSceneComponents[i]->SetRelativeLocation(RenderData->SkeletonBones[i].LocalBindPose.GetTranslationVector());
+                BoneGizmoSceneComponents[i]->SetRelativeRotation(RenderData->SkeletonBones[i].LocalBindPose.GetRotationVector());
+            }
+            else
+            {
+                // Create a bone gizmo for child bones
+                BoneGizmoSceneComponent = AddComponent<USceneComponent>(RenderData->SkeletonBones[i].Name);
+                BoneGizmoSceneComponents.Add(BoneGizmoSceneComponent);
+                BoneGizmoSceneComponent->SetupAttachment(BoneGizmoSceneComponents[RenderData->SkeletonBones[i].ParentIndex]);
+                BoneGizmoSceneComponents[i]->SetRelativeLocation(RenderData->SkeletonBones[i].LocalBindPose.GetTranslationVector());
+                BoneGizmoSceneComponents[i]->SetRelativeRotation(RenderData->SkeletonBones[i].LocalBindPose.GetRotationVector());
+            }
+        }
     }
 }
 
