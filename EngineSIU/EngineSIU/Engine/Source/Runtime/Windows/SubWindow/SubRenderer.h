@@ -22,11 +22,13 @@ public:
     /** Render */
     void PrepareRender(const FSubCamera& Camera) const;
     void Render() const;
+    void RenderMesh() const;
     void ClearRender() const;
 
     void UpdateObjectConstant(const FMatrix& WorldMatrix, const FVector4& UUIDColor, bool bIsSelected) const;
 
     void UpdateLightConstant() const;
+    void UpdateConstants() const;
 
     /** Update Buffer */
     void UpdateViewCamera(const FSubCamera& Camera) const;

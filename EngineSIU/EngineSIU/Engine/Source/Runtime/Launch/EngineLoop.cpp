@@ -68,6 +68,9 @@ int32 FEngineLoop::Init(HINSTANCE hInstance)
     if (SubAppWnd)
     {
         SubGraphicDevice.Initialize(SubAppWnd, GraphicDevice.Device);
+        SubGraphicDevice.ClearColor[0] = 0.025f;
+        SubGraphicDevice.ClearColor[1] = 0.025f;
+        SubGraphicDevice.ClearColor[2] = 0.025f;
     }
     
     if (!GPUTimingManager.Initialize(GraphicDevice.Device, GraphicDevice.DeviceContext))
@@ -169,8 +172,7 @@ void FEngineLoop::RenderSubWindow() const
     if (SubAppWnd && IsWindowVisible(SubAppWnd) && SubGraphicDevice.Device)
     {
         SubGraphicDevice.Prepare();
-        SubGraphicDevice.DeviceContext->OMSetRenderTargets(1, &SubGraphicDevice.BackBufferRTV, nullptr);
-
+        
         SubRenderer->PrepareRender(*SubCamera);
         SubRenderer->Render();
         SubRenderer->ClearRender();
@@ -427,11 +429,18 @@ LRESULT CALLBACK FEngineLoop::AppWndProc(HWND hWnd, uint32 Msg, WPARAM wParam, L
         case WM_SIZE:
             if (wParam != SIZE_MINIMIZED)
             {
+                RECT ClientRect;
+                GetClientRect(hWnd, &ClientRect);
+
+                float FullWidth = static_cast<float>(ClientRect.right - ClientRect.left);
+                float FullHeight = static_cast<float>(ClientRect.bottom - ClientRect.top);
+                
                 if (GEngineLoop.GetUnrealEditor())
                 {
-                    SubGraphicDevice.Resize(hWnd);
+                    SubGraphicDevice.Resize(hWnd, FullWidth, FullHeight);
                     GEngineLoop.GetUnrealEditor()->OnResize(hWnd, true);
                 }
+                GEngineLoop.SubCamera->UpdateCamera(FullWidth * 0.75f, FullHeight);
             }
             return 0;
         case WM_CLOSE:
@@ -443,6 +452,43 @@ LRESULT CALLBACK FEngineLoop::AppWndProc(HWND hWnd, uint32 Msg, WPARAM wParam, L
             if (ImGui::GetCurrentContext() == nullptr) break; 
             ImGui::SetCurrentContext(GEngineLoop.SubUI->Context);
             GEngineLoop.CurrentImGuiContext = ImGui::GetCurrentContext();
+            return 0;
+
+        case WM_RBUTTONDOWN:
+            if (GEngineLoop.SubCamera)
+            {
+                SetCapture(hWnd);
+                POINT MousePos;
+                GetCursorPos(&MousePos);
+                ScreenToClient(hWnd, &MousePos);
+                GEngineLoop.SubCamera->OnMouseDownRight(MousePos.x, MousePos.y, hWnd);
+            }
+            
+            return 0;
+        case WM_RBUTTONUP:
+            ReleaseCapture();
+            if (GEngineLoop.SubCamera)
+            {
+                GEngineLoop.SubCamera->OnMouseUpRight();
+            }
+            return 0;
+
+        case WM_MOUSEMOVE:
+            if (GEngineLoop.SubCamera)
+            {
+                POINT currentMousePos;
+                GetCursorPos(&currentMousePos);
+                ScreenToClient(hWnd, &currentMousePos);
+                
+                GEngineLoop.SubCamera->OnMouseMove(currentMousePos.x, currentMousePos.y, hWnd);
+            }
+            return 0;
+        case WM_MOUSEWHEEL:
+            if (GEngineLoop.SubCamera)
+            {
+                short wheelDelta = GET_WHEEL_DELTA_WPARAM(wParam);
+                GEngineLoop.SubCamera->OnMouseWheel(wheelDelta);
+            }
             return 0;
         default:
             return DefWindowProc(hWnd, Msg, wParam, lParam);

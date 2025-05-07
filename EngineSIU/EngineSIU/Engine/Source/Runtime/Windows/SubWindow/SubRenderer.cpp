@@ -23,6 +23,12 @@ void FSubRenderer::Initialize(FGraphicsDevice* InGraphics, FDXDBufferManager* In
     StaticMeshRenderPass = new FStaticMeshRenderPass();
     StaticMeshRenderPass->Initialize(BufferManager, Graphics, ShaderManager);
 
+    UINT MaterialBufferSize = sizeof(FMaterialConstants);
+    BufferManager->CreateBufferGeneric<FMaterialConstants>("FMaterialConstants", nullptr, MaterialBufferSize, D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
+
+    UINT LitUnlitBufferSize = sizeof(FLitUnlitConstants);
+    BufferManager->CreateBufferGeneric<FLitUnlitConstants>("FLitUnlitConstants", nullptr, LitUnlitBufferSize, D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
+    
     UINT LightInfoBufferSize = sizeof(FLightInfoBuffer);
     BufferManager->CreateBufferGeneric<FLightInfoBuffer>("FLightInfoBuffer", nullptr, LightInfoBufferSize, D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
     
@@ -60,7 +66,6 @@ void FSubRenderer::Initialize(FGraphicsDevice* InGraphics, FDXDBufferManager* In
         // TODO: 적절한 오류 처리
         return;
     }
-
 }
 
 void FSubRenderer::Release()
@@ -82,8 +87,15 @@ void FSubRenderer::PrepareRender(const FSubCamera& Camera) const
 {
     UpdateViewCamera(Camera);
 
+    // Set RTV + DSV
+    Graphics->DeviceContext->OMSetRenderTargets(1, &Graphics->BackBufferRTV, Graphics->DeviceDSV);
+    
     // Set Viewport
-    Graphics->DeviceContext->RSSetViewports(1, &Graphics->Viewport);
+    Graphics->DeviceContext->RSSetViewports(1, &Graphics->RenderViewport);
+
+    // Set Rasterizer + DSS
+    Graphics->DeviceContext->RSSetState(Graphics->RasterizerSolidBack);
+    Graphics->DeviceContext->OMSetDepthStencilState(Graphics->DepthStencilState, 0);
     
     // Clear RenderTarget
     Graphics->DeviceContext->ClearRenderTargetView(Graphics->BackBufferRTV, Graphics->ClearColor);
@@ -103,19 +115,23 @@ void FSubRenderer::Render() const
 
     if (!vertexShader || !inputLayout || !pixelShader)
     {
-        // 셰이더가 제대로 로드되지 않았거나 키가 일치하지 않는 경우
-        // TODO: 적절한 오류 메시지 또는 로깅
         return;
     }
 
     Graphics->DeviceContext->VSSetShader(vertexShader, nullptr, 0);
     Graphics->DeviceContext->PSSetShader(pixelShader, nullptr, 0);
     Graphics->DeviceContext->IASetInputLayout(inputLayout);
+    Graphics->DeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
     
     UpdateObjectConstant(FMatrix::Identity, FVector4(), false);
 
-    UpdateLightConstant();
-    
+    UpdateConstants();
+
+    RenderMesh();
+}
+
+void FSubRenderer::RenderMesh() const
+{
     FSkeletalMeshRenderData* RenderData = PreviewSkeletalMesh->GetRenderData();
 
     TArray<FStaticMaterial*> RenderMaterial = PreviewSkeletalMesh->GetMaterials();
@@ -172,6 +188,8 @@ void FSubRenderer::UpdateObjectConstant(const FMatrix& WorldMatrix, const FVecto
 
 void FSubRenderer::UpdateLightConstant() const
 {
+    BufferManager->BindConstantBuffer(TEXT("FLightInfoBuffer"), 0, EShaderStage::Vertex);
+    
     FLightInfoBuffer LightBufferData = {};
     LightBufferData.DirectionalLightsCount = 0;
     LightBufferData.PointLightsCount = 0;
@@ -184,6 +202,26 @@ void FSubRenderer::UpdateLightConstant() const
     LightBufferData.Ambient[0] = AmbientLightInfo;
 
     BufferManager->UpdateConstantBuffer(TEXT("FLightInfoBuffer"), LightBufferData);
+}
+
+void FSubRenderer::UpdateConstants() const
+{
+    TArray<FString> PSBufferKeys = {
+        TEXT("FLightInfoBuffer"),
+        TEXT("FMaterialConstants"),
+        TEXT("FLitUnlitConstants")
+    };
+
+    BufferManager->BindConstantBuffers(PSBufferKeys, 0, EShaderStage::Pixel);
+    
+    /** Lit Flag */
+    FLitUnlitConstants Data;
+    Data.bIsLit = true;
+    BufferManager->UpdateConstantBuffer(TEXT("FLitUnlitConstants"), Data);
+
+    /** Light */
+    UpdateLightConstant();
+    
 }
 
 void FSubRenderer::UpdateViewCamera(const FSubCamera& Camera) const

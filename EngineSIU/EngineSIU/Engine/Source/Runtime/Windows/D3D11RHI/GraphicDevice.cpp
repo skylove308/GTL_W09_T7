@@ -12,6 +12,7 @@ void FGraphicsDevice::Initialize(HWND hWindow)
     CreateDepthStencilState();
     CreateRasterizerState();
     CreateAlphaBlendState();
+    CreateDepthStencilViewAndTexture();
     CurrentRasterizer = RasterizerSolidBack;
 }
 
@@ -25,6 +26,7 @@ void FGraphicsDevice::Initialize(HWND hWindow, ID3D11Device* InDevice)
     CreateDepthStencilState();
     CreateRasterizerState();
     CreateAlphaBlendState();
+    CreateDepthStencilViewAndTexture();
     CurrentRasterizer = RasterizerSolidBack;
 }
 
@@ -121,6 +123,13 @@ void FGraphicsDevice::CreateSwapChain(HWND hWnd)
     Viewport.TopLeftX = 0;
     Viewport.TopLeftY = 0;
 
+    RenderViewport.Width = Viewport.Width * 0.75f;
+    RenderViewport.Height = Viewport.Height;
+    RenderViewport.TopLeftX = 0;
+    RenderViewport.TopLeftY = 0;
+    RenderViewport.MinDepth = 0;
+    RenderViewport.MaxDepth = 1.0f;
+
     DxgiFactory->Release();
 }
 
@@ -175,6 +184,8 @@ void FGraphicsDevice::CreateDepthStencilState()
         // 오류 처리
         return;
     }
+
+    
 }
 
 void FGraphicsDevice::CreateRasterizerState()
@@ -284,6 +295,18 @@ void FGraphicsDevice::ReleaseDepthStencilResources()
         DepthStencilState->Release();
         DepthStencilState = nullptr;
     }
+
+    if (DeviceDSV)
+    {
+        DeviceDSV->Release();
+        DeviceDSV = nullptr;
+    }
+
+    if (DeviceDSVTexture)
+    {
+        DeviceDSVTexture->Release();
+        DeviceDSVTexture = nullptr;
+    }
 }
 
 void FGraphicsDevice::Release()
@@ -334,8 +357,48 @@ void FGraphicsDevice::Resize(HWND hWindow)
     Viewport.TopLeftY = 0;
 
     CreateBackBuffer();
+    CreateDepthStencilViewAndTexture();
 
     // TODO : Resize에 따른 Depth Pre-Pass 리사이징 필요
+}
+
+void FGraphicsDevice::Resize(HWND hWnd, float Width, float Height)
+{
+    DeviceContext->OMSetRenderTargets(0, nullptr, nullptr);
+
+    ReleaseFrameBuffer();
+
+    if (ScreenWidth == 0 || ScreenHeight == 0)
+    {
+        MessageBox(hWnd, L"Invalid width or height for ResizeBuffers!", L"Error", MB_ICONERROR | MB_OK);
+        return;
+    }
+
+    // SwapChain 크기 조정
+    HRESULT hr = S_OK;
+    hr = SwapChain->ResizeBuffers(0, Width, Height, BackBufferFormat, 0); // DXGI_FORMAT_B8G8R8A8_UNORM으로 시도
+    if (FAILED(hr))
+    {
+        MessageBox(hWnd, L"failed", L"ResizeBuffers failed ", MB_ICONERROR | MB_OK);
+        return;
+    }
+
+    SwapChain->GetDesc(&SwapchainDesc);
+    ScreenWidth = SwapchainDesc.BufferDesc.Width;
+    ScreenHeight = SwapchainDesc.BufferDesc.Height;
+
+    Viewport.Width = ScreenWidth;
+    Viewport.Height = ScreenHeight;
+
+    RenderViewport.Width = Viewport.Width * 0.75f;
+    RenderViewport.Height = Viewport.Height;
+    RenderViewport.TopLeftX = 0;
+    RenderViewport.TopLeftY = 0;
+    RenderViewport.MinDepth = 0;
+    RenderViewport.MaxDepth = 1.0f;
+
+    CreateBackBuffer();
+    CreateDepthStencilViewAndTexture();
 }
 
 void FGraphicsDevice::CreateAlphaBlendState()
@@ -357,6 +420,59 @@ void FGraphicsDevice::CreateAlphaBlendState()
     {
         MessageBox(NULL, L"AlphaBlendState 생성에 실패했습니다!", L"Error", MB_ICONERROR | MB_OK);
     }
+}
+
+void FGraphicsDevice::CreateDepthStencilViewAndTexture()
+{
+    // 기존 DepthStencilView 및 Texture가 있다면 해제
+    if (DeviceDSV)
+    {
+        DeviceDSV->Release();
+        DeviceDSV = nullptr;
+    }
+    // DepthStencilBufferTexture도 멤버로 두고 관리한다면 여기서 해제
+    if (DeviceDSVTexture)
+    {
+        DeviceDSVTexture->Release();
+        DeviceDSVTexture = nullptr;
+    }
+
+
+    // Depth Stencil Texture 설명 설정
+    D3D11_TEXTURE2D_DESC DepthStencilTextureDesc = {};
+    DepthStencilTextureDesc.Width = ScreenWidth; // 백버퍼와 동일한 너비
+    DepthStencilTextureDesc.Height = ScreenHeight; // 백버퍼와 동일한 높이
+    DepthStencilTextureDesc.MipLevels = 1;
+    DepthStencilTextureDesc.ArraySize = 1;
+    DepthStencilTextureDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT; // 대표적인 뎁스-스텐실 포맷
+    DepthStencilTextureDesc.SampleDesc.Count = 1; // 멀티샘플링 사용 안 함
+    DepthStencilTextureDesc.SampleDesc.Quality = 0;
+    DepthStencilTextureDesc.Usage = D3D11_USAGE_DEFAULT;
+    DepthStencilTextureDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+    DepthStencilTextureDesc.CPUAccessFlags = 0;
+    DepthStencilTextureDesc.MiscFlags = 0;
+
+    HRESULT hr = Device->CreateTexture2D(&DepthStencilTextureDesc, nullptr, &DeviceDSVTexture);
+    if (FAILED(hr))
+    {
+        // 오류 처리 (예: 로그 출력, 프로그램 종료 등)
+        return;
+    }
+
+    // Depth Stencil View 설명 설정
+    D3D11_DEPTH_STENCIL_VIEW_DESC DepthStencilViewDesc = {};
+    DepthStencilViewDesc.Format = DepthStencilTextureDesc.Format;
+    DepthStencilViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+    DepthStencilViewDesc.Texture2D.MipSlice = 0;
+
+    // Depth Stencil View 생성
+    hr = Device->CreateDepthStencilView(DeviceDSVTexture, &DepthStencilViewDesc, &DeviceDSV);
+    if (FAILED(hr))
+    {
+        // 오류 처리
+        return;
+    }
+
 }
 
 void FGraphicsDevice::ChangeRasterizer(EViewModeIndex ViewModeIndex)
@@ -407,6 +523,7 @@ void FGraphicsDevice::Prepare()
 {
     DeviceContext->OMSetRenderTargets(0, nullptr, nullptr);
     DeviceContext->ClearRenderTargetView(BackBufferRTV, ClearColor);
+    DeviceContext->ClearDepthStencilView(DeviceDSV, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 }
 
 /* TODO: 픽셀 피킹 관련 함수로, 임시로 주석 처리

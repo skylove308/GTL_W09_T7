@@ -23,6 +23,9 @@ public:
     
     ID3D11Texture2D* BackBufferTexture = nullptr;
     ID3D11RenderTargetView* BackBufferRTV = nullptr;
+
+    ID3D11Texture2D* DeviceDSVTexture = nullptr;
+    ID3D11DepthStencilView* DeviceDSV = nullptr;
     
     ID3D11RasterizerState* RasterizerSolidBack = nullptr;
     ID3D11RasterizerState* RasterizerSolidFront = nullptr;
@@ -39,8 +42,9 @@ public:
     UINT ScreenHeight = 0;
 
     D3D11_VIEWPORT Viewport;
+    D3D11_VIEWPORT RenderViewport;
     
-    FLOAT ClearColor[4] = { 0.025f, 0.025f, 0.025f, 1.0f }; // 화면을 초기화(clear) 할 때 사용할 색상(RGBA)
+    FLOAT ClearColor[4] = { 0.0f, 0.0f, 0.0f, 1.0f }; // 화면을 초기화(clear) 할 때 사용할 색상(RGBA)
 
     void Initialize(HWND hWindow);
     void Initialize(HWND hWindow, ID3D11Device* InDevice);
@@ -56,6 +60,8 @@ public:
     void SwapBuffer() const;
     
     void Resize(HWND hWindow);
+
+    void Resize(HWND hWnd, float Width, float Height);
     
     ID3D11RasterizerState* GetCurrentRasterizer() const { return CurrentRasterizer; }
 
@@ -71,6 +77,8 @@ private:
     void CreateDepthStencilState();
     void CreateRasterizerState();
     void CreateAlphaBlendState();
+
+    void CreateDepthStencilViewAndTexture();
     
     void ReleaseDeviceAndSwapChain();
     void ReleaseFrameBuffer();
