@@ -11,7 +11,7 @@
 #include "UnrealEd/UnrealEd.h"
 #include "World/World.h"
 #include "Renderer/TileLightCullingPass.h"
-
+#include "resource.h"
 #include "SoundManager.h"
 #include "SubWindow/ImGuiSubWindow.h"
 #include "SubWindow/SubCamera.h"
@@ -348,12 +348,13 @@ void FEngineLoop::WindowInit(HINSTANCE hInstance)
 {
     WCHAR WindowClass[] = L"JungleWindowClass";
 
-    WCHAR Title[] = L"Game Tech Lab";
+    WCHAR Title[] = L"Rand Engine";
 
     WNDCLASSW wc{};
     wc.lpfnWndProc = AppWndProc;
     wc.hInstance = hInstance;
     wc.lpszClassName = WindowClass;
+    wc.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_ICON2));
     wc.style = CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS;
 
     RegisterClassW(&wc);

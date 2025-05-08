@@ -1999,5 +1999,6 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\Editor\Icon\RandEngine.ico" />
+    <Image Include="Assets\Editor\Icon\RandEngine1.ico" />
   </ItemGroup>
 </Project>
