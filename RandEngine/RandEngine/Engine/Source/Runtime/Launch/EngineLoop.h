@@ -8,6 +8,7 @@
 #include "Stats/GPUTimingManager.h"
 
 
+class FSubEngine;
 class FSubCamera;
 class FSubRenderer;
 class USkeletalMesh;
@@ -57,19 +58,13 @@ public:
     HWND SkeletalViewerWnd;
     static FGraphicsDevice AnimationViewerGD;
     HWND AnimationViewerWnd;
-    void RenderSubWindow();
-    void CleanupSubWindow();
-    void RequestShowWindow(bool bShow);
     void SubWindowInit(HINSTANCE hInstance);
     void SelectSkeletalMesh(USkeletalMesh* SkeletalMesh);
     USkeletalMesh* GetSelectedSkeletalMesh() const { return SelectedSkeletalMesh; }
-    /** Sub Window Handle - Skeletal Mesh Viewer */
-
-    FSubRenderer* SubRenderer;
-    FSubCamera* SubCamera;
-    FImGuiSubWindow* SubUI;
     USkeletalMesh* SelectedSkeletalMesh;
-    bool bIsShowSubWindow = false;
+    void CleanupSubWindow();
+    
+    FSubEngine* SkeletalViewerSubEngine;
 private:
     UImGuiManager* FUIManager;
     ImGuiContext* CurrentImGuiContext;

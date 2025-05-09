@@ -13,6 +13,7 @@
 #include "Renderer/TileLightCullingPass.h"
 #include "resource.h"
 #include "SoundManager.h"
+#include "SubWindow/FSubEngine.h"
 #include "SubWindow/ImGuiSubWindow.h"
 #include "SubWindow/SubCamera.h"
 #include "SubWindow/SubRenderer.h"
@@ -31,13 +32,11 @@ FEngineLoop::FEngineLoop()
     : AppWnd(nullptr)
     , SkeletalViewerWnd(nullptr)
     , FUIManager(nullptr)
-    , SubUI(nullptr)
     , CurrentImGuiContext(nullptr)
     , SelectedSkeletalMesh(nullptr)
     , LevelEditor(nullptr)
     , UnrealEditor(nullptr)
     , BufferManager(nullptr)
-    , SubRenderer(nullptr)
 {
 }
 
@@ -62,7 +61,6 @@ int32 FEngineLoop::Init(HINSTANCE hInstance)
 
     UnrealEditor->Initialize();
     GraphicDevice.Initialize(AppWnd);
-    SubRenderer = new FSubRenderer();
 
     if (SkeletalViewerWnd)
     {
@@ -101,13 +99,9 @@ int32 FEngineLoop::Init(HINSTANCE hInstance)
     FUIManager->Initialize(AppWnd, GraphicDevice.Device, GraphicDevice.DeviceContext);
     ResourceManager.Initialize(&Renderer, &GraphicDevice);
     
-    if (SkeletalViewerWnd && SkeletalViewerGD.Device) 
-    {
-        SubUI = new FImGuiSubWindow(SkeletalViewerWnd, SkeletalViewerGD.Device, SkeletalViewerGD.DeviceContext);
-        UImGuiManager::ApplySharedStyle(FUIManager->GetContext(), SubUI->Context);
-        SubRenderer->Initialize(&SkeletalViewerGD, BufferManager);
-        SubCamera = new FSubCamera(800, 600);
-    }
+    SkeletalViewerSubEngine = new FSubEngine();
+    SkeletalViewerSubEngine->Initialize(SkeletalViewerWnd, &SkeletalViewerGD, BufferManager,FUIManager,UnrealEditor);
+    
     
     uint32 ClientWidth = 0;
     uint32 ClientHeight = 0;
@@ -166,28 +160,6 @@ void FEngineLoop::Render(float DeltaTime)
     FUIManager->EndFrame();
 }
 
-void FEngineLoop::RenderSubWindow()
-{
-    if (SkeletalViewerWnd && IsWindowVisible(SkeletalViewerWnd) && SkeletalViewerGD.Device)
-    {
-        SkeletalViewerGD.Prepare();
-        
-        SubRenderer->PrepareRender(*SubCamera);
-        SubRenderer->Render(*SubCamera);
-        SubRenderer->ClearRender();
-        
-        // Sub window rendering
-        SubUI->BeginFrame();
-
-        UnrealEditor->RenderSubWindowPanel();
-        
-        SubUI->EndFrame();
-        
-        // Sub swap
-        SkeletalViewerGD.SwapBuffer();
-    }
-}
-
 void FEngineLoop::Tick()
 {
     LARGE_INTEGER Frequency;
@@ -242,8 +214,9 @@ void FEngineLoop::Tick()
         Render(DeltaTime);
         
         /** Sub window render */
-        RenderSubWindow();
-
+        // RenderSubWindow();
+        SkeletalViewerSubEngine->Tick(DeltaTime);
+        
         if (CurrentImGuiContext != nullptr)
         {
             ImGui::SetCurrentContext(CurrentImGuiContext);
@@ -263,13 +236,13 @@ void FEngineLoop::Tick()
 
 
         /** Sub Window Flag */
-        if (bIsShowSubWindow)
+        if (SkeletalViewerSubEngine->bIsShowSubWindow)
         {
             if (SkeletalViewerWnd)
             {
                 ::ShowWindow(SkeletalViewerWnd, SW_SHOW);
             }
-            bIsShowSubWindow = false;
+            SkeletalViewerSubEngine->bIsShowSubWindow = false;
         }
         
         do
@@ -292,21 +265,8 @@ void FEngineLoop::GetClientSize(uint32& OutWidth, uint32& OutHeight) const
 
 void FEngineLoop::Exit()
 {
+    SkeletalViewerSubEngine->Release();
     CleanupSubWindow();
-
-    if (FUIManager)
-    {
-        FUIManager->Shutdown();
-        delete FUIManager;
-        FUIManager = nullptr;
-    }
-
-    if (SubUI)
-    {
-        SubUI->Shutdown();
-        delete SubUI;
-        SubUI = nullptr;
-    }
     
     LevelEditor->Release();
     ResourceManager.Release(&Renderer);
@@ -332,11 +292,6 @@ void FEngineLoop::CleanupSubWindow()
         DestroyWindow(SkeletalViewerWnd);
         SkeletalViewerWnd = nullptr;
     }
-}
-
-void FEngineLoop::RequestShowWindow(bool bShow)
-{
-    bIsShowSubWindow = bShow;
 }
 
 void FEngineLoop::WindowInit(HINSTANCE hInstance)
@@ -416,7 +371,7 @@ LRESULT CALLBACK FEngineLoop::AppWndProc(HWND hWnd, uint32 Msg, WPARAM wParam, L
     }
     else if (hWnd == GEngineLoop.SkeletalViewerWnd)
     {
-        ImGui::SetCurrentContext(GEngineLoop.SubUI->Context);
+        ImGui::SetCurrentContext(GEngineLoop.SkeletalViewerSubEngine->SubUI->Context);
         if (ImGui_ImplWin32_WndProcHandler(hWnd, Msg, wParam, lParam)) return true;
 
         /** SubWindow Msg */
@@ -436,55 +391,55 @@ LRESULT CALLBACK FEngineLoop::AppWndProc(HWND hWnd, uint32 Msg, WPARAM wParam, L
                     SkeletalViewerGD.Resize(hWnd, FullWidth, FullHeight);
                     GEngineLoop.GetUnrealEditor()->OnResize(hWnd, true);
                 }
-                GEngineLoop.SubCamera->UpdateCamera(FullWidth * 0.75f, FullHeight);
+                GEngineLoop.SkeletalViewerSubEngine->SubCamera->UpdateCamera(FullWidth * 0.75f, FullHeight);
             }
             return 0;
         case WM_CLOSE:
             GEngineLoop.SelectSkeletalMesh(nullptr);
-            GEngineLoop.SubCamera->Reset();
+            GEngineLoop.SkeletalViewerSubEngine->SubCamera->Reset();
             ::ShowWindow(hWnd, SW_HIDE);
             return 0;
         
         case WM_ACTIVATE:
             if (ImGui::GetCurrentContext() == nullptr) break; 
-            ImGui::SetCurrentContext(GEngineLoop.SubUI->Context);
+            ImGui::SetCurrentContext(GEngineLoop.SkeletalViewerSubEngine->SubUI->Context);
             GEngineLoop.CurrentImGuiContext = ImGui::GetCurrentContext();
             return 0;
 
         case WM_RBUTTONDOWN:
-            if (GEngineLoop.SubCamera)
+            if (GEngineLoop.SkeletalViewerSubEngine->SubCamera)
             {
                 SetCapture(hWnd);
                 POINT MousePos;
                 GetCursorPos(&MousePos);
                 ScreenToClient(hWnd, &MousePos);
-                GEngineLoop.SubCamera->OnMouseDownRight(MousePos.x, MousePos.y, hWnd);
+                GEngineLoop.SkeletalViewerSubEngine->SubCamera->OnMouseDownRight(MousePos.x, MousePos.y, hWnd);
             }
             
             return 0;
         case WM_RBUTTONUP:
             ReleaseCapture();
-            if (GEngineLoop.SubCamera)
+            if (GEngineLoop.SkeletalViewerSubEngine->SubCamera)
             {
-                GEngineLoop.SubCamera->OnMouseUpRight();
+                GEngineLoop.SkeletalViewerSubEngine->SubCamera->OnMouseUpRight();
             }
             return 0;
 
         case WM_MOUSEMOVE:
-            if (GEngineLoop.SubCamera)
+            if (GEngineLoop.SkeletalViewerSubEngine->SubCamera)
             {
                 POINT currentMousePos;
                 GetCursorPos(&currentMousePos);
                 ScreenToClient(hWnd, &currentMousePos);
                 
-                GEngineLoop.SubCamera->OnMouseMove(currentMousePos.x, currentMousePos.y, hWnd);
+                GEngineLoop.SkeletalViewerSubEngine->SubCamera->OnMouseMove(currentMousePos.x, currentMousePos.y, hWnd);
             }
             return 0;
         case WM_MOUSEWHEEL:
-            if (GEngineLoop.SubCamera)
+            if (GEngineLoop.SkeletalViewerSubEngine->SubCamera)
             {
                 short wheelDelta = GET_WHEEL_DELTA_WPARAM(wParam);
-                GEngineLoop.SubCamera->OnMouseWheel(wheelDelta);
+                GEngineLoop.SkeletalViewerSubEngine->SubCamera->OnMouseWheel(wheelDelta);
             }
             return 0;
         default:
@@ -561,9 +516,9 @@ void FEngineLoop::UpdateUI()
 void FEngineLoop::SelectSkeletalMesh(USkeletalMesh* SkeletalMesh)
 {
     SelectedSkeletalMesh = SkeletalMesh;
-    if (SubRenderer)
+    if (SkeletalViewerSubEngine->SubRenderer)
     {
-        SubRenderer->SetPreviewSkeletalMesh(SelectedSkeletalMesh);
+        SkeletalViewerSubEngine->SubRenderer->SetPreviewSkeletalMesh(SelectedSkeletalMesh);
     }
 }
 

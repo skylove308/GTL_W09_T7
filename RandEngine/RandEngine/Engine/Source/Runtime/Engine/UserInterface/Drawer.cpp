@@ -3,6 +3,7 @@
 // #include "Engine/FbxLoader.h"
 #include "Components/Mesh/SkeletalMeshRenderData.h"
 #include "ImGui/imgui_internal.h"
+#include "SubWindow/FSubEngine.h"
 #include "UObject/UObjectIterator.h"
 
 FDrawer& FDrawer::GetInstance()
@@ -74,7 +75,7 @@ void FDrawer::RenderContentDrawer()
         {
             UE_LOG(ELogLevel::Display, TEXT("Double Clicked"));
             GEngineLoop.SelectSkeletalMesh(Obj);
-            GEngineLoop.RequestShowWindow(true);
+            GEngineLoop.SkeletalViewerSubEngine->RequestShowWindow(true);
             break;
         }
     }
