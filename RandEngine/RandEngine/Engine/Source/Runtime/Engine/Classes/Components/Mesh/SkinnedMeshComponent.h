@@ -24,9 +24,10 @@ public:
     virtual void GetUsedMaterials(TArray<UMaterial*>& Out) const override;
 
     USkeletalMesh* GetSkeletalMesh() const { return SkeletalMesh; }
-    void SetSkeletalMesh(USkeletalMesh* InMesh)
+    void SetSkeletalMesh(USkeletalMesh* InMesh, FBoundingBox InAABB)
     {
         SkeletalMesh = InMesh;
+        AABB = InAABB;
         OverrideMaterials.SetNum(SkeletalMesh ? SkeletalMesh->GetMaterials().Num() : 0);
     }
 

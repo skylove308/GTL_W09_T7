@@ -11,11 +11,10 @@ ASkeletalMeshActor::ASkeletalMeshActor()
     USkeletalMesh* DefaultMesh = FFBXManager::CreateSkeletalMesh("Contents/Mutant.fbx");
     if (DefaultMesh)
     {
-        SkeletalMeshComponent->SetSkeletalMesh(DefaultMesh);
 
         FSkeletalMeshRenderData* RenderData = DefaultMesh->GetRenderData();
         if (!RenderData) return;
-
+        SkeletalMeshComponent->SetSkeletalMesh(DefaultMesh, FBoundingBox(RenderData->BoundingBoxMin, RenderData->BoundingBoxMax));
         for (int32 i = 0; i < RenderData->SkeletonBones.Num(); ++i)
         {
             if (RenderData->SkeletonBones[i].ParentIndex == -1)

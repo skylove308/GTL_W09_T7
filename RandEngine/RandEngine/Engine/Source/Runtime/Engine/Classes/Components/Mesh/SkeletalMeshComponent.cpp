@@ -42,26 +42,33 @@ void USkeletalMeshComponent::SetProperties(const TMap<FString, FString>& InPrope
         {
             if (USkeletalMesh* LoadedMesh = FFBXManager::CreateSkeletalMesh(*MeshPath))
             {
-                SetSkeletalMesh(LoadedMesh);
+                SetSkeletalMesh(LoadedMesh, AABB);
                 UE_LOG(ELogLevel::Display, TEXT("Set SkeletalMesh '%s' for %s"), **MeshPath, *GetName());
             }
             else
             {
                 UE_LOG(ELogLevel::Warning, TEXT("Could not load SkeletalMesh '%s' for %s"), **MeshPath, *GetName());
-                SetSkeletalMesh(nullptr);
+                SetSkeletalMesh(nullptr, FBoundingBox());
             }
         }
         else
         {
-            SetSkeletalMesh(nullptr);
+            SetSkeletalMesh(nullptr, FBoundingBox());
         }
     }
 }
 
 int USkeletalMeshComponent::CheckRayIntersection(const FVector& InRayOrigin, const FVector& InRayDirection, float& OutHitDistance) const
 {
-    if (!SkeletalMesh) return 0;
-    if (!AABB.Intersect(InRayOrigin, InRayDirection, OutHitDistance)) return 0;
+    if (!SkeletalMesh)
+    {
+        return 0;
+    }
+
+    if (!AABB.Intersect(InRayOrigin, InRayDirection, OutHitDistance))
+    {
+        return 0;
+    }
 
     const auto* RenderData = SkeletalMesh->GetRenderData();
     const auto& Vertices = RenderData->Vertices;
