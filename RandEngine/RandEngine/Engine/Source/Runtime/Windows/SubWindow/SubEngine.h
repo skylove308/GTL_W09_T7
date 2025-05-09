@@ -19,8 +19,7 @@ public:
     virtual void Render();
     virtual void Release();
     void RequestShowWindow(bool bShow);
-    void SeltSkeletalMesh(USkeletalMesh* InSkeletalMesh);
-    
+
 public:
     HWND* Wnd;
     FGraphicsDevice* Graphics;
@@ -28,7 +27,7 @@ public:
     FSubRenderer* SubRenderer;
     UnrealEd* UnrealEditor;
     FImGuiSubWindow* SubUI;
-    USkeletalMesh* SelectedSkeletalMesh;
+
     
     POINT LastMousePos;
     bool bRBClicked =false;

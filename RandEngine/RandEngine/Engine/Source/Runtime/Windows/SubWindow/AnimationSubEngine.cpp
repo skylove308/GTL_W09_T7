@@ -1,20 +1,20 @@
-﻿#include "SkeletalSubEngine.h"
+﻿#include "AnimationSubEngine.h"
 
 #include "ImGuiManager.h"
 #include "ImGuiSubWindow.h"
 #include "SubRenderer.h"
 #include "UnrealClient.h"
 
-FSkeletalSubEngine::FSkeletalSubEngine() : FSubEngine()
+FAnimationSubEngine::FAnimationSubEngine() : FSubEngine()
 {
 }
 
-FSkeletalSubEngine::~FSkeletalSubEngine()
+FAnimationSubEngine::~FAnimationSubEngine()
 {
 }
 
-void FSkeletalSubEngine::Initialize(HWND& hWnd, FGraphicsDevice* InGraphics, FDXDBufferManager* InBufferManager, UImGuiManager* InSubWindow,
-                                    UnrealEd* InUnrealEd)
+void FAnimationSubEngine::Initialize(HWND& hWnd, FGraphicsDevice* InGraphics, FDXDBufferManager* InBufferManager, UImGuiManager* InSubWindow,
+    UnrealEd* InUnrealEd)
 {
     Graphics = InGraphics;
     BufferManager = InBufferManager;
@@ -29,14 +29,14 @@ void FSkeletalSubEngine::Initialize(HWND& hWnd, FGraphicsDevice* InGraphics, FDX
     ViewportClient->Initialize(EViewScreenLocation::EVL_MAX, FRect(0,0,800,600));
 }
 
-void FSkeletalSubEngine::Tick(float DeltaTime)
+void FAnimationSubEngine::Tick(float DeltaTime)
 {
     Input(DeltaTime);
     ViewportClient->Tick(DeltaTime);
     Render();    
 }
 
-void FSkeletalSubEngine::Input(float DeltaTime)
+void FAnimationSubEngine::Input(float DeltaTime)
 {
     if (::GetForegroundWindow() != *Wnd)
         return;
@@ -92,7 +92,7 @@ void FSkeletalSubEngine::Input(float DeltaTime)
     }
 }
 
-void FSkeletalSubEngine::Render()
+void FAnimationSubEngine::Render()
 {
     if (Wnd && IsWindowVisible(*Wnd) && Graphics->Device)
     {
@@ -114,7 +114,7 @@ void FSkeletalSubEngine::Render()
     }
 }
 
-void FSkeletalSubEngine::Release()
+void FAnimationSubEngine::Release()
 {
     FSubEngine::Release();
     if (SubUI)
@@ -131,7 +131,7 @@ void FSkeletalSubEngine::Release()
     }
 }
 
-void FSkeletalSubEngine::SeltSkeletalMesh(USkeletalMesh* InSkeletalMesh)
+void FAnimationSubEngine::SeltSkeletalMesh(USkeletalMesh* InSkeletalMesh)
 {
     SelectedSkeletalMesh = InSkeletalMesh;
     if (SubRenderer)

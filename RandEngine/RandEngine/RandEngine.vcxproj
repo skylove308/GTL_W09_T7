@@ -360,9 +360,9 @@ xcopy /y /d "$(SolutionDir)$(ProjectName)\Engine\Source\ThirdParty\FBX\lib\x64\$
     <ClCompile Include="Engine\Source\Runtime\Windows\D3D11RHI\DXDShaderManager.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Windows\D3D11RHI\GraphicDevice.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Windows\RawInput.cpp" />
-    <ClCompile Include="Engine\Source\Runtime\Windows\SubWindow\FSubEngine.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Windows\SubWindow\AnimationSubEngine.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Windows\SubWindow\SubEngine.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Windows\SubWindow\SkeletalSubEngine.cpp" />
-    <ClCompile Include="Engine\Source\Runtime\Windows\SubWindow\SubCamera.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Windows\SubWindow\SubRenderer.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Windows\WindowsCursor.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Windows\WindowsPlatformTime.cpp" />
@@ -668,10 +668,10 @@ xcopy /y /d "$(SolutionDir)$(ProjectName)\Engine\Source\ThirdParty\FBX\lib\x64\$
     <ClInclude Include="Engine\Source\Runtime\Windows\D3D11RHI\DXDShaderManager.h" />
     <ClInclude Include="Engine\Source\Runtime\Windows\D3D11RHI\GraphicDevice.h" />
     <ClInclude Include="Engine\Source\Runtime\Windows\RawInput.h" />
-    <ClInclude Include="Engine\Source\Runtime\Windows\SubWindow\FSubEngine.h" />
+    <ClInclude Include="Engine\Source\Runtime\Windows\SubWindow\AnimationSubEngine.h" />
+    <ClInclude Include="Engine\Source\Runtime\Windows\SubWindow\SubEngine.h" />
     <ClInclude Include="Engine\Source\Runtime\Windows\SubWindow\ImGuiSubWindow.h" />
     <ClInclude Include="Engine\Source\Runtime\Windows\SubWindow\SkeletalSubEngine.h" />
-    <ClInclude Include="Engine\Source\Runtime\Windows\SubWindow\SubCamera.h" />
     <ClInclude Include="Engine\Source\Runtime\Windows\SubWindow\SubRenderer.h" />
     <ClInclude Include="Engine\Source\Runtime\Windows\WindowsCursor.h" />
     <ClInclude Include="Engine\Source\Runtime\Windows\WindowsPlatformTime.h" />

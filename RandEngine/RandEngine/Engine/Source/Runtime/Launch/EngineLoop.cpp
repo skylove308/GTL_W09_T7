@@ -13,10 +13,9 @@
 #include "Renderer/TileLightCullingPass.h"
 #include "resource.h"
 #include "SoundManager.h"
-#include "SubWindow/FSubEngine.h"
+#include "SubWindow/SubEngine.h"
 #include "SubWindow/ImGuiSubWindow.h"
 #include "SubWindow/SkeletalSubEngine.h"
-#include "SubWindow/SubCamera.h"
 #include "UserInterface/Drawer.h"
 
 extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);

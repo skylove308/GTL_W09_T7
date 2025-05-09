@@ -42,7 +42,7 @@
 #include "Contents/Actors/TriggerBox.h"
 #include "Renderer/CompositingPass.h"
 #include "Engine/SkeletalMeshActor.h"
-#include "SubWindow/FSubEngine.h"
+#include "SubWindow/SubEngine.h"
 
 void ControlEditorPanel::Render()
 {
