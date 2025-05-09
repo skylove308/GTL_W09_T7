@@ -6,19 +6,21 @@
 #include "UnrealEd/EditorViewportClient.h"
 #include "UnrealEd/UnrealEd.h"
 
+//자신의 꿈을 펼쳐볼 수 있는 서브 엔진입니다.
 class FSubEngine
 {
 public:
     FSubEngine();
     ~FSubEngine();
 
-    void Initialize(HWND& hWnd, FGraphicsDevice* InGraphics, FDXDBufferManager* InBufferManager, UImGuiManager* InSubWindow,UnrealEd* InUnrealEd);
-    void Tick(float DeltaTime);
-    void Input(float DeltaTime);
-    void Render();
-    void Release();
+    virtual void Initialize(HWND& hWnd, FGraphicsDevice* InGraphics, FDXDBufferManager* InBufferManager, UImGuiManager* InSubWindow,UnrealEd* InUnrealEd);
+    virtual void Tick(float DeltaTime);
+    virtual void Input(float DeltaTime);
+    virtual void Render();
+    virtual void Release();
     void RequestShowWindow(bool bShow);
     void SeltSkeletalMesh(USkeletalMesh* InSkeletalMesh);
+    
 public:
     HWND* Wnd;
     FGraphicsDevice* Graphics;
@@ -29,16 +31,11 @@ public:
     USkeletalMesh* SelectedSkeletalMesh;
     
     POINT LastMousePos;
+    bool bRBClicked =false;
 
     FEditorViewportClient* ViewportClient;
     bool bIsShowSubWindow;
 
 private:
-    bool bAClicked =false;
-    bool bWClicked =false;
-    bool bDClicked =false;
-    bool bSClicked =false;
-    bool bRBClicked =false;
-
 };
 

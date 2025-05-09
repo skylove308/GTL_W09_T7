@@ -15,8 +15,8 @@
 #include "SoundManager.h"
 #include "SubWindow/FSubEngine.h"
 #include "SubWindow/ImGuiSubWindow.h"
+#include "SubWindow/SkeletalSubEngine.h"
 #include "SubWindow/SubCamera.h"
-#include "SubWindow/SubRenderer.h"
 #include "UserInterface/Drawer.h"
 
 extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
@@ -33,7 +33,6 @@ FEngineLoop::FEngineLoop()
     , SkeletalViewerWnd(nullptr)
     , FUIManager(nullptr)
     , CurrentImGuiContext(nullptr)
-    // , SelectedSkeletalMesh(nullptr)
     , LevelEditor(nullptr)
     , UnrealEditor(nullptr)
     , BufferManager(nullptr)
@@ -99,7 +98,7 @@ int32 FEngineLoop::Init(HINSTANCE hInstance)
     FUIManager->Initialize(AppWnd, GraphicDevice.Device, GraphicDevice.DeviceContext);
     ResourceManager.Initialize(&Renderer, &GraphicDevice);
     
-    SkeletalViewerSubEngine = new FSubEngine();
+    SkeletalViewerSubEngine = new FSkeletalSubEngine();
     SkeletalViewerSubEngine->Initialize(SkeletalViewerWnd, &SkeletalViewerGD, BufferManager,FUIManager,UnrealEditor);
     
     
