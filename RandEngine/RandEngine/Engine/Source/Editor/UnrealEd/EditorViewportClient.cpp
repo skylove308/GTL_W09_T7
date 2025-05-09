@@ -281,19 +281,19 @@ void FEditorViewportClient::InputKey(const FKeyEvent& InKeyEvent)
             }
             break;
         }
-        case VK_SPACE:
-        {
-            if (InKeyEvent.IsLeftControlDown())
-            {
-                UE_LOG(ELogLevel::Display, "CTRL + Space");
-                GEngineLoop.ToggleContentDrawer();
-            }
-            else
-            {
-                EdEngine->GetEditorPlayer()->AddControlMode();
-            }
-            break;
-        }
+        // case 'L':
+        // {
+        //     if (InKeyEvent.IsLeftControlDown())
+        //     {
+        //         UE_LOG(ELogLevel::Display, "CTRL + Space");
+        //         GEngineLoop.ToggleContentDrawer();
+        //     }
+        //     else
+        //     {
+        //         EdEngine->GetEditorPlayer()->AddControlMode();
+        //     }
+        //     break;
+        // }
         default:
             break;
         }
@@ -739,4 +739,9 @@ FVector FViewportCamera::GetUpVector() const
     FVector Up = FVector(0.f, 0.f, 1.0f);
     Up = JungleMath::FVectorRotate(Up, ViewRotation);
     return Up;
+}
+void FEditorViewportClient::CameraReset()
+{
+    PerspectiveCamera.SetLocation(FVector(0.0f, 0.0f, 0.0f));
+    PerspectiveCamera.SetRotation(FVector(0,0,0));
 }

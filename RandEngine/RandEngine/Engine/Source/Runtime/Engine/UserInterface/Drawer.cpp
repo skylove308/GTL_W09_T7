@@ -4,6 +4,7 @@
 #include "Components/Mesh/SkeletalMeshRenderData.h"
 #include "ImGui/imgui_internal.h"
 #include "SubWindow/FSubEngine.h"
+#include "SubWindow/SubRenderer.h"
 #include "UObject/UObjectIterator.h"
 
 FDrawer& FDrawer::GetInstance()
@@ -74,7 +75,7 @@ void FDrawer::RenderContentDrawer()
         if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
         {
             UE_LOG(ELogLevel::Display, TEXT("Double Clicked"));
-            GEngineLoop.SelectSkeletalMesh(Obj);
+            GEngineLoop.SkeletalViewerSubEngine->SubRenderer->SetPreviewSkeletalMesh(Obj);GEngineLoop.SkeletalViewerSubEngine->SubRenderer->SetPreviewSkeletalMesh(Obj);
             GEngineLoop.SkeletalViewerSubEngine->RequestShowWindow(true);
             break;
         }

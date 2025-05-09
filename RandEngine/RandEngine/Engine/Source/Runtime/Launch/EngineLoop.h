@@ -34,6 +34,7 @@ public:
     void Render(float DeltaTime);
     void Tick();
     void Exit();
+    void Input();
 
     void GetClientSize(uint32& OutWidth, uint32& OutHeight) const;
     static void ToggleContentDrawer();
@@ -59,10 +60,8 @@ public:
     static FGraphicsDevice AnimationViewerGD;
     HWND AnimationViewerWnd;
     void SubWindowInit(HINSTANCE hInstance);
-    void SelectSkeletalMesh(USkeletalMesh* SkeletalMesh);
-    USkeletalMesh* GetSelectedSkeletalMesh() const { return SelectedSkeletalMesh; }
-    USkeletalMesh* SelectedSkeletalMesh;
     void CleanupSubWindow();
+
     
     FSubEngine* SkeletalViewerSubEngine;
 private:
@@ -76,10 +75,7 @@ private:
     UnrealEd* UnrealEditor;
     FDXDBufferManager* BufferManager; //TODO: UEngine으로 옮겨야함.
 
-
-    
-
-    
+    bool bLClicked = false;
     bool bIsExit = false;
 
     int32 TargetFPS = 999;
