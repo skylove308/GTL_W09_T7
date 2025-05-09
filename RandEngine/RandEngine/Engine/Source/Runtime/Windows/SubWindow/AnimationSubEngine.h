@@ -13,6 +13,6 @@ public:
     virtual void Render();
     virtual void Release();
 
-    void SeltSkeletalMesh(USkeletalMesh* InSkeletalMesh);    
+    void SetSkeletalMesh(USkeletalMesh* InSkeletalMesh);    
     USkeletalMesh* SelectedSkeletalMesh;
 };

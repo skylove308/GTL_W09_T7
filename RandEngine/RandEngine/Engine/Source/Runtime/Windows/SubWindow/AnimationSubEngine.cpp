@@ -131,7 +131,7 @@ void FAnimationSubEngine::Release()
     }
 }
 
-void FAnimationSubEngine::SeltSkeletalMesh(USkeletalMesh* InSkeletalMesh)
+void FAnimationSubEngine::SetSkeletalMesh(USkeletalMesh* InSkeletalMesh)
 {
     SelectedSkeletalMesh = InSkeletalMesh;
     if (SubRenderer)

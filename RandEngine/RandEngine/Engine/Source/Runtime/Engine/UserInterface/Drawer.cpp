@@ -3,6 +3,7 @@
 // #include "Engine/FbxLoader.h"
 #include "Components/Mesh/SkeletalMeshRenderData.h"
 #include "ImGui/imgui_internal.h"
+#include "SubWindow/SkeletalSubEngine.h"
 #include "SubWindow/SubEngine.h"
 #include "SubWindow/SubRenderer.h"
 #include "UObject/UObjectIterator.h"
@@ -75,7 +76,8 @@ void FDrawer::RenderContentDrawer()
         if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
         {
             UE_LOG(ELogLevel::Display, TEXT("Double Clicked"));
-            GEngineLoop.SkeletalViewerSubEngine->SubRenderer->SetPreviewSkeletalMesh(Obj);GEngineLoop.SkeletalViewerSubEngine->SubRenderer->SetPreviewSkeletalMesh(Obj);
+            static_cast<FSkeletalSubEngine*>(GEngineLoop.SkeletalViewerSubEngine)->SetSkeletalMesh(Obj);
+            GEngineLoop.SkeletalViewerSubEngine->SubRenderer->SetPreviewSkeletalMesh(Obj);
             GEngineLoop.SkeletalViewerSubEngine->RequestShowWindow(true);
             break;
         }

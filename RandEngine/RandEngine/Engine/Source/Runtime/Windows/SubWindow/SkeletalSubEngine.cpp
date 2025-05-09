@@ -131,7 +131,7 @@ void FSkeletalSubEngine::Release()
     }
 }
 
-void FSkeletalSubEngine::SeltSkeletalMesh(USkeletalMesh* InSkeletalMesh)
+void FSkeletalSubEngine::SetSkeletalMesh(USkeletalMesh* InSkeletalMesh)
 {
     SelectedSkeletalMesh = InSkeletalMesh;
     if (SubRenderer)
