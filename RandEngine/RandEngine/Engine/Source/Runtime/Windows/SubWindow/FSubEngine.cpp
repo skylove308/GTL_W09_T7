@@ -36,68 +36,6 @@ void FSubEngine::Initialize(HWND& hWnd, FGraphicsDevice* InGraphics, FDXDBufferM
 
     ViewportClient = new FEditorViewportClient();
     ViewportClient->Initialize(EViewScreenLocation::EVL_MAX, FRect(0,0,800,600));
-
-    FSlateAppMessageHandler* Handler = GEngineLoop.GetAppMessageHandler();
-    
-    // Handler->OnMouseDownDelegate.AddLambda([this](const FPointerEvent& InMouseEvent)
-    //     {
-    //         if (ImGui::GetIO().WantCaptureMouse) return;
-    //
-    //         switch (InMouseEvent.GetEffectingButton())  // NOLINT(clang-diagnostic-switch-enum)
-    //         {
-    //         case EKeys::LeftMouseButton:
-    //         {
-    //             if (const UEditorEngine* EdEngine = Cast<UEditorEngine>(GEngine))
-    //             {
-    //                 if (const AActor* SelectedActor = EdEngine->GetSelectedActor())
-    //                 {
-    //                     USceneComponent* TargetComponent = nullptr;
-    //                     if (USceneComponent* SelectedComponent = EdEngine->GetSelectedComponent())
-    //                     {
-    //                         TargetComponent = SelectedComponent;
-    //                     }
-    //                     else if (AActor* SelectedActor = EdEngine->GetSelectedActor())
-    //                     {
-    //                         TargetComponent = SelectedActor->GetRootComponent();
-    //                     }
-    //                     else
-    //                     {
-    //                         return;
-    //                     }
-    //
-    //                     // 초기 Actor와 Cursor의 거리차를 저장
-    //                     const FViewportCamera* ViewTransform = ViewportClient->GetViewportType() == LVT_Perspective
-    //                                                         ? &ViewportClient->PerspectiveCamera
-    //                                                         : &ViewportClient->OrthogonalCamera;
-    //
-    //                     FVector RayOrigin, RayDir;
-    //                     ViewportClient->DeprojectFVector2D(FWindowsCursor::GetClientPosition(), RayOrigin, RayDir);
-    //
-    //                     const FVector TargetLocation = TargetComponent->GetWorldLocation();
-    //                     const float TargetDist = FVector::Distance(ViewTransform->GetLocation(), TargetLocation);
-    //                     const FVector TargetRayEnd = RayOrigin + RayDir * TargetDist;
-    //                     TargetDiff = TargetLocation - TargetRayEnd;
-    //                 }
-    //             }
-    //             break;
-    //         }
-    //         case EKeys::RightMouseButton:
-    //         {
-    //             if (!InMouseEvent.IsMouseButtonDown(EKeys::LeftMouseButton))
-    //             {
-    //                 FWindowsCursor::SetShowMouseCursor(false);
-    //                 MousePinPosition = InMouseEvent.GetScreenSpacePosition();
-    //             }
-    //             break;
-    //         }
-    //         default:
-    //             break;
-    //         }
-    //     });
-    // Handler->OnKeyDownDelegate.AddLambda([this](const FKeyEvent& InKeyEvent)
-    //         {
-    //             ViewportClient->InputKey(InKeyEvent);
-    //         });
 }
 
 void FSubEngine::Input(float DeltaTime)
