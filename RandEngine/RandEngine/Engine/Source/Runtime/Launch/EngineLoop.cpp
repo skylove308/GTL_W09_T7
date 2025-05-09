@@ -21,16 +21,15 @@
 extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 FGraphicsDevice FEngineLoop::GraphicDevice;
-FGraphicsDevice FEngineLoop::SubGraphicDevice;
+FGraphicsDevice FEngineLoop::SkeletalViewerGD;
+FGraphicsDevice FEngineLoop::AnimationViewerGD;
 FRenderer FEngineLoop::Renderer;
 UPrimitiveDrawBatch FEngineLoop::PrimitiveDrawBatch;
 FResourceMgr FEngineLoop::ResourceManager;
-uint32 FEngineLoop::TotalAllocationBytes = 0;
-uint32 FEngineLoop::TotalAllocationCount = 0;
 
 FEngineLoop::FEngineLoop()
     : AppWnd(nullptr)
-    , SubAppWnd(nullptr)
+    , SkeletalViewerWnd(nullptr)
     , FUIManager(nullptr)
     , SubUI(nullptr)
     , CurrentImGuiContext(nullptr)
@@ -65,12 +64,12 @@ int32 FEngineLoop::Init(HINSTANCE hInstance)
     GraphicDevice.Initialize(AppWnd);
     SubRenderer = new FSubRenderer();
 
-    if (SubAppWnd)
+    if (SkeletalViewerWnd)
     {
-        SubGraphicDevice.Initialize(SubAppWnd, GraphicDevice.Device);
-        SubGraphicDevice.ClearColor[0] = 0.025f;
-        SubGraphicDevice.ClearColor[1] = 0.025f;
-        SubGraphicDevice.ClearColor[2] = 0.025f;
+        SkeletalViewerGD.Initialize(SkeletalViewerWnd, GraphicDevice.Device);
+        SkeletalViewerGD.ClearColor[0] = 0.025f;
+        SkeletalViewerGD.ClearColor[1] = 0.025f;
+        SkeletalViewerGD.ClearColor[2] = 0.025f;
     }
     
     if (!GPUTimingManager.Initialize(GraphicDevice.Device, GraphicDevice.DeviceContext))
@@ -102,11 +101,11 @@ int32 FEngineLoop::Init(HINSTANCE hInstance)
     FUIManager->Initialize(AppWnd, GraphicDevice.Device, GraphicDevice.DeviceContext);
     ResourceManager.Initialize(&Renderer, &GraphicDevice);
     
-    if (SubAppWnd && SubGraphicDevice.Device) 
+    if (SkeletalViewerWnd && SkeletalViewerGD.Device) 
     {
-        SubUI = new FImGuiSubWindow(SubAppWnd, SubGraphicDevice.Device, SubGraphicDevice.DeviceContext);
+        SubUI = new FImGuiSubWindow(SkeletalViewerWnd, SkeletalViewerGD.Device, SkeletalViewerGD.DeviceContext);
         UImGuiManager::ApplySharedStyle(FUIManager->GetContext(), SubUI->Context);
-        SubRenderer->Initialize(&SubGraphicDevice, BufferManager);
+        SubRenderer->Initialize(&SkeletalViewerGD, BufferManager);
         SubCamera = new FSubCamera(800, 600);
     }
     
@@ -167,11 +166,11 @@ void FEngineLoop::Render(float DeltaTime)
     FUIManager->EndFrame();
 }
 
-void FEngineLoop::RenderSubWindow() const
+void FEngineLoop::RenderSubWindow()
 {
-    if (SubAppWnd && IsWindowVisible(SubAppWnd) && SubGraphicDevice.Device)
+    if (SkeletalViewerWnd && IsWindowVisible(SkeletalViewerWnd) && SkeletalViewerGD.Device)
     {
-        SubGraphicDevice.Prepare();
+        SkeletalViewerGD.Prepare();
         
         SubRenderer->PrepareRender(*SubCamera);
         SubRenderer->Render(*SubCamera);
@@ -185,7 +184,7 @@ void FEngineLoop::RenderSubWindow() const
         SubUI->EndFrame();
         
         // Sub swap
-        SubGraphicDevice.SwapBuffer();
+        SkeletalViewerGD.SwapBuffer();
     }
 }
 
@@ -223,9 +222,9 @@ void FEngineLoop::Tick()
         }
 
         // Sub window message proc
-        if (!bIsExit && SubAppWnd && IsWindowVisible(SubAppWnd))
+        if (!bIsExit && SkeletalViewerWnd && IsWindowVisible(SkeletalViewerWnd))
         {
-            while (PeekMessage(&Msg, SubAppWnd, 0, 0, PM_REMOVE))
+            while (PeekMessage(&Msg, SkeletalViewerWnd, 0, 0, PM_REMOVE))
             {
                 TranslateMessage(&Msg);
                 DispatchMessage(&Msg);
@@ -266,9 +265,9 @@ void FEngineLoop::Tick()
         /** Sub Window Flag */
         if (bIsShowSubWindow)
         {
-            if (SubAppWnd)
+            if (SkeletalViewerWnd)
             {
-                ::ShowWindow(SubAppWnd, SW_SHOW);
+                ::ShowWindow(SkeletalViewerWnd, SW_SHOW);
             }
             bIsShowSubWindow = false;
         }
@@ -293,10 +292,6 @@ void FEngineLoop::GetClientSize(uint32& OutWidth, uint32& OutHeight) const
 
 void FEngineLoop::Exit()
 {
-    if (SubGraphicDevice.Device)
-    {
-        SubGraphicDevice.Release();
-    }
     CleanupSubWindow();
 
     if (FUIManager)
@@ -327,15 +322,15 @@ void FEngineLoop::Exit()
 void FEngineLoop::CleanupSubWindow()
 {
     // 서브 윈도우 리소스 해제
-    if (SubGraphicDevice.Device)
+    if (SkeletalViewerGD.Device)
     {
-        SubGraphicDevice.Release();
+        SkeletalViewerGD.Release();
     }
     
-    if (SubAppWnd && IsWindow(SubAppWnd))
+    if (SkeletalViewerWnd && IsWindow(SkeletalViewerWnd))
     {
-        DestroyWindow(SubAppWnd);
-        SubAppWnd = nullptr;
+        DestroyWindow(SkeletalViewerWnd);
+        SkeletalViewerWnd = nullptr;
     }
 }
 
@@ -392,14 +387,14 @@ void FEngineLoop::SubWindowInit(HINSTANCE hInstance)
     // 서브 윈도우 생성 (크기, 위치, 스타일 조정 필요)
     // WS_OVERLAPPEDWINDOW 는 타이틀 바, 메뉴, 크기 조절 등이 포함된 일반적인 창
     // WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME 등으로 커스텀 가능
-    SubAppWnd = CreateWindowExW(
+    SkeletalViewerWnd = CreateWindowExW(
         0, SubWindowClass, SubTitle, WS_OVERLAPPEDWINDOW, // WS_VISIBLE 제거 (초기에는 숨김)
         CW_USEDEFAULT, CW_USEDEFAULT, 800, 600, // 원하는 크기
         AppWnd, // 부모 윈도우를 메인 윈도우로 설정 (선택 사항)
         nullptr, hInstance, nullptr
     );
 
-    if (!SubAppWnd)
+    if (!SkeletalViewerWnd)
     {
         // 오류 처리
         UE_LOG(ELogLevel::Error, TEXT("Failed to create sub window!"));
@@ -419,7 +414,7 @@ LRESULT CALLBACK FEngineLoop::AppWndProc(HWND hWnd, uint32 Msg, WPARAM wParam, L
         ImGui::SetCurrentContext(GEngineLoop.FUIManager->GetContext());
         if (ImGui_ImplWin32_WndProcHandler(hWnd, Msg, wParam, lParam)) return true;
     }
-    else if (hWnd == GEngineLoop.SubAppWnd)
+    else if (hWnd == GEngineLoop.SkeletalViewerWnd)
     {
         ImGui::SetCurrentContext(GEngineLoop.SubUI->Context);
         if (ImGui_ImplWin32_WndProcHandler(hWnd, Msg, wParam, lParam)) return true;
@@ -438,7 +433,7 @@ LRESULT CALLBACK FEngineLoop::AppWndProc(HWND hWnd, uint32 Msg, WPARAM wParam, L
                 
                 if (GEngineLoop.GetUnrealEditor())
                 {
-                    SubGraphicDevice.Resize(hWnd, FullWidth, FullHeight);
+                    SkeletalViewerGD.Resize(hWnd, FullWidth, FullHeight);
                     GEngineLoop.GetUnrealEditor()->OnResize(hWnd, true);
                 }
                 GEngineLoop.SubCamera->UpdateCamera(FullWidth * 0.75f, FullHeight);

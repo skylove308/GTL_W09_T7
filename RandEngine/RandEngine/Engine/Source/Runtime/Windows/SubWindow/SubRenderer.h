@@ -32,7 +32,6 @@ public:
 
     /** Update Buffer */
     void UpdateViewCamera(const FSubCamera& Camera) const;
-
     /** Set */
     void SetPreviewSkeletalMesh(USkeletalMesh* InPreviewSkeletalMesh);
 
@@ -42,7 +41,6 @@ private:
     FDXDShaderManager* ShaderManager = nullptr;
     
     USkeletalMesh* PreviewSkeletalMesh = nullptr;
-
 private:
     /** TargetPos & MaxZ Offset */
     bool bOnlyOnce = false;

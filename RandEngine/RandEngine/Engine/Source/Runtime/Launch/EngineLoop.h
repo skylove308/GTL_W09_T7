@@ -31,44 +31,49 @@ public:
     int32 PreInit();
     int32 Init(HINSTANCE hInstance);
     void Render(float DeltaTime);
-    void RenderSubWindow() const;
     void Tick();
     void Exit();
-    void CleanupSubWindow();
-    void RequestShowWindow(bool bShow);
 
     void GetClientSize(uint32& OutWidth, uint32& OutHeight) const;
     static void ToggleContentDrawer();
 
 private:
     void WindowInit(HINSTANCE hInstance);
-    void SubWindowInit(HINSTANCE hInstance);
     static LRESULT CALLBACK AppWndProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
 
     void UpdateUI();
-
 public:
     static FGraphicsDevice GraphicDevice;
-    static FGraphicsDevice SubGraphicDevice;
     static FRenderer Renderer;
     static UPrimitiveDrawBatch PrimitiveDrawBatch;
     static FResourceMgr ResourceManager;
-    static uint32 TotalAllocationBytes;
-    static uint32 TotalAllocationCount;
 
     HWND AppWnd;
-
-    /** Sub Window Handle - Skeletal Mesh Viewer */
-    HWND SubAppWnd;
-
+    
     FGPUTimingManager GPUTimingManager;
     FEngineProfiler EngineProfiler;
 
+    static FGraphicsDevice SkeletalViewerGD;
+    HWND SkeletalViewerWnd;
+    static FGraphicsDevice AnimationViewerGD;
+    HWND AnimationViewerWnd;
+    void RenderSubWindow();
+    void CleanupSubWindow();
+    void RequestShowWindow(bool bShow);
+    void SubWindowInit(HINSTANCE hInstance);
+    void SelectSkeletalMesh(USkeletalMesh* SkeletalMesh);
+    USkeletalMesh* GetSelectedSkeletalMesh() const { return SelectedSkeletalMesh; }
+    /** Sub Window Handle - Skeletal Mesh Viewer */
+
+    FSubRenderer* SubRenderer;
+    FSubCamera* SubCamera;
+    FImGuiSubWindow* SubUI;
+    USkeletalMesh* SelectedSkeletalMesh;
+    bool bIsShowSubWindow = false;
 private:
     UImGuiManager* FUIManager;
-    FImGuiSubWindow* SubUI;
     ImGuiContext* CurrentImGuiContext;
-    USkeletalMesh* SelectedSkeletalMesh;
+    
     //TODO: Editor들 EditorEngine으로 넣기
 
     std::unique_ptr<FSlateAppMessageHandler> AppMessageHandler;
@@ -76,19 +81,17 @@ private:
     UnrealEd* UnrealEditor;
     FDXDBufferManager* BufferManager; //TODO: UEngine으로 옮겨야함.
 
-    FSubRenderer* SubRenderer;
-    FSubCamera* SubCamera;
+
+    
+
     
     bool bIsExit = false;
-    bool bIsShowSubWindow = false;
-    // @todo Option으로 선택 가능하도록
-    int32 TargetFPS = 999;
 
+    int32 TargetFPS = 999;
 public:
     SLevelEditor* GetLevelEditor() const { return LevelEditor; }
     UnrealEd* GetUnrealEditor() const { return UnrealEditor; }
-    void SelectSkeletalMesh(USkeletalMesh* SkeletalMesh);
-    USkeletalMesh* GetSelectedSkeletalMesh() const { return SelectedSkeletalMesh; }
+    
     FSlateAppMessageHandler* GetAppMessageHandler() const { return AppMessageHandler.get(); }
 };
 
