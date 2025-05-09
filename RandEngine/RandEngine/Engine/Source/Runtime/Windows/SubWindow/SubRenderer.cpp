@@ -1,4 +1,4 @@
-﻿#include "SubRenderer.h"
+#include "SubRenderer.h"
 
 #include "RendererHelpers.h"
 #include "StaticMeshRenderPass.h"
@@ -7,7 +7,7 @@
 #include "D3D11RHI/DXDShaderManager.h"
 #include "D3D11RHI/GraphicDevice.h"
 #include "Engine/Asset/SkeletalMeshAsset.h"
-
+#include "Editor/PropertyEditor/Animation/AnimationTimelinePanel.h"
 FSubRenderer::~FSubRenderer()
 {
     Release();
@@ -63,6 +63,7 @@ void FSubRenderer::Initialize(FGraphicsDevice* InGraphics, FDXDBufferManager* In
         // TODO: 적절한 오류 처리
         return;
     }
+
 }
 
 void FSubRenderer::Release()
@@ -91,14 +92,23 @@ void FSubRenderer::PrepareRender(const FSubCamera& Camera) const
     // Clear RenderTarget
     Graphics->DeviceContext->ClearRenderTargetView(Graphics->BackBufferRTV, Graphics->ClearColor);
 }
-
+SAnimationTimelinePanel* AnimationTimelinePanel;
 void FSubRenderer::Render(FSubCamera& Camera)
 {
     if (PreviewSkeletalMesh == nullptr)
     {
         return;
     }
-
+    if(AnimationTimelinePanel==nullptr)
+    {
+        AnimationTimelinePanel = new SAnimationTimelinePanel();
+        MockAnimSequence* MocdkAnimSequence = new MockAnimSequence();
+        MocdkAnimSequence->FrameRate = 30.0f;
+        MocdkAnimSequence->SequenceLength = 10.0f;
+        MocdkAnimSequence->AddNotify(1.0f, FName("Footstep_L"));
+        MocdkAnimSequence->AddNotify(1.6f, FName("Footstep_R"));
+        AnimationTimelinePanel->SetTargetSequence(MocdkAnimSequence);
+    }
     // 셰이더 설정
     ID3D11VertexShader* vertexShader = ShaderManager->GetVertexShaderByKey(L"StaticMeshVertexShader");
     ID3D11InputLayout* inputLayout = ShaderManager->GetInputLayoutByKey(L"StaticMeshVertexShader"); // VS와 함께 생성했으므로 같은 키 사용
@@ -119,6 +129,8 @@ void FSubRenderer::Render(FSubCamera& Camera)
     UpdateConstants();
 
     RenderMesh(Camera);
+    AnimationTimelinePanel->RenderTimelineEditor();
+    AnimationTimelinePanel->UpdatePlayback(0.0166);
 }
 
 void FSubRenderer::RenderMesh(FSubCamera& Camera)
