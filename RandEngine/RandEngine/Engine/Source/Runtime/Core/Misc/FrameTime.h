@@ -1,11 +1,12 @@
-﻿#pragma once
+#pragma once
 #include "FrameNumber.h"
 #include "HAL/PlatformType.h"
 
 class FFrameTime
 {
-    static const float MaxSubframe;
+    inline static const float MaxSubframe = 10;
 
+public:
     /**
      * Default constructor initializing to zero
      */
@@ -31,7 +32,6 @@ class FFrameTime
      */
     FFrameTime& operator=(FFrameNumber InFrameNumber);
 
-public:
 
     /**
      * Access this time's frame number

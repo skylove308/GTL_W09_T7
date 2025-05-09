@@ -173,12 +173,12 @@ void FEngineLoop::RenderSubWindow() const
     {
         SubGraphicDevice.Prepare();
         
+        SubUI->BeginFrame();
         SubRenderer->PrepareRender(*SubCamera);
         SubRenderer->Render(*SubCamera);
         SubRenderer->ClearRender();
         
         // Sub window rendering
-        SubUI->BeginFrame();
 
         UnrealEditor->RenderSubWindowPanel();
         

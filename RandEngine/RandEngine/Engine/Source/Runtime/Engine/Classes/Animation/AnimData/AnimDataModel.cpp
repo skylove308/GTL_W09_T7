@@ -1,4 +1,4 @@
-﻿#include "AnimDataModel.h"
+#include "AnimDataModel.h"
 
 const TArray<FBoneAnimationTrack>& UAnimDataModel::GetBoneAnimationTracks() const
 {

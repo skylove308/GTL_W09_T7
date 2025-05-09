@@ -1,5 +1,6 @@
-﻿#pragma once
+#pragma once
 #include "Container/Array.h"
+#include "Math/Quat.h"
 #include "Math/Vector.h"
 
 struct FRawAnimSequenceTrack

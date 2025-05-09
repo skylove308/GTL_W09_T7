@@ -1,4 +1,4 @@
-﻿#include "FrameTime.h"
+#include "FrameTime.h"
 
 #include "Math/MathUtility.h"
 

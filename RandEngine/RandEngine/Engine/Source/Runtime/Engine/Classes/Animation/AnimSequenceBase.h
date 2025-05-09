@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "AnimationAsset.h"
 #include "AnimData/AnimDataModel.h"
 
@@ -14,7 +14,7 @@ public:
     void SetAnimDataModel(UAnimDataModel* InDataModel);
 
 
-    TArray<struct FAnimNotifyEvent> Notifies;
+    //TArray<struct FAnimNotifyEvent> Notifies;
     
 private:
     UAnimDataModel* DataModel;

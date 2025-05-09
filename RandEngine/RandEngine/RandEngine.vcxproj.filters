@@ -1543,51 +1543,6 @@
     <ClInclude Include="Engine\Source\ThirdParty\ImGui\include\ImGui\imconfig.h">
       <Filter>Engine\Source\ThirdParty\ImGui\include\ImGui</Filter>
     </ClInclude>
-    <ClCompile Include="Engine\Source\ThirdParty\ImGui\include\ImGui\imgui.cpp">
-      <Filter>Engine\Source\ThirdParty\ImGui\include\ImGui</Filter>
-    </ClCompile>
-    <ClInclude Include="Engine\Source\ThirdParty\ImGui\include\ImGui\imgui.h">
-      <Filter>Engine\Source\ThirdParty\ImGui\include\ImGui</Filter>
-    </ClInclude>
-    <ClCompile Include="Engine\Source\ThirdParty\ImGui\include\ImGui\imgui_bezier.cpp">
-      <Filter>Engine\Source\ThirdParty\ImGui\include\ImGui</Filter>
-    </ClCompile>
-    <ClInclude Include="Engine\Source\ThirdParty\ImGui\include\ImGui\imgui_bezier.h">
-      <Filter>Engine\Source\ThirdParty\ImGui\include\ImGui</Filter>
-    </ClInclude>
-    <ClCompile Include="Engine\Source\ThirdParty\ImGui\include\ImGui\imgui_curve.cpp">
-      <Filter>Engine\Source\ThirdParty\ImGui\include\ImGui</Filter>
-    </ClCompile>
-    <ClInclude Include="Engine\Source\ThirdParty\ImGui\include\ImGui\imgui_curve.h">
-      <Filter>Engine\Source\ThirdParty\ImGui\include\ImGui</Filter>
-    </ClInclude>
-    <ClCompile Include="Engine\Source\ThirdParty\ImGui\include\ImGui\imgui_demo.cpp">
-      <Filter>Engine\Source\ThirdParty\ImGui\include\ImGui</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Source\ThirdParty\ImGui\include\ImGui\imgui_draw.cpp">
-      <Filter>Engine\Source\ThirdParty\ImGui\include\ImGui</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Source\ThirdParty\ImGui\include\ImGui\imgui_impl_dx11.cpp">
-      <Filter>Engine\Source\ThirdParty\ImGui\include\ImGui</Filter>
-    </ClCompile>
-    <ClInclude Include="Engine\Source\ThirdParty\ImGui\include\ImGui\imgui_impl_dx11.h">
-      <Filter>Engine\Source\ThirdParty\ImGui\include\ImGui</Filter>
-    </ClInclude>
-    <ClCompile Include="Engine\Source\ThirdParty\ImGui\include\ImGui\imgui_impl_win32.cpp">
-      <Filter>Engine\Source\ThirdParty\ImGui\include\ImGui</Filter>
-    </ClCompile>
-    <ClInclude Include="Engine\Source\ThirdParty\ImGui\include\ImGui\imgui_impl_win32.h">
-      <Filter>Engine\Source\ThirdParty\ImGui\include\ImGui</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\Source\ThirdParty\ImGui\include\ImGui\imgui_internal.h">
-      <Filter>Engine\Source\ThirdParty\ImGui\include\ImGui</Filter>
-    </ClInclude>
-    <ClCompile Include="Engine\Source\ThirdParty\ImGui\include\ImGui\imgui_tables.cpp">
-      <Filter>Engine\Source\ThirdParty\ImGui\include\ImGui</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Source\ThirdParty\ImGui\include\ImGui\imgui_widgets.cpp">
-      <Filter>Engine\Source\ThirdParty\ImGui\include\ImGui</Filter>
-    </ClCompile>
     <ClInclude Include="Engine\Source\ThirdParty\ImGui\include\ImGui\imstb_rectpack.h">
       <Filter>Engine\Source\ThirdParty\ImGui\include\ImGui</Filter>
     </ClInclude>
@@ -1657,6 +1612,21 @@
     <ClCompile Include="Engine\Source\Runtime\Engine\UserInterface\Drawer.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Windows\SubWindow\SubCamera.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Windows\SubWindow\SubRenderer.cpp" />
+    <ClCompile Include="Engine\Source\Editor\PropertyEditor\Animation\AnimationTimelinePanel.cpp" />
+    <ClCompile Include="Engine\Source\ThirdParty\ImGui\include\ImGui\GraphEditor.cpp" />
+    <ClCompile Include="Engine\Source\ThirdParty\ImGui\include\ImGui\ImCurveEdit.cpp" />
+    <ClCompile Include="Engine\Source\ThirdParty\ImGui\include\ImGui\ImGradient.cpp" />
+    <ClCompile Include="Engine\Source\ThirdParty\ImGui\include\ImGui\imgui.cpp" />
+    <ClCompile Include="Engine\Source\ThirdParty\ImGui\include\ImGui\imgui_bezier.cpp" />
+    <ClCompile Include="Engine\Source\ThirdParty\ImGui\include\ImGui\imgui_curve.cpp" />
+    <ClCompile Include="Engine\Source\ThirdParty\ImGui\include\ImGui\imgui_demo.cpp" />
+    <ClCompile Include="Engine\Source\ThirdParty\ImGui\include\ImGui\imgui_draw.cpp" />
+    <ClCompile Include="Engine\Source\ThirdParty\ImGui\include\ImGui\imgui_impl_dx11.cpp" />
+    <ClCompile Include="Engine\Source\ThirdParty\ImGui\include\ImGui\imgui_impl_win32.cpp" />
+    <ClCompile Include="Engine\Source\ThirdParty\ImGui\include\ImGui\imgui_tables.cpp" />
+    <ClCompile Include="Engine\Source\ThirdParty\ImGui\include\ImGui\imgui_widgets.cpp" />
+    <ClCompile Include="Engine\Source\ThirdParty\ImGui\include\ImGui\ImGuizmo.cpp" />
+    <ClCompile Include="Engine\Source\ThirdParty\ImGui\include\ImGui\ImSequencer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="RandEngine.natvis" />
@@ -1964,6 +1934,18 @@
     <ClInclude Include="Engine\Source\ThirdParty\FBX\include\libxml2\libxml\xpathInternals.h" />
     <ClInclude Include="Engine\Source\ThirdParty\FBX\include\libxml2\libxml\xpointer.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="Engine\Source\Editor\PropertyEditor\Animation\AnimationTimelinePanel.h" />
+    <ClInclude Include="Engine\Source\ThirdParty\ImGui\include\ImGui\GraphEditor.h" />
+    <ClInclude Include="Engine\Source\ThirdParty\ImGui\include\ImGui\ImCurveEdit.h" />
+    <ClInclude Include="Engine\Source\ThirdParty\ImGui\include\ImGui\ImGradient.h" />
+    <ClInclude Include="Engine\Source\ThirdParty\ImGui\include\ImGui\imgui.h" />
+    <ClInclude Include="Engine\Source\ThirdParty\ImGui\include\ImGui\imgui_bezier.h" />
+    <ClInclude Include="Engine\Source\ThirdParty\ImGui\include\ImGui\imgui_curve.h" />
+    <ClInclude Include="Engine\Source\ThirdParty\ImGui\include\ImGui\imgui_impl_dx11.h" />
+    <ClInclude Include="Engine\Source\ThirdParty\ImGui\include\ImGui\imgui_impl_win32.h" />
+    <ClInclude Include="Engine\Source\ThirdParty\ImGui\include\ImGui\imgui_internal.h" />
+    <ClInclude Include="Engine\Source\ThirdParty\ImGui\include\ImGui\ImGuizmo.h" />
+    <ClInclude Include="Engine\Source\ThirdParty\ImGui\include\ImGui\ImSequencer.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\CompositingShader.hlsl" />

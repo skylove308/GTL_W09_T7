@@ -204,6 +204,7 @@ xcopy /y /d "$(SolutionDir)$(ProjectName)\Engine\Source\ThirdParty\FBX\lib\x64\$
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Engine\Source\Editor\PropertyEditor\Animation\AnimationTimelinePanel.cpp" />
     <ClCompile Include="Engine\Source\Contents\Actors\Fish.cpp" />
     <ClCompile Include="Engine\Source\Contents\Actors\GoalPlatformActor.cpp" />
     <ClCompile Include="Engine\Source\Contents\Actors\ItemActor.cpp" />
@@ -374,7 +375,11 @@ xcopy /y /d "$(SolutionDir)$(ProjectName)\Engine\Source\ThirdParty\FBX\lib\x64\$
     <ClCompile Include="Engine\Source\Runtime\Windows\SubWindow\SubRenderer.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Windows\WindowsCursor.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Windows\WindowsPlatformTime.cpp" />
+    <ClCompile Include="Engine\Source\ThirdParty\ImGui\include\ImGui\GraphEditor.cpp" />
+    <ClCompile Include="Engine\Source\ThirdParty\ImGui\include\ImGui\ImCurveEdit.cpp" />
+    <ClCompile Include="Engine\Source\ThirdParty\ImGui\include\ImGui\ImGradient.cpp" />
     <ClCompile Include="Engine\Source\ThirdParty\ImGui\include\ImGui\imgui.cpp" />
+    <ClCompile Include="Engine\Source\ThirdParty\ImGui\include\ImGui\ImGuizmo.cpp" />
     <ClCompile Include="Engine\Source\ThirdParty\ImGui\include\ImGui\imgui_bezier.cpp" />
     <ClCompile Include="Engine\Source\ThirdParty\ImGui\include\ImGui\imgui_curve.cpp" />
     <ClCompile Include="Engine\Source\ThirdParty\ImGui\include\ImGui\imgui_demo.cpp" />
@@ -383,6 +388,7 @@ xcopy /y /d "$(SolutionDir)$(ProjectName)\Engine\Source\ThirdParty\FBX\lib\x64\$
     <ClCompile Include="Engine\Source\ThirdParty\ImGui\include\ImGui\imgui_impl_win32.cpp" />
     <ClCompile Include="Engine\Source\ThirdParty\ImGui\include\ImGui\imgui_tables.cpp" />
     <ClCompile Include="Engine\Source\ThirdParty\ImGui\include\ImGui\imgui_widgets.cpp" />
+    <ClCompile Include="Engine\Source\ThirdParty\ImGui\include\ImGui\ImSequencer.cpp" />
     <ClCompile Include="Engine\Source\ThirdParty\tinyfiledialogs\include\tinyfiledialogs.cpp" />
     <ClCompile Include="LuaScripts\LuaScriptComponent.cpp" />
     <ClCompile Include="SoundManager.cpp" />
@@ -476,6 +482,7 @@ xcopy /y /d "$(SolutionDir)$(ProjectName)\Engine\Source\ThirdParty\FBX\lib\x64\$
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Engine\Source\Editor\PropertyEditor\Animation\AnimationTimelinePanel.h" />
     <ClInclude Include="Engine\Source\Contents\Actors\Fish.h" />
     <ClInclude Include="Engine\Source\Contents\Actors\GoalPlatformActor.h" />
     <ClInclude Include="Engine\Source\Contents\Actors\ItemActor.h" />
@@ -1002,13 +1009,18 @@ xcopy /y /d "$(SolutionDir)$(ProjectName)\Engine\Source\ThirdParty\FBX\lib\x64\$
     <ClInclude Include="Engine\Source\ThirdParty\fmod\inc\fmod_dsp_effects.h" />
     <ClInclude Include="Engine\Source\ThirdParty\fmod\inc\fmod_errors.h" />
     <ClInclude Include="Engine\Source\ThirdParty\fmod\inc\fmod_output.h" />
+    <ClInclude Include="Engine\Source\ThirdParty\ImGui\include\ImGui\GraphEditor.h" />
     <ClInclude Include="Engine\Source\ThirdParty\ImGui\include\ImGui\imconfig.h" />
+    <ClInclude Include="Engine\Source\ThirdParty\ImGui\include\ImGui\ImCurveEdit.h" />
+    <ClInclude Include="Engine\Source\ThirdParty\ImGui\include\ImGui\ImGradient.h" />
     <ClInclude Include="Engine\Source\ThirdParty\ImGui\include\ImGui\imgui.h" />
+    <ClInclude Include="Engine\Source\ThirdParty\ImGui\include\ImGui\ImGuizmo.h" />
     <ClInclude Include="Engine\Source\ThirdParty\ImGui\include\ImGui\imgui_bezier.h" />
     <ClInclude Include="Engine\Source\ThirdParty\ImGui\include\ImGui\imgui_curve.h" />
     <ClInclude Include="Engine\Source\ThirdParty\ImGui\include\ImGui\imgui_impl_dx11.h" />
     <ClInclude Include="Engine\Source\ThirdParty\ImGui\include\ImGui\imgui_impl_win32.h" />
     <ClInclude Include="Engine\Source\ThirdParty\ImGui\include\ImGui\imgui_internal.h" />
+    <ClInclude Include="Engine\Source\ThirdParty\ImGui\include\ImGui\ImSequencer.h" />
     <ClInclude Include="Engine\Source\ThirdParty\ImGui\include\ImGui\imstb_rectpack.h" />
     <ClInclude Include="Engine\Source\ThirdParty\ImGui\include\ImGui\imstb_textedit.h" />
     <ClInclude Include="Engine\Source\ThirdParty\ImGui\include\ImGui\imstb_truetype.h" />

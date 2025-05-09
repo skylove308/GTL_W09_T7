@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "IAnimationDataModel.h"
 #include "UObject/Object.h"
 #include "UObject/ObjectMacros.h"
