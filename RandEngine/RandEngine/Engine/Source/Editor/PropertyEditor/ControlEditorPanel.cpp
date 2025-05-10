@@ -42,6 +42,7 @@
 #include "Contents/Actors/TriggerBox.h"
 #include "Renderer/CompositingPass.h"
 #include "Engine/SkeletalMeshActor.h"
+#include "SubWindow/SubEngine.h"
 
 void ControlEditorPanel::Render()
 {
@@ -105,7 +106,7 @@ void ControlEditorPanel::Render()
         {
             if (ImGui::MenuItem("Skeletal Mesh Viewer"))
             {
-                GEngineLoop.RequestShowWindow(true);
+                GEngineLoop.SkeletalViewerSubEngine->RequestShowWindow(true);
             }
             ImGui::EndMenu();
         }

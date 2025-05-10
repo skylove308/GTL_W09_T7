@@ -2,6 +2,7 @@
 #include "Math/Matrix.h"
 #include "Math/Vector4.h"
 
+class FEditorViewportClient;
 class USkeletalMesh;
 class FSubCamera;
 class FDXDShaderManager;
@@ -20,9 +21,12 @@ public:
     void Release();
 
     /** Render */
-    void PrepareRender(const FSubCamera& Camera) const;
-    void Render(FSubCamera& Camera);
-    void RenderMesh(FSubCamera& Camera);
+    // void PrepareRender(const FSubCamera& Camera) const;
+    // void Render(FSubCamera& Camera);
+    // void RenderMesh(FSubCamera& Camera);
+    void PrepareRender(FEditorViewportClient* Viewport) const;
+    void Render();
+    void RenderMesh();
     void ClearRender() const;
 
     void UpdateObjectConstant(const FMatrix& WorldMatrix, const FVector4& UUIDColor, bool bIsSelected) const;
@@ -31,8 +35,7 @@ public:
     void UpdateConstants() const;
 
     /** Update Buffer */
-    void UpdateViewCamera(const FSubCamera& Camera) const;
-
+    void UpdateViewCamera(FEditorViewportClient* Viewport) const;
     /** Set */
     void SetPreviewSkeletalMesh(USkeletalMesh* InPreviewSkeletalMesh);
 
@@ -42,7 +45,6 @@ private:
     FDXDShaderManager* ShaderManager = nullptr;
     
     USkeletalMesh* PreviewSkeletalMesh = nullptr;
-
 private:
     /** TargetPos & MaxZ Offset */
     bool bOnlyOnce = false;

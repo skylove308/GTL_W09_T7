@@ -2,6 +2,8 @@
 
 #include "Components/Mesh/SkeletalMeshRenderData.h"
 #include "Engine/Asset/SkeletalMeshAsset.h"
+#include "SubWindow/SkeletalSubEngine.h"
+#include "SubWindow/SubEngine.h"
 
 void SkeletalViewerPanel::Render()
 {
@@ -29,7 +31,7 @@ void SkeletalViewerPanel::OnResize(HWND hWnd)
 
 void SkeletalViewerPanel::CreateSkeletalTreeNode()
 {
-    USkeletalMesh* Selected = GEngineLoop.GetSelectedSkeletalMesh();
+    USkeletalMesh* Selected = static_cast<FSkeletalSubEngine*>(GEngineLoop.SkeletalViewerSubEngine)->SelectedSkeletalMesh;
 
     if (Selected == nullptr) return;
 
@@ -51,5 +53,4 @@ void SkeletalViewerPanel::RenderSkeletalTreeNode(const FSkeletalHierarchyData& N
         }
         ImGui::TreePop();
     }
-
 }

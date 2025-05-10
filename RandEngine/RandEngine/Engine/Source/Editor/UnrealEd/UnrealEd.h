@@ -13,7 +13,7 @@ public:
     void Initialize();
     
     void Render() const;
-    void RenderSubWindowPanel() const;
+    void RenderSkeletalSubWindowPanel() const;
     void OnResize(HWND hWnd, bool bSubWindow = false) const;
     
     void AddEditorPanel(const FString& PanelId, const std::shared_ptr<UEditorPanel>& EditorPanel, bool bSubWindow = false);
@@ -22,5 +22,5 @@ public:
 
 private:
     TMap<FString, std::shared_ptr<UEditorPanel>> Panels;
-    TMap<FString, std::shared_ptr<UEditorPanel>> SubPanels;
+    TMap<FString, std::shared_ptr<UEditorPanel>> SkeletalSubPanels;
 };

@@ -3,10 +3,10 @@
 #include "RendererHelpers.h"
 #include "StaticMeshRenderPass.h"
 #include "Components/Mesh/SkeletalMeshRenderData.h"
-#include "Windows/SubWindow/SubCamera.h"
 #include "D3D11RHI/DXDShaderManager.h"
 #include "D3D11RHI/GraphicDevice.h"
 #include "Engine/Asset/SkeletalMeshAsset.h"
+#include "UnrealEd/EditorViewportClient.h"
 #include "Editor/PropertyEditor/Animation/AnimationTimelinePanel.h"
 FSubRenderer::~FSubRenderer()
 {
@@ -75,9 +75,9 @@ void FSubRenderer::Release()
     }
 }
 
-void FSubRenderer::PrepareRender(const FSubCamera& Camera) const
+void FSubRenderer::PrepareRender(FEditorViewportClient* Viewport) const
 {
-    UpdateViewCamera(Camera);
+    UpdateViewCamera(Viewport);
 
     // Set RTV + DSV
     Graphics->DeviceContext->OMSetRenderTargets(1, &Graphics->BackBufferRTV, Graphics->DeviceDSV);
@@ -92,22 +92,11 @@ void FSubRenderer::PrepareRender(const FSubCamera& Camera) const
     // Clear RenderTarget
     Graphics->DeviceContext->ClearRenderTargetView(Graphics->BackBufferRTV, Graphics->ClearColor);
 }
-SAnimationTimelinePanel* AnimationTimelinePanel;
-void FSubRenderer::Render(FSubCamera& Camera)
+void FSubRenderer::Render()
 {
     if (PreviewSkeletalMesh == nullptr)
     {
         return;
-    }
-    if(AnimationTimelinePanel==nullptr)
-    {
-        AnimationTimelinePanel = new SAnimationTimelinePanel();
-        MockAnimSequence* MocdkAnimSequence = new MockAnimSequence();
-        MocdkAnimSequence->FrameRate = 30.0f;
-        MocdkAnimSequence->SequenceLength = 2.0f;
-        MocdkAnimSequence->AddNotify(1.0f, FName("Footstep_L"));
-        MocdkAnimSequence->AddNotify(1.6f, FName("Footstep_R"));
-        AnimationTimelinePanel->SetTargetSequence(MocdkAnimSequence);
     }
     // 셰이더 설정
     ID3D11VertexShader* vertexShader = ShaderManager->GetVertexShaderByKey(L"StaticMeshVertexShader");
@@ -128,28 +117,13 @@ void FSubRenderer::Render(FSubCamera& Camera)
 
     UpdateConstants();
 
-    RenderMesh(Camera);
-    AnimationTimelinePanel->RenderTimelineEditor();
-    AnimationTimelinePanel->UpdatePlayback(0.0166);
+    RenderMesh();
+
 }
 
-void FSubRenderer::RenderMesh(FSubCamera& Camera)
+void FSubRenderer::RenderMesh()
 {
     FSkeletalMeshRenderData* RenderData = PreviewSkeletalMesh->GetRenderData();
-
-    if (!bOnlyOnce)
-    {
-        FVector Target = (RenderData->BoundingBoxMax + RenderData->BoundingBoxMin) * 0.5f;
-        FVector Extent = RenderData->BoundingBoxMax - RenderData->BoundingBoxMin;
-        Camera.SetTargetPosition(Target.X, Target.Y, Target.Z);
-        
-        float MaxOff = std::max(std::max(Extent.X, Extent.Y), Extent.Z);
-        Camera.SetTargetZOffset(MaxOff);
-
-        Camera.UpdateViewMatrix();
-        Camera.UpdateCamera();
-        bOnlyOnce = true;
-    }
     
     TArray<FStaticMaterial*> RenderMaterial = PreviewSkeletalMesh->GetMaterials();
     
@@ -238,19 +212,18 @@ void FSubRenderer::UpdateConstants() const
 
     /** Light */
     UpdateLightConstant();
-    
 }
 
-void FSubRenderer::UpdateViewCamera(const FSubCamera& Camera) const
+void FSubRenderer::UpdateViewCamera(FEditorViewportClient* Viewport) const
 {
     FCameraConstantBuffer CameraConstantBuffer;
-    CameraConstantBuffer.ViewMatrix = Camera.GetViewMatrix();
+    CameraConstantBuffer.ViewMatrix = Viewport->GetViewMatrix();
     CameraConstantBuffer.InvViewMatrix = FMatrix::Inverse(CameraConstantBuffer.ViewMatrix);
-    CameraConstantBuffer.ProjectionMatrix = Camera.GetProjectionMatrix();
+    CameraConstantBuffer.ProjectionMatrix = Viewport->GetProjectionMatrix();
     CameraConstantBuffer.InvProjectionMatrix = FMatrix::Inverse(CameraConstantBuffer.ProjectionMatrix);
-    CameraConstantBuffer.ViewLocation = Camera.GetCameraLocation();
-    CameraConstantBuffer.NearClip = Camera.GetCameraNearClip();
-    CameraConstantBuffer.FarClip = Camera.GetCameraFarClip();
+    CameraConstantBuffer.ViewLocation = Viewport->GetCameraLocation();
+    CameraConstantBuffer.NearClip = Viewport->GetCameraNearClip();
+    CameraConstantBuffer.FarClip = Viewport->GetCameraFarClip();
     BufferManager->UpdateConstantBuffer("FCameraConstantBuffer", CameraConstantBuffer);
 }
 
