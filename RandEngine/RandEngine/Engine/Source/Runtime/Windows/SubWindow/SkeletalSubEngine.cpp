@@ -29,14 +29,14 @@ void USkeletalSubEngine::Initialize(HWND& hWnd, FGraphicsDevice* InGraphics, FDX
     ViewportClient->Initialize(EViewScreenLocation::EVL_MAX, FRect(0,0,800,600));
     ViewportClient->CameraReset();
 
-    // EditorPlayer = FObjectFactory::ConstructObject<AEditorPlayer>(this);
+    EditorPlayer = FObjectFactory::ConstructObject<AEditorPlayer>(this);
 }
 
 void USkeletalSubEngine::Tick(float DeltaTime)
 {
     Input(DeltaTime);
     ViewportClient->Tick(DeltaTime);
-    // EditorPlayer->Tick(DeltaTime);
+    EditorPlayer->Tick(DeltaTime);
     Render();    
 }
 
