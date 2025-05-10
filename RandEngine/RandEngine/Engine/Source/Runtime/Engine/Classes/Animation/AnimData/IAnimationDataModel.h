@@ -13,10 +13,11 @@ struct FBoneAnimationTrack
 
 struct FAnimationCurveData
 {
-
+    // Bone 이외에 Curve?
     /** Float-based animation curves */
     TArray<FFloatCurve>	FloatCurves;
 
+    // Bone을 비롯한 Curve 데이터
     /** FTransform-based animation curves, used for animation layer editing */
     TArray<FTransformCurve>	TransformCurves;
 };
@@ -49,7 +50,7 @@ public:
     */
     virtual const TArray<FBoneAnimationTrack>& GetBoneAnimationTracks() const = 0;
     virtual const FAnimationCurveData& GetCurveData() const = 0;
-    // virtual FTransform EvaluateBoneTrackTransform(FName TrackName, const FFrameTime& FrameTime, const EAnimInterpolationType& Interpolation) const = 0;
+    //virtual FTransform EvaluateBoneTrackTransform(FName TrackName, const FFrameTime& FrameTime, const EAnimInterpolationType& Interpolation) const = 0;
     // virtual FTransform GetBoneTrackTransform(FName TrackName, const FFrameNumber& FrameNumber) const = 0;
     // virtual void GetBoneTrackTransforms(FName TrackName, const TArray<FFrameNumber>& FrameNumbers, TArray<FTransform>& OutTransforms) const = 0;
     // virtual void GetBoneTrackTransforms(FName TrackName, TArray<FTransform>& OutTransforms) const = 0;

@@ -1,4 +1,6 @@
 #include "SkeletalMeshActor.h"
+
+#include "AssetManager.h"
 #include "Components/Mesh/SkeletalMeshComponent.h"
 #include "Engine/FbxLoader.h"
 #include "UObject/Casts.h"
@@ -7,8 +9,8 @@ ASkeletalMeshActor::ASkeletalMeshActor()
 {
     SkeletalMeshComponent = AddComponent<USkeletalMeshComponent>();
     RootComponent = SkeletalMeshComponent;
-    SkeletalMeshComponent->SetSkeletalMesh(FManagerFBX::GetSkeletalMesh(L"Contents/Mutant.fbx"));
-    //SkeletalMeshComponent->SetSkeletalMesh(FManagerFBX::GetSkeletalMesh(L"Contents/Sharkry_NoTwist.fbx"));
+    //SkeletalMeshComponent->SetSkeletalMesh(FManagerFBX::GetSkeletalMesh(L"Contents/Mutant.fbx"));
+    SkeletalMeshComponent->SetSkeletalMesh(UAssetManager::Get().GetSkeletalMesh(L"Contents/Hip Hop Dancing.fbx"));
     
     {
         FSkeletalMeshRenderData* RenderData = SkeletalMeshComponent->GetSkeletalMesh()->GetRenderData();

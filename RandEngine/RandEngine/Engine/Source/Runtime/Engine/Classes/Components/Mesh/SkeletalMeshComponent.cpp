@@ -1,4 +1,6 @@
 #include "SkeletalMeshComponent.h"
+
+#include "Engine/AssetManager.h"
 #include "Engine/Asset/SkeletalMeshAsset.h"
 #include "Engine/FbxLoader.h"
 #include "Engine/SkeletalMeshActor.h"
@@ -40,7 +42,7 @@ void USkeletalMeshComponent::SetProperties(const TMap<FString, FString>& InPrope
     {
         if (*MeshPath != TEXT("None"))
         {
-            if (USkeletalMesh* LoadedMesh = FManagerFBX::CreateSkeletalMesh(*MeshPath))
+            if (USkeletalMesh* LoadedMesh = UAssetManager::Get().GetSkeletalMesh(GetData(*MeshPath)))
             {
                 SetSkeletalMesh(LoadedMesh);
                 UE_LOG(ELogLevel::Display, TEXT("Set SkeletalMesh '%s' for %s"), **MeshPath, *GetName());

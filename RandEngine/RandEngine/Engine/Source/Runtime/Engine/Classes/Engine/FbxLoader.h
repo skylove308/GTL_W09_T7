@@ -17,6 +17,9 @@
 
 #include "SkeletalMeshDebugger.h"
 
+struct FFbxLoadResult;
+struct FAnimationCurveData;
+struct FBoneAnimationTrack;
 class USkeletalMeshComponent;
 
 namespace FBX
@@ -46,6 +49,14 @@ namespace std
 
 struct FFBXLoader
 {
+    static void LoadFbxAnimation(FbxScene* InScene);
+    static void ExtractCurveData(FbxAnimStack* AnimStack, FbxScene* Scene, TArray<FBoneAnimationTrack>& OutBoneTracks, FAnimationCurveData& OutCurveData, int32
+                                 & OutTotalKeyCount);
+    static void TraverseNodeBoneTrack(FbxNode* Node, TArray<FBoneAnimationTrack>& OutBoneTracks, int32& OutTotalKeyCount, FbxTime::EMode TimeMode, int32
+                               NumFrames);
+    static void TraverseNodeCurveData(FbxNode* Node, FbxAnimLayer* AnimLayer, FAnimationCurveData& OutCurveData);
+
+    
     static bool ParseFBX(const FString& FBXFilePath, FBX::FBXInfo& OutFBXInfo);
 
     // Convert the Raw data to Cooked data (FSkeletalMeshRenderData)
@@ -62,6 +73,8 @@ private:
 struct FManagerFBX
 {
 public:
+    static bool LoadFBX(const FString& InFilePath, FFbxLoadResult& OutResult);
+
     static FSkeletalMeshRenderData* LoadFBXSkeletalMeshAsset(const FString& PathFileName, USkeleton* OutSkeleton);
 
     static void CombineMaterialIndex(FSkeletalMeshRenderData& OutFSkeletalMesh);
@@ -74,14 +87,7 @@ public:
 
     static UMaterial* GetMaterial(const FString& InName);
 
-    static USkeletalMesh* CreateSkeletalMesh(const FString& InFilePath);
-
-    static const TMap<FWString, USkeletalMesh*>& GetSkeletalMeshes();
-
-    static USkeletalMesh* GetSkeletalMesh(const FWString& InName);
-
 private:
     inline static TMap<FString, FSkeletalMeshRenderData*> SkeletalMeshRenderDataMap;
-    inline static TMap<FWString, USkeletalMesh*> SkeletalMeshMap;
     inline static TMap<FString, UMaterial*> MaterialMap;
 };

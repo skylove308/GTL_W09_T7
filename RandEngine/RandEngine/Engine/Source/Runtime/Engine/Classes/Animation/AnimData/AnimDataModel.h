@@ -20,6 +20,13 @@ public:
     // ...
 
 
+    void SetBoneAnimationTracks(const TArray<FBoneAnimationTrack>& InValue);
+    void SetCurveData(const FAnimationCurveData& InValue);
+    void SetPlayLength(const double& InValue);
+    void SetNumberOfFrames(const int32& InValue);
+    void SetNumberOfKeys(const int32& InValue);
+    void SetFrameRate(const FFrameRate& InValue);
+
 private:
     TArray<FBoneAnimationTrack> BoneAnimationTracks;
     float PlayLength;

@@ -15,8 +15,6 @@ public:
     USkeletalMesh();
     virtual ~USkeletalMesh() override;
 
-    USkeleton* Skeleton;
-
     virtual UObject* Duplicate(UObject* InOuter) override;
 
     const TArray<FStaticMaterial*>& GetMaterials() const { return materials; }
@@ -36,6 +34,8 @@ public:
 
     void SetData(FSkeletalMeshRenderData* renderData);
 
+public:
+    USkeleton* Skeleton;
 private:
     FSkeletalMeshRenderData* SkeletalMeshRenderData = nullptr;
     TArray<FStaticMaterial*> materials;
