@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ImGui/ImSequencer.h"
+#include "ImGui/imgui_neo_sequencer.h"
 #include "Container/Array.h"
 #include "Container/Set.h"
 #include "UObject/NameTypes.h"
@@ -71,7 +71,7 @@ public:
 enum class EEditorTimelineTrackType
 {
     AnimNotify_Root,
-    AnimNotify_Item
+    AnimNotify_UserTrack
 };
 
 struct FEditorTimelineTrack
@@ -79,25 +79,22 @@ struct FEditorTimelineTrack
     EEditorTimelineTrackType TrackType;
     std::string DisplayName;
     int TrackId;
-    int Depth;
-    bool bIsExpanded;
+    int ParentTrackId;
+    bool bIsExpanded; // 그룹 트랙의 확장/축소 상태
+    int IndentLevel;
 
-    FEditorTimelineTrack(EEditorTimelineTrackType InType, const std::string& InBaseName, int InDepth = 0)
-        : TrackType(InType), Depth(InDepth), bIsExpanded(true)
+    FEditorTimelineTrack(EEditorTimelineTrackType InTrackType, const std::string& InDisplayName, int InTrackId, int InParentTrackId = -1, int InIndentLevel = 0)
+        : TrackType(InTrackType), DisplayName(InDisplayName), TrackId(InTrackId),
+        ParentTrackId(InParentTrackId), bIsExpanded(true), IndentLevel(InIndentLevel)
     {
-        TrackId = NextTrackIdCounter++;
-        std::string prefix = "";
-        for (int i = 0; i < Depth; ++i)
-        {
-            prefix += "  ";
-        }
-        DisplayName = prefix + InBaseName;
+        if (NextTrackIdCounter <= InTrackId) NextTrackIdCounter = InTrackId + 1;
     }
+    
     static int NextTrackIdCounter;
 };
 
 
-class SAnimationTimelinePanel : public ImSequencer::SequenceInterface, public UEditorPanel
+class SAnimationTimelinePanel : public UEditorPanel
 {
     MockAnimSequence* MocdkAnimSequence; //for Text
 public:
@@ -127,35 +124,12 @@ public:
     void RenderTimelineEditor();
 
 
-    // --- ImSequencer::SequenceInterface Implementation (가상 함수들) ---
-    virtual int GetFrameMin() const override;
-    virtual int GetFrameMax() const override;
-    virtual int GetItemCount() const override;
-    virtual const char* GetItemLabel(int index) const override;
-    virtual void Get(int index, int** start, int** end, int* type, unsigned int* color) override;
-
-    // 아래 함수들은 현재 구현 범위에서는 간소화
-    virtual void Add(int typeIndex) override {}
-    virtual void Del(int index) override {}
-    virtual void Duplicate(int index) override {}
-    virtual size_t GetCustomHeight(int index) override { return 0; }
-    virtual void DoubleClick(int index) override {}
-
-    // 노티파이 UI 그리기 (ImSequencer 인터페이스)
-    virtual void CustomDraw(int displayTrackIndex, 
-                            ImDrawList* drawList, const ImRect& rc, 
-                            const ImRect& legendRect, const ImRect& clippingRect,
-                            const ImRect& legendClippingRect) override;
-
-    virtual void CustomDrawCompact(int displayTrackIndex, ImDrawList* drawList, const ImRect& rc, const ImRect& clippingRect) override;
     
     virtual void Render() override;
     virtual void OnResize(HWND hWnd) override;
 private:
     // --- Private Helper Methods for UI Rendering ---
-    void FitTimelineToView();
     void RenderPlaybackControls();
-    void RenderViewControls();
     void CenterViewOnFrame(int targetFrame);
     void AdjustFirstFrameToKeepCenter();
     void ClampFirstVisibleFrame();
@@ -164,7 +138,9 @@ private:
 
     // 노티파이 그리기 헬퍼 함수
     void RenderNotifyTrackItems(const TArray<FMockAnimNotifyEvent>& notifies, ImDrawList* drawList, const ImRect& rc, const ImRect& clippingRect, bool isCompact); 
-
+    void AddUserNotifyTrack(int InParentRootTrackId, const std::string& NewTrackName);
+    void RemoveUserNotifyTrack(int InTrackId);
+    void AssignNotifyToTrack(int NotifyEventId, int TargetTrackId);
 public:
     MockAnimSequence* TargetSequence; // 편집 대상이 되는 모의 시퀀스 객체
 
