@@ -13,6 +13,7 @@
 #include "Renderer/TileLightCullingPass.h"
 #include "resource.h"
 #include "SoundManager.h"
+#include "SubWindow/AnimationSubEngine.h"
 #include "SubWindow/SubEngine.h"
 #include "SubWindow/ImGuiSubWindow.h"
 #include "SubWindow/SkeletalSubEngine.h"
@@ -49,8 +50,9 @@ int32 FEngineLoop::Init(HINSTANCE hInstance)
 
     /* must be initialized before window. */
     WindowInit(hInstance);
-    SubWindowInit(hInstance);
-
+    SkeletalSubWindowInit(hInstance);
+    AnimationSubWindowInit(hInstance);
+    
     UnrealEditor = new UnrealEd();
     BufferManager = new FDXDBufferManager();
     FUIManager = new UImGuiManager;
@@ -67,7 +69,13 @@ int32 FEngineLoop::Init(HINSTANCE hInstance)
         SkeletalViewerGD.ClearColor[1] = 0.025f;
         SkeletalViewerGD.ClearColor[2] = 0.025f;
     }
-    
+    if (AnimationViewerWnd)
+    {
+        AnimationViewerGD.Initialize(AnimationViewerWnd, GraphicDevice.Device);
+        AnimationViewerGD.ClearColor[0] = 0.025f;
+        AnimationViewerGD.ClearColor[1] = 0.025f;
+        AnimationViewerGD.ClearColor[2] = 0.025f;
+    }
     if (!GPUTimingManager.Initialize(GraphicDevice.Device, GraphicDevice.DeviceContext))
     {
         UE_LOG(ELogLevel::Error, TEXT("Failed to initialize GPU Timing Manager!"));
@@ -99,7 +107,9 @@ int32 FEngineLoop::Init(HINSTANCE hInstance)
     
     SkeletalViewerSubEngine = new FSkeletalSubEngine();
     SkeletalViewerSubEngine->Initialize(SkeletalViewerWnd, &SkeletalViewerGD, BufferManager,FUIManager,UnrealEditor);
-    
+    AnimationViewerSubEngine = new FAnimationSubEngine();
+    AnimationViewerSubEngine->Initialize(AnimationViewerWnd, &AnimationViewerGD, BufferManager,FUIManager,UnrealEditor);
+
     
     uint32 ClientWidth = 0;
     uint32 ClientHeight = 0;
@@ -200,6 +210,14 @@ void FEngineLoop::Tick()
                 DispatchMessage(&Msg);
             }
         }
+        if (!bIsExit && AnimationViewerWnd && IsWindowVisible(AnimationViewerWnd))
+        {
+            while (PeekMessage(&Msg, AnimationViewerWnd, 0, 0, PM_REMOVE))
+            {
+                TranslateMessage(&Msg);
+                DispatchMessage(&Msg);
+            }
+        }
         // Engine loop Break
         if (bIsExit) break;
 
@@ -212,7 +230,7 @@ void FEngineLoop::Tick()
         /** Main window render */
         Render(DeltaTime);
         SkeletalViewerSubEngine->Tick(DeltaTime);
-
+        AnimationViewerSubEngine->Tick(DeltaTime);
         /** Sub window render */
         // RenderSubWindow();
 
@@ -243,7 +261,14 @@ void FEngineLoop::Tick()
             }
             SkeletalViewerSubEngine->bIsShowSubWindow = false;
         }
-        
+        if (AnimationViewerSubEngine->bIsShowSubWindow)
+        {
+            if (AnimationViewerWnd)
+            {
+                ::ShowWindow(AnimationViewerWnd, SW_SHOW);
+            }
+            AnimationViewerSubEngine->bIsShowSubWindow = false;
+        }
         do
         {
             Sleep(0);
@@ -293,6 +318,19 @@ void FEngineLoop::Input()
     {
         bLClicked = false;
     }
+    // if (GetAsyncKeyState('K') & 0x8000)
+    // {
+    //     if (!bKClicked)
+    //     {
+    //         bKClicked = true;
+    //
+    //         ToggleContentDrawer();
+    //     }
+    // }
+    // else
+    // {
+    //     bKClicked = false;
+    // }
 }
 
 void FEngineLoop::CleanupSubWindow()
@@ -332,9 +370,9 @@ void FEngineLoop::WindowInit(HINSTANCE hInstance)
     );
 }
 
-void FEngineLoop::SubWindowInit(HINSTANCE hInstance)
+void FEngineLoop::SkeletalSubWindowInit(HINSTANCE hInstance)
 {
-    WCHAR SubWindowClass[] = L"JungleSubWindowClass";
+    WCHAR SubWindowClass[] = L"JungleSkeletalWindowClass";
     WCHAR SubTitle[] = L"Skeleton Mesh Viewer";
 
     WNDCLASSEXW wcexSub = {}; // WNDCLASSEXW 사용 권장
@@ -366,6 +404,52 @@ void FEngineLoop::SubWindowInit(HINSTANCE hInstance)
     );
 
     if (!SkeletalViewerWnd)
+    {
+        // 오류 처리
+        UE_LOG(ELogLevel::Error, TEXT("Failed to create sub window!"));
+    }
+    else
+    {
+        // 필요할 때
+        // ShowWindow(SubAppWnd, SW_SHOW);
+        // 호출하여 표시
+    }
+}
+
+void FEngineLoop::AnimationSubWindowInit(HINSTANCE hInstance)
+{
+    WCHAR SubWindowClass[] = L"JungleAnimationWindowClass";
+    WCHAR SubTitle[] = L"Animation Viewer";
+
+    WNDCLASSEXW wcexSub = {}; // WNDCLASSEXW 사용 권장
+    wcexSub.cbSize = sizeof(WNDCLASSEX);
+    wcexSub.style = CS_HREDRAW | CS_VREDRAW; // | CS_DBLCLKS 등 필요시 추가
+    wcexSub.lpfnWndProc = AppWndProc; // 서브 윈도우 프로시저 지정
+    wcexSub.cbClsExtra = 0;
+    wcexSub.cbWndExtra = 0;
+    wcexSub.hInstance = hInstance;
+    wcexSub.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
+    wcexSub.lpszMenuName = nullptr;
+    wcexSub.lpszClassName = SubWindowClass;
+
+    if (!RegisterClassExW(&wcexSub))
+    {
+        // 오류 처리
+        UE_LOG(ELogLevel::Error, TEXT("Failed to register sub window class!"));
+        return;
+    }
+
+    // 서브 윈도우 생성 (크기, 위치, 스타일 조정 필요)
+    // WS_OVERLAPPEDWINDOW 는 타이틀 바, 메뉴, 크기 조절 등이 포함된 일반적인 창
+    // WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME 등으로 커스텀 가능
+    AnimationViewerWnd = CreateWindowExW(
+        0, SubWindowClass, SubTitle, WS_OVERLAPPEDWINDOW, // WS_VISIBLE 제거 (초기에는 숨김)
+        CW_USEDEFAULT, CW_USEDEFAULT, 800, 600, // 원하는 크기
+        AppWnd, // 부모 윈도우를 메인 윈도우로 설정 (선택 사항)
+        nullptr, hInstance, nullptr
+    );
+
+    if (!AnimationViewerWnd)
     {
         // 오류 처리
         UE_LOG(ELogLevel::Error, TEXT("Failed to create sub window!"));
@@ -419,6 +503,47 @@ LRESULT CALLBACK FEngineLoop::AppWndProc(HWND hWnd, uint32 Msg, WPARAM wParam, L
         case WM_ACTIVATE:
             if (ImGui::GetCurrentContext() == nullptr) break; 
             ImGui::SetCurrentContext(GEngineLoop.SkeletalViewerSubEngine->SubUI->Context);
+            GEngineLoop.CurrentImGuiContext = ImGui::GetCurrentContext();
+            return 0;
+            return 0;
+        default:
+            return DefWindowProc(hWnd, Msg, wParam, lParam);
+        }
+    }
+    else if (hWnd == GEngineLoop.AnimationViewerWnd)
+    {
+        ImGui::SetCurrentContext(GEngineLoop.AnimationViewerSubEngine->SubUI->Context);
+        if (ImGui_ImplWin32_WndProcHandler(hWnd, Msg, wParam, lParam)) return true;
+
+        /** SubWindow Msg */
+        switch (Msg)
+        {
+        case WM_SIZE:
+            if (wParam != SIZE_MINIMIZED)
+            {
+                RECT ClientRect;
+                GetClientRect(hWnd, &ClientRect);
+
+                float FullWidth = static_cast<float>(ClientRect.right - ClientRect.left);
+                float FullHeight = static_cast<float>(ClientRect.bottom - ClientRect.top);
+                
+                if (GEngineLoop.GetUnrealEditor())
+                {
+                    SkeletalViewerGD.Resize(hWnd, FullWidth, FullHeight);
+                    GEngineLoop.GetUnrealEditor()->OnResize(hWnd, true);
+                }
+                GEngineLoop.AnimationViewerSubEngine->ViewportClient->AspectRatio = (FullWidth * 0.75f) / FullHeight;
+            }
+            return 0;
+        case WM_CLOSE:
+            // GEngineLoop.SelectSkeletalMesh(nullptr);
+            GEngineLoop.AnimationViewerSubEngine->ViewportClient->CameraReset();
+            ::ShowWindow(hWnd, SW_HIDE);
+            return 0;
+        
+        case WM_ACTIVATE:
+            if (ImGui::GetCurrentContext() == nullptr) break; 
+            ImGui::SetCurrentContext(GEngineLoop.AnimationViewerSubEngine->SubUI->Context);
             GEngineLoop.CurrentImGuiContext = ImGui::GetCurrentContext();
             return 0;
             return 0;

@@ -59,11 +59,13 @@ public:
     HWND SkeletalViewerWnd;
     static FGraphicsDevice AnimationViewerGD;
     HWND AnimationViewerWnd;
-    void SubWindowInit(HINSTANCE hInstance);
+    void SkeletalSubWindowInit(HINSTANCE hInstance);
+    void AnimationSubWindowInit(HINSTANCE hInstance);
     void CleanupSubWindow();
 
     
     FSubEngine* SkeletalViewerSubEngine;
+    FSubEngine* AnimationViewerSubEngine;
 private:
     UImGuiManager* FUIManager;
     ImGuiContext* CurrentImGuiContext;
@@ -76,6 +78,7 @@ private:
     FDXDBufferManager* BufferManager; //TODO: UEngine으로 옮겨야함.
 
     bool bLClicked = false;
+    bool bKClicked = false;
     bool bIsExit = false;
 
     int32 TargetFPS = 999;
