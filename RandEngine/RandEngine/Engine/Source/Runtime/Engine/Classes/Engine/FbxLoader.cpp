@@ -637,13 +637,13 @@ namespace  FBX {
         const TArray<FControlPointSkinningData>& CpSkinData,
         FSkeletalMeshRenderData& OutSkeletalMesh)
     {
-        OutSkeletalMesh.BindPoseVertices.Empty(); OutSkeletalMesh.Indices.Empty();
+        OutSkeletalMesh.Vertices.Empty(); OutSkeletalMesh.Indices.Empty();
         std::unordered_map<FSkeletalMeshVertex, uint32> UniqueVertices;
         const int32 TotalPolygonVertices = PolygonVertexIndices.Num();
 
         if (TotalPolygonVertices == 0) return true;
 
-        OutSkeletalMesh.Indices.Reserve(TotalPolygonVertices); OutSkeletalMesh.BindPoseVertices.Reserve(TotalPolygonVertices * 7 / 10);
+        OutSkeletalMesh.Indices.Reserve(TotalPolygonVertices); OutSkeletalMesh.Vertices.Reserve(TotalPolygonVertices * 7 / 10);
 
         for (int32 PolyVertIndex = 0; PolyVertIndex < TotalPolygonVertices; ++PolyVertIndex)
         {
@@ -682,9 +682,9 @@ namespace  FBX {
 
             if (it != UniqueVertices.end()) OutSkeletalMesh.Indices.Add(it->second);
 
-            else { uint32 NewIndex = static_cast<uint32>(OutSkeletalMesh.BindPoseVertices.Add(CurrentVertex)); UniqueVertices[CurrentVertex] = NewIndex; OutSkeletalMesh.Indices.Add(NewIndex); }
+            else { uint32 NewIndex = static_cast<uint32>(OutSkeletalMesh.Vertices.Add(CurrentVertex)); UniqueVertices[CurrentVertex] = NewIndex; OutSkeletalMesh.Indices.Add(NewIndex); }
         }
-        return !OutSkeletalMesh.BindPoseVertices.IsEmpty() && !OutSkeletalMesh.Indices.IsEmpty();
+        return !OutSkeletalMesh.Vertices.IsEmpty() && !OutSkeletalMesh.Indices.IsEmpty();
     }
     bool CreateMaterialSubsetsInternal(const MeshRawData& RawMeshData, const TMap<FName, int32>& MaterialNameToIndexMap, FSkeletalMeshRenderData& OutSkeletalMesh)
     {
@@ -1428,7 +1428,7 @@ bool FFBXLoader::ConvertToSkeletalMesh(const TArray<FBX::MeshRawData>& AllRawMes
         CombinedCpSkinData[cpIdx].NormalizeWeights(MAX_BONE_INFLUENCES);
     }
 
-    OutSkeletalMeshRenderData.BindPoseVertices.Empty();
+    OutSkeletalMeshRenderData.Vertices.Empty();
     OutSkeletalMeshRenderData.Indices.Empty();
     std::unordered_map<FSkeletalMeshVertex, uint32> UniqueFinalVertices;
     uint32 FinalVertexIndexCounter = 0;
@@ -1498,7 +1498,7 @@ bool FFBXLoader::ConvertToSkeletalMesh(const TArray<FBX::MeshRawData>& AllRawMes
         else
         {
             uint32 NewIndex = FinalVertexIndexCounter++;
-            OutSkeletalMeshRenderData.BindPoseVertices.Add(CurrentFinalVertex);
+            OutSkeletalMeshRenderData.Vertices.Add(CurrentFinalVertex);
             UniqueFinalVertices[CurrentFinalVertex] = NewIndex;
             OutSkeletalMeshRenderData.Indices.Add(NewIndex);
         }
@@ -1571,9 +1571,9 @@ bool FFBXLoader::ConvertToSkeletalMesh(const TArray<FBX::MeshRawData>& AllRawMes
 
     // Calculate Bounding Box
     TArray<FVector> PositionsForBoundsCalculation;
-    PositionsForBoundsCalculation.Reserve(OutSkeletalMeshRenderData.BindPoseVertices.Num());
+    PositionsForBoundsCalculation.Reserve(OutSkeletalMeshRenderData.Vertices.Num());
 
-    for (const FSkeletalMeshVertex& VertexToSkinForBounds : OutSkeletalMeshRenderData.BindPoseVertices)
+    for (const FSkeletalMeshVertex& VertexToSkinForBounds : OutSkeletalMeshRenderData.Vertices)
     {
         FVector FinalPosForBounds = FVector::ZeroVector;
         bool bWasSkinned = false; // 실제로 스키닝 계산이 수행되었는지
@@ -1616,7 +1616,6 @@ bool FFBXLoader::ConvertToSkeletalMesh(const TArray<FBX::MeshRawData>& AllRawMes
         TempVerticesForBounds.Add(TempVtx);
     }
     FFBXLoader::ComputeBoundingBox(TempVerticesForBounds, OutSkeletalMeshRenderData.Bounds.MinLocation, OutSkeletalMeshRenderData.Bounds.MaxLocation);
-
 
     return true;
 }

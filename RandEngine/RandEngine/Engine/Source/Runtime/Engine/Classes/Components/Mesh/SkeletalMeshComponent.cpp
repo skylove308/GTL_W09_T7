@@ -73,7 +73,7 @@ int USkeletalMeshComponent::CheckRayIntersection(const FVector& InRayOrigin, con
     }
 
     const auto* RenderData = SkeletalMesh->GetRenderData();
-    const auto& Vertices = RenderData->BindPoseVertices;
+    const auto& Vertices = RenderData->Vertices;
     const auto& Indices = RenderData->Indices;
 
     OutHitDistance = FLT_MAX;
