@@ -63,6 +63,25 @@ public:
     void RemoveScaling(float Tolerance = SMALL_NUMBER);
 
     bool Equals(const FMatrix& Other, float Tolerance = KINDA_SMALL_NUMBER) const;
+
+    void RemoveTranslation();
+
+    static inline float Determinant3x3(float a, float b, float c,
+        float d, float e, float f,
+        float g, float h, float i)
+    {
+        return a * (e * i - f * h) - b * (d * i - f * g) + c * (d * h - e * g);
+    }
+    float Determinant() const
+    {
+        // 여인수 전개 (첫 번째 행 기준)
+        float Det3x3_00 = Determinant3x3(M[1][1], M[1][2], M[1][3], M[2][1], M[2][2], M[2][3], M[3][1], M[3][2], M[3][3]);
+        float Det3x3_01 = Determinant3x3(M[1][0], M[1][2], M[1][3], M[2][0], M[2][2], M[2][3], M[3][0], M[3][2], M[3][3]);
+        float Det3x3_02 = Determinant3x3(M[1][0], M[1][1], M[1][3], M[2][0], M[2][1], M[2][3], M[3][0], M[3][1], M[3][3]);
+        float Det3x3_03 = Determinant3x3(M[1][0], M[1][1], M[1][2], M[2][0], M[2][1], M[2][2], M[3][0], M[3][1], M[3][2]);
+
+        return M[0][0] * Det3x3_00 - M[0][1] * Det3x3_01 + M[0][2] * Det3x3_02 - M[0][3] * Det3x3_03;
+    }
 };
 
 inline FArchive& operator<<(FArchive& Ar, FMatrix& M)

@@ -22,6 +22,10 @@
 #define PHONG "LIGHTING_MODEL_BLINN_PHONG"
 #define PBR "LIGHTING_MODEL_PBR"
 
+#ifndef MAX_BONE_INFLUENCES
+#define MAX_BONE_INFLUENCES 4
+#endif
+
 // Material Subset
 struct FMaterialSubset
 {
@@ -125,6 +129,21 @@ struct FObjMaterialInfo
     
     /* Texture */
     TArray<FTextureInfo> TextureInfos;
+
+    FString DiffuseTextureName;  // map_Kd : Diffuse texture
+    FWString DiffuseTexturePath;
+
+    FString AmbientTextureName;  // map_Ka : Ambient texture
+    FWString AmbientTexturePath;
+
+    FString SpecularTextureName; // map_Ks : Specular texture
+    FWString SpecularTexturePath;
+
+    FString BumpTextureName;     // map_Bump : Bump texture
+    FWString BumpTexturePath;
+
+    FString AlphaTextureName;    // map_d : Alpha texture
+    FWString AlphaTexturePath;
 };
 
 struct FVertexTexture

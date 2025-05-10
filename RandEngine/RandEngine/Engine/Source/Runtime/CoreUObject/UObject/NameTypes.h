@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "Core/HAL/PlatformType.h"
 
 class FString;
@@ -25,6 +25,8 @@ public:
     FString ToString() const;
     uint32 GetDisplayIndex() const { return DisplayIndex; }
     uint32 GetComparisonIndex() const { return ComparisonIndex; }
+    bool IsNone() { return DisplayIndex == NAME_None && ComparisonIndex == NAME_None; }
+    bool IsNone() const { return DisplayIndex == NAME_None && ComparisonIndex == NAME_None; }
 
     bool operator==(const FName& Other) const;
     bool operator==(ENameNone) const;

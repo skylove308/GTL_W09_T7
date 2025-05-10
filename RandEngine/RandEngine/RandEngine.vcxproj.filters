@@ -1652,11 +1652,14 @@
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Engine\SkeletalMeshActor.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\Mesh\SkeletalMeshComponent.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\Mesh\SkinnedMeshComponent.cpp" />
-    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\Mesh\SkeletalMeshRenderData.cpp" />
     <ClCompile Include="Engine\Source\Editor\PropertyEditor\Sub\SkeletalViewerPanel.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\UserInterface\Drawer.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Windows\SubWindow\SubCamera.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Windows\SubWindow\SubRenderer.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Engine\SkeletalMeshDebugger.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Engine\Animation\Skeleton.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\Mesh\SkeletalMesh.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Renderer\SkeletalMeshRenderPass.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="RandEngine.natvis" />
@@ -1676,7 +1679,6 @@
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Engine\SkeletalMeshActor.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\Mesh\SkeletalMeshComponent.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\Mesh\SkinnedMeshComponent.h" />
-    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\Mesh\SkeletalMeshRenderData.h" />
     <ClInclude Include="Engine\Source\Editor\PropertyEditor\Sub\SkeletalViewerPanel.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\UserInterface\Drawer.h" />
     <ClInclude Include="Engine\Source\Runtime\Windows\SubWindow\ImGuiSubWindow.h" />
@@ -1964,6 +1966,10 @@
     <ClInclude Include="Engine\Source\ThirdParty\FBX\include\libxml2\libxml\xpathInternals.h" />
     <ClInclude Include="Engine\Source\ThirdParty\FBX\include\libxml2\libxml\xpointer.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="Engine\Source\Runtime\Engine\SkeletalMeshDebugger.h" />
+    <ClInclude Include="Engine\Source\Runtime\Engine\Animation\Skeleton.h" />
+    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\Mesh\SkeletalMesh.h" />
+    <ClInclude Include="Engine\Source\Runtime\Renderer\SkeletalMeshRenderPass.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\CompositingShader.hlsl" />

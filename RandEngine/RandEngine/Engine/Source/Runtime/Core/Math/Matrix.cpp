@@ -442,3 +442,12 @@ bool FMatrix::Equals(const FMatrix& Other, float Tolerance) const
 
     return true;
 }
+
+void FMatrix::RemoveTranslation()
+{
+    // Set the translation part to zero
+    M[3][0] = 0.0f;
+    M[3][1] = 0.0f;
+    M[3][2] = 0.0f;
+    M[3][3] = 1.0f; // Keep W as 1
+}

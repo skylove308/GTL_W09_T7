@@ -472,6 +472,7 @@ void ControlEditorPanel::CreateModifyButton(const ImVec2 ButtonSize, ImFont* Ico
                 case OBJ_FBX:
                     SpawnedActor = World->SpawnActor<ASkeletalMeshActor>();
                     SpawnedActor->SetActorLabel(TEXT("OBJ_FBX"));
+                    SpawnedActor->SetActorTickInEditor(true);
                     break;
                 case OBJ_CAMERA:
                 case OBJ_PLAYER:
