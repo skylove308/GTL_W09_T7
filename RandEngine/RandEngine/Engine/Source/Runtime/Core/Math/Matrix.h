@@ -1,6 +1,7 @@
 #pragma once
 #include <DirectXMath.h>
 
+#include "Axis.h"
 #include "Serialization/Archive.h"
 
 struct FVector;
@@ -32,6 +33,13 @@ public:
     float* operator[](int row);
     const float* operator[](int row) const;
 
+    FVector ExtractScaling(float Tolerance = SMALL_NUMBER);
+    FVector GetOrigin() const;
+    float Determinant() const;
+
+    void SetAxis(int32 i, const FVector& Axis);
+    FVector GetScaledAxis(EAxis::Type InAxis) const;
+    
     // 유틸리티 함수
     static FMatrix Transpose(const FMatrix& Mat);
     static FMatrix Inverse(const FMatrix& Mat);
@@ -71,16 +79,6 @@ public:
         float g, float h, float i)
     {
         return a * (e * i - f * h) - b * (d * i - f * g) + c * (d * h - e * g);
-    }
-    float Determinant() const
-    {
-        // 여인수 전개 (첫 번째 행 기준)
-        float Det3x3_00 = Determinant3x3(M[1][1], M[1][2], M[1][3], M[2][1], M[2][2], M[2][3], M[3][1], M[3][2], M[3][3]);
-        float Det3x3_01 = Determinant3x3(M[1][0], M[1][2], M[1][3], M[2][0], M[2][2], M[2][3], M[3][0], M[3][2], M[3][3]);
-        float Det3x3_02 = Determinant3x3(M[1][0], M[1][1], M[1][3], M[2][0], M[2][1], M[2][3], M[3][0], M[3][1], M[3][3]);
-        float Det3x3_03 = Determinant3x3(M[1][0], M[1][1], M[1][2], M[2][0], M[2][1], M[2][2], M[3][0], M[3][1], M[3][2]);
-
-        return M[0][0] * Det3x3_00 - M[0][1] * Det3x3_01 + M[0][2] * Det3x3_02 - M[0][3] * Det3x3_03;
     }
 };
 

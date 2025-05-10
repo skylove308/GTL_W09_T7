@@ -1,4 +1,6 @@
 ﻿#include "Vector.h"
+
+#include "Vector4.h"
 #include "Misc/Parse.h"
 
 const FVector2D FVector2D::ZeroVector = FVector2D(0, 0);
@@ -18,10 +20,31 @@ const FVector FVector::XAxisVector = FVector(1, 0, 0);
 const FVector FVector::YAxisVector = FVector(0, 1, 0);
 const FVector FVector::ZAxisVector = FVector(0, 0, 1);
 
+FVector::FVector(const FVector4& Vector4)
+{
+    X = Vector4.X;
+    Y = Vector4.Y;
+    Z = Vector4.Z;
+}
+
+FVector& FVector::operator*=(const FVector& Other)
+{
+    X = Other.X;
+    Y = Other.Y;
+    Z = Other.Z;
+    return *this;
+}
 
 FString FVector2D::ToString() const
 {
     return FString::Printf(TEXT("X=%3.3f Y=%3.3f"), X, Y);
+}
+
+bool FVector::ContainsNaN() const
+{
+    return (!FMath::IsFinite(X) || 
+            !FMath::IsFinite(Y) ||
+            !FMath::IsFinite(Z));
 }
 
 bool FVector2D::InitFromString(const FString& InSourceString)

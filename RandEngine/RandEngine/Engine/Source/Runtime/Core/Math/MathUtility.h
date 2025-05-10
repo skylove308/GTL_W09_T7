@@ -139,11 +139,11 @@ struct FMath
         return Abs<float>(Value) <= ErrorTolerance;
     }
 
-    [[nodiscard]] static FORCEINLINE bool IsNearlyEqual(float A, float B, float ErrorTolerance = KINDA_SMALL_NUMBER)
+    [[nodiscard]] static FORCEINLINE bool IsNearlyEqual(float A, float B, float ErrorTolerance = SMALL_NUMBER)
     {
         return Abs<float>(A - B) <= ErrorTolerance;
     }
-
+    
     // Begin Interpolations
     /** A와 B를 Alpha값에 따라 선형으로 보간합니다. */
     template <typename T>
@@ -615,4 +615,13 @@ struct FMath
         int b = p[xi + 1];
         return lerp(grad(a, xf), grad(b, xf - 1.0f), u);
     }
+
+    template <typename T>
+    [[nodiscard]] static T Min3(const T& A, const T& B, const T& C)
+    {
+        return FMath::Min(A, FMath::Min(B, C));
+    }
+
+    static FORCEINLINE bool IsInf(float x) { return !_finite(x); }
+    static FORCEINLINE bool IsNaN(float A) { return _isnan(A); }
 };

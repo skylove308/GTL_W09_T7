@@ -20,9 +20,13 @@
 #include "Components/Material/Material.h" // UMaterial, FFbxMaterialInfo (또는 FObjMaterialInfo) 정의
 #include "UserInterface/Console.h"    // Console 클래스 (로깅 제거됨)
 // #include "Launch/EngineLoop.h"        // EngineLoop::GraphicDevice 접근용 (필요 시)
+#include "AssetManager.h"
 #include "Components/Mesh/SkeletalMeshComponent.h"
 #include "UObject/ObjectFactory.h"    // FManagerFBX 에서 사용
 #include "SkeletalMeshDebugger.h"   // FSkeletalMeshDebugger 클래스 사용
+#include "Animation/AnimSequence.h"
+#include "Animation/AnimData/AnimDataModel.h"
+#include "Animation/AnimData/IAnimationDataModel.h"
 
 namespace  FBX {
     // --- 중간 데이터 구조체 (Internal) ---
@@ -633,13 +637,13 @@ namespace  FBX {
         const TArray<FControlPointSkinningData>& CpSkinData,
         FSkeletalMeshRenderData& OutSkeletalMesh)
     {
-        OutSkeletalMesh.BindPoseVertices.Empty(); OutSkeletalMesh.Indices.Empty();
+        OutSkeletalMesh.Vertices.Empty(); OutSkeletalMesh.Indices.Empty();
         std::unordered_map<FSkeletalMeshVertex, uint32> UniqueVertices;
         const int32 TotalPolygonVertices = PolygonVertexIndices.Num();
 
         if (TotalPolygonVertices == 0) return true;
 
-        OutSkeletalMesh.Indices.Reserve(TotalPolygonVertices); OutSkeletalMesh.BindPoseVertices.Reserve(TotalPolygonVertices * 7 / 10);
+        OutSkeletalMesh.Indices.Reserve(TotalPolygonVertices); OutSkeletalMesh.Vertices.Reserve(TotalPolygonVertices * 7 / 10);
 
         for (int32 PolyVertIndex = 0; PolyVertIndex < TotalPolygonVertices; ++PolyVertIndex)
         {
@@ -678,9 +682,9 @@ namespace  FBX {
 
             if (it != UniqueVertices.end()) OutSkeletalMesh.Indices.Add(it->second);
 
-            else { uint32 NewIndex = static_cast<uint32>(OutSkeletalMesh.BindPoseVertices.Add(CurrentVertex)); UniqueVertices[CurrentVertex] = NewIndex; OutSkeletalMesh.Indices.Add(NewIndex); }
+            else { uint32 NewIndex = static_cast<uint32>(OutSkeletalMesh.Vertices.Add(CurrentVertex)); UniqueVertices[CurrentVertex] = NewIndex; OutSkeletalMesh.Indices.Add(NewIndex); }
         }
-        return !OutSkeletalMesh.BindPoseVertices.IsEmpty() && !OutSkeletalMesh.Indices.IsEmpty();
+        return !OutSkeletalMesh.Vertices.IsEmpty() && !OutSkeletalMesh.Indices.IsEmpty();
     }
     bool CreateMaterialSubsetsInternal(const MeshRawData& RawMeshData, const TMap<FName, int32>& MaterialNameToIndexMap, FSkeletalMeshRenderData& OutSkeletalMesh)
     {
@@ -1029,7 +1033,7 @@ FString FbxTransformToString(const FbxAMatrix& Matrix)
         S[0], S[1], S[2]);
 }
 
-bool FFBXLoader::ParseFBX(const FString& FBXFilePath, FBX::FBXInfo& OutFBXInfo)
+bool FFBXLoader::ParseFBX(const FString& FBXFilePath, FBX::FBXInfo& OutFBXInfo, UAnimSequence*& OutAnimSequence)
 {
     using namespace ::FBX; // Use helpers from anonymous namespace
 
@@ -1040,7 +1044,7 @@ bool FFBXLoader::ParseFBX(const FString& FBXFilePath, FBX::FBXInfo& OutFBXInfo)
     struct SceneGuard { FbxScene*& Scn; ~SceneGuard() { if (Scn) Scn->Destroy(); } } ScnGuard{ Scene };
     FbxImporter* Importer = FbxImporter::Create(SdkManager, ""); if (!Importer) return false;
     struct ImporterGuard { FbxImporter*& Imp; ~ImporterGuard() { if (Imp) Imp->Destroy(); } } ImpGuard{ Importer };
-
+    
 #if USE_WIDECHAR
     std::string FilepathStdString = FBXFilePath.ToAnsiString();
 #else
@@ -1061,6 +1065,9 @@ bool FFBXLoader::ParseFBX(const FString& FBXFilePath, FBX::FBXInfo& OutFBXInfo)
     OutFBXInfo.FilePath = FBXFilePath; std::filesystem::path fsPath(FBXFilePath.ToWideString()); OutFBXInfo.FileDirectory = fsPath.parent_path().wstring().c_str();
     FbxNode* RootNode = Scene->GetRootNode();
     if (!RootNode) return false;
+    
+    // 일단 박아둠.
+    LoadFbxAnimation(Scene, OutAnimSequence);
 
     TMap<FbxSurfaceMaterial*, FName> MaterialPtrToNameMap; OutFBXInfo.Materials.Empty();
     int NumTotalNodes = Scene->GetNodeCount();
@@ -1421,7 +1428,7 @@ bool FFBXLoader::ConvertToSkeletalMesh(const TArray<FBX::MeshRawData>& AllRawMes
         CombinedCpSkinData[cpIdx].NormalizeWeights(MAX_BONE_INFLUENCES);
     }
 
-    OutSkeletalMeshRenderData.BindPoseVertices.Empty();
+    OutSkeletalMeshRenderData.Vertices.Empty();
     OutSkeletalMeshRenderData.Indices.Empty();
     std::unordered_map<FSkeletalMeshVertex, uint32> UniqueFinalVertices;
     uint32 FinalVertexIndexCounter = 0;
@@ -1491,7 +1498,7 @@ bool FFBXLoader::ConvertToSkeletalMesh(const TArray<FBX::MeshRawData>& AllRawMes
         else
         {
             uint32 NewIndex = FinalVertexIndexCounter++;
-            OutSkeletalMeshRenderData.BindPoseVertices.Add(CurrentFinalVertex);
+            OutSkeletalMeshRenderData.Vertices.Add(CurrentFinalVertex);
             UniqueFinalVertices[CurrentFinalVertex] = NewIndex;
             OutSkeletalMeshRenderData.Indices.Add(NewIndex);
         }
@@ -1564,9 +1571,9 @@ bool FFBXLoader::ConvertToSkeletalMesh(const TArray<FBX::MeshRawData>& AllRawMes
 
     // Calculate Bounding Box
     TArray<FVector> PositionsForBoundsCalculation;
-    PositionsForBoundsCalculation.Reserve(OutSkeletalMeshRenderData.BindPoseVertices.Num());
+    PositionsForBoundsCalculation.Reserve(OutSkeletalMeshRenderData.Vertices.Num());
 
-    for (const FSkeletalMeshVertex& VertexToSkinForBounds : OutSkeletalMeshRenderData.BindPoseVertices)
+    for (const FSkeletalMeshVertex& VertexToSkinForBounds : OutSkeletalMeshRenderData.Vertices)
     {
         FVector FinalPosForBounds = FVector::ZeroVector;
         bool bWasSkinned = false; // 실제로 스키닝 계산이 수행되었는지
@@ -1610,7 +1617,6 @@ bool FFBXLoader::ConvertToSkeletalMesh(const TArray<FBX::MeshRawData>& AllRawMes
     }
     FFBXLoader::ComputeBoundingBox(TempVerticesForBounds, OutSkeletalMeshRenderData.Bounds.MinLocation, OutSkeletalMeshRenderData.Bounds.MaxLocation);
 
-
     return true;
 }
 
@@ -1649,34 +1655,54 @@ void FFBXLoader::ComputeBoundingBox(const TArray<FSkeletalMeshVertex>& InVertice
 
 void FFBXLoader::CalculateTangent(FSkeletalMeshVertex& PivotVertex, const FSkeletalMeshVertex& Vertex1, const FSkeletalMeshVertex& Vertex2) { /* TODO: Implement if needed */ }
 
+bool FManagerFBX::LoadFBX(const FString& InFilePath, FFbxLoadResult& OutResult)
+{
+    FWString MeshKey = InFilePath.ToWideString();
+
+    USkeletalMesh* NewMesh = FObjectFactory::ConstructObject<USkeletalMesh>(nullptr);
+    NewMesh->Skeleton = FObjectFactory::ConstructObject<USkeleton>(NewMesh); // Outer를 NewMesh로 설정 예시
+
+    UAnimSequence* NewAnimSequence = nullptr;
+
+    FSkeletalMeshRenderData* RenderData = LoadFBXSkeletalMeshAsset(InFilePath, NewMesh->Skeleton, NewAnimSequence);
+    if (!RenderData)
+    {
+        if (NewAnimSequence)
+        {
+            GUObjectArray.MarkRemoveObject(NewAnimSequence);
+        }
+        GUObjectArray.MarkRemoveObject(NewMesh->Skeleton);
+        GUObjectArray.MarkRemoveObject(NewMesh);
+        return false;
+    }
+    
+    NewMesh->SetData(RenderData);
+
+    OutResult.SkeletalMeshes.Add(NewMesh);
+    if (NewAnimSequence)
+    {
+        OutResult.Animations.Add(NewAnimSequence);
+    }
+    return true;
+}
+
 // --- FManagerFBX Static Method Implementations ---
-FSkeletalMeshRenderData* FManagerFBX::LoadFBXSkeletalMeshAsset(const FString& PathFileName, USkeleton* OutSkeleton)
+FSkeletalMeshRenderData* FManagerFBX::LoadFBXSkeletalMeshAsset(const FString& PathFileName, USkeleton* OutSkeleton, UAnimSequence*& OutAnimSequence)
 {
     using namespace FBX;
     if (!OutSkeleton) return nullptr; // USkeleton 객체 필요
 
-    FSkeletalMeshRenderData** FoundDataPtr = SkeletalMeshRenderDataMap.Find(PathFileName);
-
-    if (FoundDataPtr)
-    {
-        // 캐시된 RenderData가 있으면, USkeleton 정보만 채워야 할 수도 있음
-        // TODO: 캐시된 RenderData와 함께 USkeleton을 어떻게 처리할지 정책 결정 필요
-        //       간단하게는 캐시 히트 시에도 파싱/변환을 다시 수행하거나,
-        //       캐시된 RenderData에서 스켈레톤 정보를 읽어 OutSkeleton을 채우는 로직 추가
-        // 여기서는 일단 캐시 히트 시 바로 반환 (USkeleton 채우는 로직 누락 가능성)
-        return *FoundDataPtr;
-    }
-
     FBXInfo ParsedInfo;
-    if (!FFBXLoader::ParseFBX(PathFileName, ParsedInfo)) return nullptr;
+    if (!FFBXLoader::ParseFBX(PathFileName, ParsedInfo, OutAnimSequence)) return nullptr;
     if (ParsedInfo.Meshes.IsEmpty()) return nullptr;
+    
     FSkeletalMeshRenderData* NewRenderData = new FSkeletalMeshRenderData();
     if (!FFBXLoader::ConvertToSkeletalMesh(ParsedInfo.Meshes, ParsedInfo, *NewRenderData, OutSkeleton))
     {
         delete NewRenderData;
         return nullptr;
     }
-    SkeletalMeshRenderDataMap.Add(PathFileName, NewRenderData);
+    
     return NewRenderData;
 }
 
@@ -1718,37 +1744,162 @@ UMaterial* FManagerFBX::CreateMaterial(const FFbxMaterialInfo& MaterialInfo)
 
 UMaterial* FManagerFBX::GetMaterial(const FString& InName) { UMaterial** Ptr = MaterialMap.Find(InName); return Ptr ? *Ptr : nullptr; }
 
-USkeletalMesh* FManagerFBX::CreateSkeletalMesh(const FString& InFilePath)
+void FFBXLoader::LoadFbxAnimation(FbxScene* InScene, UAnimSequence*& OutAnimSequence)
 {
-    FWString MeshKey = InFilePath.ToWideString();
-
-    if (SkeletalMeshMap.Contains(MeshKey))
-        return SkeletalMeshMap[MeshKey];
-
-    USkeletalMesh* NewMesh = FObjectFactory::ConstructObject<USkeletalMesh>(nullptr);
-    NewMesh->Skeleton = FObjectFactory::ConstructObject<USkeleton>(NewMesh); // Outer를 NewMesh로 설정 예시
-    if (!NewMesh->Skeleton)
+    int animStackCount = InScene->GetSrcObjectCount<FbxAnimStack>();
+    // int animStackCount = InScene->GetMemberCount<FbxAnimStack>();
+    for (int i = 0; i < animStackCount; ++i)
     {
-        return nullptr;
+        FbxAnimStack* AnimStack = InScene->GetSrcObject<FbxAnimStack>(i);
+        // FbxAnimStack* AnimStack = InScene->GetMember<FbxAnimStack>(i);
+        
+        TArray<FBoneAnimationTrack> BoneTracks;
+        FAnimationCurveData CurveData = {};
+        int32 TotalKeyCount = 0;
+        
+        ExtractCurveData(AnimStack, InScene, BoneTracks, CurveData, TotalKeyCount);
+
+        bool bBoneTrackExist = BoneTracks.Num() > 0;
+        bool bCurveDataExist = CurveData.TransformCurves.Num() > 0 && CurveData.FloatCurves.Num() > 0;
+        
+        
+        if (bBoneTrackExist || bCurveDataExist)
+        {
+            //UAssetManager::Get()
+            OutAnimSequence = FObjectFactory::ConstructObject<UAnimSequence>(nullptr);
+            UAnimDataModel* AnimDataModel = FObjectFactory::ConstructObject<UAnimDataModel>(nullptr);
+            OutAnimSequence->SetAnimDataModel(AnimDataModel);
+
+            if (bBoneTrackExist)
+            {
+                AnimDataModel->SetBoneAnimationTracks(BoneTracks);
+            }
+
+            if (bCurveDataExist)
+            {
+                AnimDataModel->SetCurveData(CurveData);
+            }
+
+
+            const FbxTime::EMode TimeMode = InScene->GetGlobalSettings().GetTimeMode();
+            const FbxTimeSpan TimeSpan = AnimStack->GetLocalTimeSpan();
+            const FbxTime StartTime = TimeSpan.GetStart();
+            const FbxTime EndTime = TimeSpan.GetStop();
+
+            const double FrameRate = FbxTime::GetFrameRate(TimeMode);
+            const int32 NumFrames = (int32)((EndTime.GetSecondDouble() - StartTime.GetSecondDouble()) * FrameRate) + 1;
+            
+            AnimDataModel->SetPlayLength(EndTime.GetSecondDouble() - StartTime.GetSecondDouble());
+            AnimDataModel->SetFrameRate(FFrameRate((int32)FrameRate, 1));
+            AnimDataModel->SetNumberOfFrames(NumFrames);
+            AnimDataModel->SetNumberOfKeys(TotalKeyCount);
+        }
     }
-
-    FSkeletalMeshRenderData* RenderData = LoadFBXSkeletalMeshAsset(InFilePath, NewMesh->Skeleton);
-    if (!RenderData)
-    {
-        return nullptr;
-    }
-
-    NewMesh->SetData(RenderData);
-
-    SkeletalMeshMap.Add(MeshKey, NewMesh);
-    return NewMesh;
 }
 
-const TMap<FWString, USkeletalMesh*>& FManagerFBX::GetSkeletalMeshes() { return SkeletalMeshMap; }
-USkeletalMesh* FManagerFBX::GetSkeletalMesh(const FWString& InName)
+void FFBXLoader::ExtractCurveData(FbxAnimStack* AnimStack, FbxScene* Scene, TArray<FBoneAnimationTrack>& OutBoneTracks, FAnimationCurveData& OutCurveData, int32& OutTotalKeyCount)
 {
-    if (SkeletalMeshMap.Contains(InName))
-        return SkeletalMeshMap[InName];
+    const FbxTime::EMode TimeMode = Scene->GetGlobalSettings().GetTimeMode();
+    const FbxTimeSpan TimeSpan = AnimStack->GetLocalTimeSpan();
+    const FbxTime StartTime = TimeSpan.GetStart();
+    const FbxTime EndTime = TimeSpan.GetStop();
 
-    return CreateSkeletalMesh(FString(InName.c_str()));
+    const double FrameRate = FbxTime::GetFrameRate(TimeMode);
+    const int32 NumFrames = (int32)((EndTime.GetSecondDouble() - StartTime.GetSecondDouble()) * FrameRate) + 1;
+    
+    // Test
+    TraverseNodeBoneTrack(Scene->GetRootNode(), OutBoneTracks, OutTotalKeyCount, TimeMode, NumFrames);
+
+    // Test
+    FbxAnimLayer* AnimLayer = AnimStack->GetMember<FbxAnimLayer>(0); // 첫 레이어만 사용
+    TraverseNodeCurveData(Scene->GetRootNode(), AnimLayer, OutCurveData);
+}
+
+void FFBXLoader::TraverseNodeBoneTrack(FbxNode* Node, TArray<FBoneAnimationTrack>& OutBoneTracks, int32& OutTotalKeyCount, const FbxTime::EMode TimeMode, const int32 NumFrames)
+{
+    if (Node->GetSkeleton() != nullptr) // Bone일 경우
+    {        
+        //FbxAnimLayer* AnimLayer = AnimationTrack->GetMember<FbxAnimLayer>(0); // 첫 레이어만 사용
+        
+        FBoneAnimationTrack Track;
+        Track.Name = FName(Node->GetName());
+
+        for (int32 FrameIdx = 0; FrameIdx < NumFrames; ++FrameIdx)
+        {
+            FbxTime CurrentTime;
+            CurrentTime.SetFrame(FrameIdx, TimeMode);
+
+            const FbxAMatrix LocalTransform = Node->EvaluateLocalTransform(CurrentTime);
+
+            FbxVector4 FbxTranslate = LocalTransform.GetT();
+            FVector Position = FVector(FbxTranslate[0], FbxTranslate[1], FbxTranslate[2]);
+
+            // w, x, y, z임
+            FbxQuaternion FbxQuat = LocalTransform.GetQ();
+
+            FQuat Rotation = FQuat(FbxQuat[0], FbxQuat[1], FbxQuat[2], FbxQuat[3]);
+
+            FbxVector4 FbxScale = LocalTransform.GetS();
+
+            FVector Scale = FVector(FbxScale[0], FbxScale[1], FbxScale[2]);
+
+            Track.InternalTrackData.PosKeys.Add(Position);
+            Track.InternalTrackData.RotKeys.Add(Rotation);
+            Track.InternalTrackData.ScaleKeys.Add(Scale);
+            
+            ++OutTotalKeyCount;
+            
+        }
+
+        OutBoneTracks.Add(Track);
+    }
+
+    // 재귀 순회
+    for (int32 i = 0; i < Node->GetChildCount(); ++i)
+    {
+        TraverseNodeBoneTrack(Node->GetChild(i), OutBoneTracks, OutTotalKeyCount, TimeMode, NumFrames);
+    }
+}
+
+void FFBXLoader::TraverseNodeCurveData(FbxNode* Node, FbxAnimLayer* AnimLayer, FAnimationCurveData& OutCurveData)
+{
+    FbxString NodeName = Node->GetName();
+
+    
+    // 트랜슬레이션
+    FbxAnimCurve* tX = Node->LclTranslation.GetCurve(AnimLayer, FBXSDK_CURVENODE_COMPONENT_X);
+    FbxAnimCurve* tY = Node->LclTranslation.GetCurve(AnimLayer, FBXSDK_CURVENODE_COMPONENT_Y);
+    FbxAnimCurve* tZ = Node->LclTranslation.GetCurve(AnimLayer, FBXSDK_CURVENODE_COMPONENT_Z);
+
+    // 회전
+    FbxAnimCurve* rX = Node->LclRotation.GetCurve(AnimLayer, FBXSDK_CURVENODE_COMPONENT_X);
+    FbxAnimCurve* rY = Node->LclRotation.GetCurve(AnimLayer, FBXSDK_CURVENODE_COMPONENT_Y);
+    FbxAnimCurve* rZ = Node->LclRotation.GetCurve(AnimLayer, FBXSDK_CURVENODE_COMPONENT_Z);
+
+    // 스케일
+    FbxAnimCurve* sX = Node->LclScaling.GetCurve(AnimLayer, FBXSDK_CURVENODE_COMPONENT_X);
+    FbxAnimCurve* sY = Node->LclScaling.GetCurve(AnimLayer, FBXSDK_CURVENODE_COMPONENT_Y);
+    FbxAnimCurve* sZ = Node->LclScaling.GetCurve(AnimLayer, FBXSDK_CURVENODE_COMPONENT_Z);
+
+    //if (tX =)
+    FTransformCurve TransformCurve;
+
+    if (tX)
+    {
+        for (int k = 0; k < tX->KeyGetCount(); ++k)
+        {
+            float time = (float)tX->KeyGetTime(k).GetSecondDouble();
+            float value = tX->KeyGetValue(k);
+            TransformCurve.TranslationCurve.FloatCurves[static_cast<int32>(FVectorCurve::EIndex::X)].AddKey(time, value);
+            UE_LOG(ELogLevel::Display, "Node: %s | Time: %.3f | TX: %.3f\n", NodeName.Buffer(), time, value);
+        }        
+    }
+    
+
+    // 자식 노드 순회
+    for (int i = 0; i < Node->GetChildCount(); ++i) {
+        TraverseNodeCurveData(Node->GetChild(i), AnimLayer, OutCurveData);
+    }
+    
+    // TODO OutCurveData.TransformCurves.Add(New Curve)
 }

@@ -131,7 +131,7 @@ void FSubRenderer::RenderMesh()
     UINT Offset = 0;
 
     FVertexInfo VertexInfo;
-    BufferManager->CreateDynamicVertexBuffer(RenderData->MeshName, RenderData->BindPoseVertices, VertexInfo);
+    BufferManager->CreateDynamicVertexBuffer(RenderData->MeshName, RenderData->Vertices, VertexInfo);
 
     Graphics->DeviceContext->IASetVertexBuffers(0, 1, &VertexInfo.VertexBuffer, &Stride, &Offset);
 
