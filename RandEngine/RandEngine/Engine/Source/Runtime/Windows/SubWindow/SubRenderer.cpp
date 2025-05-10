@@ -1,4 +1,4 @@
-﻿#include "SubRenderer.h"
+#include "SubRenderer.h"
 
 #include "RendererHelpers.h"
 #include "StaticMeshRenderPass.h"
@@ -7,7 +7,7 @@
 #include "D3D11RHI/GraphicDevice.h"
 #include "Engine/Asset/SkeletalMeshAsset.h"
 #include "UnrealEd/EditorViewportClient.h"
-
+#include "Editor/PropertyEditor/Animation/AnimationTimelinePanel.h"
 FSubRenderer::~FSubRenderer()
 {
     Release();
@@ -63,6 +63,7 @@ void FSubRenderer::Initialize(FGraphicsDevice* InGraphics, FDXDBufferManager* In
         // TODO: 적절한 오류 처리
         return;
     }
+
 }
 
 void FSubRenderer::Release()
@@ -91,14 +92,12 @@ void FSubRenderer::PrepareRender(FEditorViewportClient* Viewport) const
     // Clear RenderTarget
     Graphics->DeviceContext->ClearRenderTargetView(Graphics->BackBufferRTV, Graphics->ClearColor);
 }
-
 void FSubRenderer::Render()
 {
     if (PreviewSkeletalMesh == nullptr)
     {
         return;
     }
-
     // 셰이더 설정
     ID3D11VertexShader* vertexShader = ShaderManager->GetVertexShaderByKey(L"StaticMeshVertexShader");
     ID3D11InputLayout* inputLayout = ShaderManager->GetInputLayoutByKey(L"StaticMeshVertexShader"); // VS와 함께 생성했으므로 같은 키 사용
@@ -119,25 +118,12 @@ void FSubRenderer::Render()
     UpdateConstants();
 
     RenderMesh();
+
 }
 
 void FSubRenderer::RenderMesh()
 {
     FSkeletalMeshRenderData* RenderData = PreviewSkeletalMesh->GetRenderData();
-
-    // if (!bOnlyOnce)
-    // {
-    //     FVector Target = (RenderData->BoundingBoxMax + RenderData->BoundingBoxMin) * 0.5f;
-    //     FVector Extent = RenderData->BoundingBoxMax - RenderData->BoundingBoxMin;
-    //     Camera.SetTargetPosition(Target.X, Target.Y, Target.Z);
-    //     
-    //     float MaxOff = std::max(std::max(Extent.X, Extent.Y), Extent.Z);
-    //     Camera.SetTargetZOffset(MaxOff);
-    //
-    //     Camera.UpdateViewMatrix();
-    //     Camera.UpdateCamera();
-    //     bOnlyOnce = true;
-    // }
     
     TArray<FStaticMaterial*> RenderMaterial = PreviewSkeletalMesh->GetMaterials();
     

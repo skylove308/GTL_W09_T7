@@ -505,7 +505,6 @@ LRESULT CALLBACK FEngineLoop::AppWndProc(HWND hWnd, uint32 Msg, WPARAM wParam, L
             ImGui::SetCurrentContext(GEngineLoop.SkeletalViewerSubEngine->SubUI->Context);
             GEngineLoop.CurrentImGuiContext = ImGui::GetCurrentContext();
             return 0;
-            return 0;
         default:
             return DefWindowProc(hWnd, Msg, wParam, lParam);
         }
@@ -545,7 +544,6 @@ LRESULT CALLBACK FEngineLoop::AppWndProc(HWND hWnd, uint32 Msg, WPARAM wParam, L
             if (ImGui::GetCurrentContext() == nullptr) break; 
             ImGui::SetCurrentContext(GEngineLoop.AnimationViewerSubEngine->SubUI->Context);
             GEngineLoop.CurrentImGuiContext = ImGui::GetCurrentContext();
-            return 0;
             return 0;
         default:
             return DefWindowProc(hWnd, Msg, wParam, lParam);
