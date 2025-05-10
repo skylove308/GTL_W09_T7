@@ -1,9 +1,8 @@
-﻿#include "SkeletalViewerPanel.h"
-
-#include "Components/Mesh/SkeletalMeshRenderData.h"
+#include "SkeletalViewerPanel.h"
 #include "Engine/Asset/SkeletalMeshAsset.h"
 #include "SubWindow/SkeletalSubEngine.h"
 #include "SubWindow/SubEngine.h"
+#include "Components/Mesh/SkeletalMesh.h"
 
 void SkeletalViewerPanel::Render()
 {
@@ -33,23 +32,45 @@ void SkeletalViewerPanel::CreateSkeletalTreeNode()
 {
     USkeletalMesh* Selected = static_cast<FSkeletalSubEngine*>(GEngineLoop.SkeletalViewerSubEngine)->SelectedSkeletalMesh;
 
-    if (Selected == nullptr) return;
+    const FReferenceSkeleton& RefSkeleton = Selected->Skeleton->ReferenceSkeleton;
+    const TArray<FBoneNode>& BoneNodes = RefSkeleton.BoneInfo;
 
-    FSkeletalHierarchyData Data = Selected->GetRenderData()->RootSkeletal;
-    
-    if (!Data.NodeName.IsEmpty() || !Data.Children.IsEmpty())
+    // 1. 뼈 계층 구조 분석
+    TMap<int32, TArray<int32>> BoneHierarchy;
+    for (int32 BoneIdx = 0; BoneIdx < BoneNodes.Num(); ++BoneIdx)
     {
-        RenderSkeletalTreeNode(Data);
+        const int32 ParentIdx = BoneNodes[BoneIdx].ParentIndex;
+        BoneHierarchy.FindOrAdd(ParentIdx).Add(BoneIdx);
+    }
+
+    // 2. 루트 본 찾기
+    const TArray<int32>& RootBones = BoneHierarchy.FindOrAdd(INDEX_NONE);
+
+    // 3. 계층 구조 렌더링
+    for (int32 RootBoneIdx : RootBones)
+    {
+        RenderBoneHierarchy(RootBoneIdx, BoneNodes, BoneHierarchy);
     }
 }
 
-void SkeletalViewerPanel::RenderSkeletalTreeNode(const FSkeletalHierarchyData& Node)
+// 재귀적 뼈 계층 구조 렌더링 함수
+void SkeletalViewerPanel::RenderBoneHierarchy(
+    int32 CurrentBoneIdx,
+    const TArray<FBoneNode>& BoneNodes,
+    const TMap<int32, TArray<int32>>& BoneHierarchy)
 {
-    if (ImGui::TreeNode(Node.NodeName.IsEmpty() ? "undefined" : GetData(Node.NodeName)))
+    const FBoneNode& CurrentBone = BoneNodes[CurrentBoneIdx];
+    const FString BoneName = CurrentBone.Name.ToString();
+
+    // 4. 트리 노드 생성 및 자식 처리
+    if (ImGui::TreeNode(BoneName.IsEmpty() ? "Unnamed Bone" : (*BoneName)))
     {
-        for (const FSkeletalHierarchyData& ChildNode : Node.Children)
+        if (BoneHierarchy.Contains(CurrentBoneIdx))
         {
-            RenderSkeletalTreeNode(ChildNode);
+            for (int32 ChildBoneIdx : BoneHierarchy[CurrentBoneIdx])
+            {
+                RenderBoneHierarchy(ChildBoneIdx, BoneNodes, BoneHierarchy);
+            }
         }
         ImGui::TreePop();
     }

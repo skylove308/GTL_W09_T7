@@ -85,6 +85,11 @@ ATransformGizmo::ATransformGizmo()
     CircleArr.Add(CircleZ);
 }
 
+void ATransformGizmo::Initialize(FEditorViewportClient* InViewport)
+{
+    AttachedViewport = InViewport;
+}
+
 void ATransformGizmo::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
@@ -122,31 +127,30 @@ void ATransformGizmo::Tick(float DeltaTime)
 
     if (TargetComponent)
     {
-        ASkeletalMeshActor* SkeletalMeshActor = Cast<ASkeletalMeshActor>(TargetComponent->GetOwner());
-        if (SkeletalMeshActor)
-        {
-            USkeletalMeshComponent* SkeletalMeshComp = Cast<USkeletalMeshComponent>(SkeletalMeshActor->GetRootComponent());
-            FSkeletalMeshRenderData* RenderData = SkeletalMeshComp->GetSkeletalMesh()->GetRenderData();
-            for (int32 i = 0; i < RenderData->SkeletonBones.Num(); ++i)
-            {
-                if (RenderData->SkeletonBones[i].ParentIndex == -1)
-                {
-                    RenderData->SkeletonBones[i].LocalBindPose = Cast<ASkeletalMeshActor>(SkeletalMeshComp->GetOwner())->BoneGizmoSceneComponents[i]->GetRelativeModelMatrix();
-                    RenderData->SkeletonBones[i].GlobalPose = RenderData->SkeletonBones[i].LocalBindPose;
-                }
-                else
-                {
-                    RenderData->SkeletonBones[i].LocalBindPose = Cast<ASkeletalMeshActor>(SkeletalMeshComp->GetOwner())->BoneGizmoSceneComponents[i]->GetRelativeModelMatrix();
-                    RenderData->SkeletonBones[i].GlobalPose = RenderData->SkeletonBones[i].LocalBindPose * FFBXManager::SkeletalMeshRenderData->SkeletonBones[RenderData->SkeletonBones[i].ParentIndex].GlobalPose;
-                }
-            }
+        // [TEMP] 삭제 필요 - 프레임마다 Gizmo기준으로 Bone업데이트 중
+        //ASkeletalMeshActor* SkeletalMeshActor = Cast<ASkeletalMeshActor>(TargetComponent->GetOwner());
+        //if (SkeletalMeshActor)
+        //{
+        //    USkeletalMeshComponent* SkeletalMeshComp = Cast<USkeletalMeshComponent>(SkeletalMeshActor->GetRootComponent());
+        //    USkeleton* Skeleton = SkeletalMeshComp->GetSkeletalMesh()->Skeleton;
 
-            FFBXLoader::ReskinVerticesCPU(
-                FFBXLoader::Mesh, // 필요시 원본 FbxMesh 포인터 보존 필요
-                RenderData->SkeletonBones,
-                RenderData->Vertices
-            );
-        }
+        //    for (int32 i = 0; i < Skeleton->BoneTree.Num(); ++i)
+        //    {
+        //        if (Skeleton->BoneTree[i].ParentIndex == -1)
+        //        {
+        //            Skeleton->CurrentPose.LocalTransforms[i] = Cast<ASkeletalMeshActor>(SkeletalMeshComp->GetOwner())->BoneGizmoSceneComponents[i]->GetRelativeModelMatrix();
+        //            //Skeleton->CurrentPose.GlobalTransforms[i] = Skeleton->CurrentPose.LocalTransforms[i];
+        //        }
+        //        else
+        //        {
+        //            Skeleton->CurrentPose.LocalTransforms[i] = Cast<ASkeletalMeshActor>(SkeletalMeshComp->GetOwner())->BoneGizmoSceneComponents[i]->GetRelativeModelMatrix();
+        //            //Skeleton->CurrentPose.GlobalTransforms[i] = Skeleton->CurrentPose.LocalTransforms[i] * Skeleton->CurrentPose.GlobalTransforms[i];
+        //        }
+        //    }
+
+        //    SkeletalMeshComp->GetSkeletalMesh()->UpdateWorldTransforms();
+        //    SkeletalMeshComp->GetSkeletalMesh()->UpdateAndApplySkinning();
+        //}
 
         SetActorLocation(TargetComponent->GetWorldLocation());
         if (EditorPlayer->GetCoordMode() == ECoordMode::CDM_LOCAL || EditorPlayer->GetControlMode() == EControlMode::CM_SCALE)
@@ -158,9 +162,4 @@ void ATransformGizmo::Tick(float DeltaTime)
             SetActorRotation(FRotator(0.0f, 0.0f, 0.0f));
         }
     }
-}
-
-void ATransformGizmo::Initialize(FEditorViewportClient* InViewport)
-{
-    AttachedViewport = InViewport;
 }

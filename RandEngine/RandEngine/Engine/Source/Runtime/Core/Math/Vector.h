@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <cassert>
 #include <compare>
 #include "MathUtility.h"
@@ -135,6 +135,9 @@ public:
 public:
     static FORCEINLINE FVector Zero() { return ZeroVector; }
     static FORCEINLINE FVector One() { return OneVector; }
+
+    static FVector Max(const FVector& A, const FVector& B);
+    static FVector Min(const FVector& A, const FVector& B);
 
     static FORCEINLINE FVector UnitX() { return XAxisVector; }
     static FORCEINLINE FVector UnitY() { return YAxisVector; }
@@ -497,4 +500,20 @@ inline FArchive& operator<<(FArchive& Ar, FVector& V)
     return Ar << V.X << V.Y << V.Z;
 }
 
+inline FVector FVector::Max(const FVector& A, const FVector& B)
+{
+    return FVector(
+        FMath::Max(A.X, B.X),
+        FMath::Max(A.Y, B.Y),
+        FMath::Max(A.Z, B.Z)
+    );
+}
+inline FVector FVector::Min(const FVector& A, const FVector& B)
+{
+    return FVector(
+        FMath::Min(A.X, B.X),
+        FMath::Min(A.Y, B.Y),
+        FMath::Min(A.Z, B.Z)
+    );
+}
 

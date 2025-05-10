@@ -24,13 +24,8 @@
 #include "Engine/EditorEngine.h"
 
 #include "PropertyEditor/ShowFlags.h"
-
 #include "UnrealEd/EditorViewportClient.h"
 #include "Components/Light/PointLightComponent.h"
-#include "Contents/Actors/Fish.h"
-#include "Components/Mesh/SkeletalMeshComponent.h"
-#include "Engine/Asset/SkeletalMeshAsset.h"
-
 
 FStaticMeshRenderPass::FStaticMeshRenderPass()
     : BufferManager(nullptr)
@@ -218,17 +213,6 @@ void FStaticMeshRenderPass::PrepareRenderArr()
             }
         }
     }
-
-    for (const auto iter : TObjectRange<USkeletalMeshComponent>())
-    {
-        if (!Cast<UGizmoBaseComponent>(iter) && iter->GetWorld() == GEngine->ActiveWorld)
-        {
-            if (iter->GetOwner() && !iter->GetOwner()->IsHidden())
-            {
-                SkeletalMeshComponents.Add(iter);
-            }
-        }
-    }
 }
 
 void FStaticMeshRenderPass::PrepareRenderState(const std::shared_ptr<FEditorViewportClient>& Viewport) 
@@ -329,53 +313,6 @@ void FStaticMeshRenderPass::RenderPrimitive(FStaticMeshRenderData* RenderData, T
     }
 }
 
-void FStaticMeshRenderPass::RenderPrimitive(FSkeletalMeshRenderData* RenderData, TArray<FStaticMaterial*> Materials, TArray<UMaterial*> OverrideMaterials, int SelectedSubMeshIndex) const
-{
-    UINT Stride = sizeof(FSkeletalMeshVertex);
-    UINT Offset = 0;
-
-    FVertexInfo VertexInfo;
-    BufferManager->CreateDynamicVertexBuffer(RenderData->ObjectName, RenderData->Vertices, VertexInfo);
-    BufferManager->UpdateDynamicVertexBuffer(RenderData->ObjectName, RenderData->Vertices);
-
-    Graphics->DeviceContext->IASetVertexBuffers(0, 1, &VertexInfo.VertexBuffer, &Stride, &Offset);
-
-    FIndexInfo IndexInfo;
-    BufferManager->CreateIndexBuffer(RenderData->ObjectName, RenderData->Indices, IndexInfo);
-    if (IndexInfo.IndexBuffer)
-    {
-        Graphics->DeviceContext->IASetIndexBuffer(IndexInfo.IndexBuffer, DXGI_FORMAT_R32_UINT, 0);
-    }
-
-    if (RenderData->MaterialSubsets.Num() == 0)
-    {
-        Graphics->DeviceContext->DrawIndexed(RenderData->Indices.Num(), 0, 0);
-        return;
-    }
-
-    for (int SubMeshIndex = 0; SubMeshIndex < RenderData->MaterialSubsets.Num(); SubMeshIndex++)
-    {
-        uint32 MaterialIndex = RenderData->MaterialSubsets[SubMeshIndex].MaterialIndex;
-
-        FSubMeshConstants SubMeshData = (SubMeshIndex == SelectedSubMeshIndex) ? FSubMeshConstants(true) : FSubMeshConstants(false);
-
-        BufferManager->UpdateConstantBuffer(TEXT("FSubMeshConstants"), SubMeshData);
-
-        if (OverrideMaterials[MaterialIndex] != nullptr)
-        {
-            MaterialUtils::UpdateMaterial(BufferManager, Graphics, OverrideMaterials[MaterialIndex]->GetMaterialInfo());
-        }
-        else
-        {
-            MaterialUtils::UpdateMaterial(BufferManager, Graphics, Materials[MaterialIndex]->Material->GetMaterialInfo());
-        }
-
-        uint32 StartIndex = RenderData->MaterialSubsets[SubMeshIndex].IndexStart;
-        uint32 IndexCount = RenderData->MaterialSubsets[SubMeshIndex].IndexCount;
-        Graphics->DeviceContext->DrawIndexed(IndexCount, StartIndex, 0);
-    }
-}
-
 void FStaticMeshRenderPass::RenderPrimitive(ID3D11Buffer* pBuffer, UINT numVertices) const
 {
     UINT Stride = sizeof(FStaticMeshVertex);
@@ -430,67 +367,7 @@ void FStaticMeshRenderPass::RenderAllStaticMeshes(const std::shared_ptr<FEditorV
 
         UpdateObjectConstant(WorldMatrix, UUIDColor, bIsSelected);
 
-#pragma region W08
-        FDiffuseMultiplier DM = {};
-        DM.DiffuseMultiplier = 0.f;
-        if (AFish* Fish = Cast<AFish>(Comp->GetOwner()))
-        {
-            if (!Fish->IsDead())
-            {
-                DM.DiffuseMultiplier = 1.f - Fish->GetHealthPercent();
-            }
-        }
-        DM.DiffuseOverrideColor = FVector(0.55f, 0.45f, 0.067f);
-        BufferManager->UpdateConstantBuffer(TEXT("FDiffuseMultiplier"), DM);
-#pragma endregion W08
-
         RenderPrimitive(RenderData, Comp->GetStaticMesh()->GetMaterials(), Comp->GetOverrideMaterials(), Comp->GetselectedSubMeshIndex());
-
-        if (Viewport->GetShowFlag() & static_cast<uint64>(EEngineShowFlags::SF_AABB))
-        {
-            FEngineLoop::PrimitiveDrawBatch.AddAABBToBatch(Comp->GetBoundingBox(), Comp->GetWorldLocation(), WorldMatrix);
-        }
-    }
-}
-
-void FStaticMeshRenderPass::RenderAllSkeletalMeshes(const std::shared_ptr<FEditorViewportClient>& Viewport)
-{
-    for (USkeletalMeshComponent* Comp : SkeletalMeshComponents)
-    {
-        if (!Comp || !Comp->GetSkeletalMesh())
-        {
-            continue;
-        }
-
-        FSkeletalMeshRenderData* RenderData = Comp->GetSkeletalMesh()->GetRenderData();
-        if (RenderData == nullptr)
-        {
-            continue;
-        }
-
-        UEditorEngine* Engine = Cast<UEditorEngine>(GEngine);
-
-        USceneComponent* SelectedComponent = Engine->GetSelectedComponent();
-        AActor* SelectedActor = Engine->GetSelectedActor();
-
-        USceneComponent* TargetComponent = nullptr;
-
-        if (SelectedComponent != nullptr)
-        {
-            TargetComponent = SelectedComponent;
-        }
-        else if (SelectedActor != nullptr)
-        {
-            TargetComponent = SelectedActor->GetRootComponent();
-        }
-
-        FMatrix WorldMatrix = Comp->GetWorldMatrix();
-        FVector4 UUIDColor = Comp->EncodeUUID() / 255.0f;
-        const bool bIsSelected = (Engine && TargetComponent == Comp);
-
-        UpdateObjectConstant(WorldMatrix, UUIDColor, bIsSelected);
-
-        RenderPrimitive(RenderData, Comp->GetSkeletalMesh()->GetMaterials(), Comp->GetOverrideMaterials(), Comp->GetselectedSubMeshIndex());
 
         if (Viewport->GetShowFlag() & static_cast<uint64>(EEngineShowFlags::SF_AABB))
         {
@@ -506,7 +383,6 @@ void FStaticMeshRenderPass::Render(const std::shared_ptr<FEditorViewportClient>&
     PrepareRenderState(Viewport);
 
     RenderAllStaticMeshes(Viewport);
-    RenderAllSkeletalMeshes(Viewport);
 
     // 렌더 타겟 해제
     Graphics->DeviceContext->OMSetRenderTargets(0, nullptr, nullptr);
@@ -546,7 +422,6 @@ void FStaticMeshRenderPass::Render(const std::shared_ptr<FEditorViewportClient>&
 void FStaticMeshRenderPass::ClearRenderArr()
 {
     StaticMeshComponents.Empty();
-    SkeletalMeshComponents.Empty();
 }
 
 

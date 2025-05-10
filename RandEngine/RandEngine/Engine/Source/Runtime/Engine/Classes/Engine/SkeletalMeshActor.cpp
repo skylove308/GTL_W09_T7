@@ -7,33 +7,32 @@ ASkeletalMeshActor::ASkeletalMeshActor()
 {
     SkeletalMeshComponent = AddComponent<USkeletalMeshComponent>();
     RootComponent = SkeletalMeshComponent;
-
-    USkeletalMesh* DefaultMesh = FFBXManager::CreateSkeletalMesh("Contents/Mutant.fbx");
-    if (DefaultMesh)
+    SkeletalMeshComponent->SetSkeletalMesh(FManagerFBX::GetSkeletalMesh(L"Contents/Mutant.fbx"));
+    //SkeletalMeshComponent->SetSkeletalMesh(FManagerFBX::GetSkeletalMesh(L"Contents/Sharkry_NoTwist.fbx"));
+    
     {
-
-        FSkeletalMeshRenderData* RenderData = DefaultMesh->GetRenderData();
+        FSkeletalMeshRenderData* RenderData = SkeletalMeshComponent->GetSkeletalMesh()->GetRenderData();
         if (!RenderData) return;
-        SkeletalMeshComponent->SetSkeletalMesh(DefaultMesh, FBoundingBox(RenderData->BoundingBoxMin, RenderData->BoundingBoxMax));
-        for (int32 i = 0; i < RenderData->SkeletonBones.Num(); ++i)
+        USkeleton* Skeleton = SkeletalMeshComponent->GetSkeletalMesh()->Skeleton;
+        for (int32 i = 0; i < Skeleton->BoneTree.Num(); ++i)
         {
-            if (RenderData->SkeletonBones[i].ParentIndex == -1)
+            if (Skeleton->BoneTree[i].ParentIndex == -1)
             {
                 // Create a bone gizmo for the root bone
-                BoneGizmoSceneComponent = AddComponent<USceneComponent>(RenderData->SkeletonBones[i].Name);
+                BoneGizmoSceneComponent = AddComponent<USceneComponent>(Skeleton->BoneTree[i].Name);
                 BoneGizmoSceneComponents.Add(BoneGizmoSceneComponent);
                 BoneGizmoSceneComponent->SetupAttachment(RootComponent);
-                BoneGizmoSceneComponents[i]->SetRelativeLocation(RenderData->SkeletonBones[i].LocalBindPose.GetTranslationVector());
-                BoneGizmoSceneComponents[i]->SetRelativeRotation(RenderData->SkeletonBones[i].LocalBindPose.GetRotationVector());
+                BoneGizmoSceneComponents[i]->SetRelativeLocation(Skeleton->BoneTree[i].BindTransform.GetTranslationVector());
+                BoneGizmoSceneComponents[i]->SetRelativeRotation(Skeleton->BoneTree[i].BindTransform.GetRotationVector());
             }
             else
             {
                 // Create a bone gizmo for child bones
-                BoneGizmoSceneComponent = AddComponent<USceneComponent>(RenderData->SkeletonBones[i].Name);
+                BoneGizmoSceneComponent = AddComponent<USceneComponent>(Skeleton->BoneTree[i].Name);
                 BoneGizmoSceneComponents.Add(BoneGizmoSceneComponent);
-                BoneGizmoSceneComponent->SetupAttachment(BoneGizmoSceneComponents[RenderData->SkeletonBones[i].ParentIndex]);
-                BoneGizmoSceneComponents[i]->SetRelativeLocation(RenderData->SkeletonBones[i].LocalBindPose.GetTranslationVector());
-                BoneGizmoSceneComponents[i]->SetRelativeRotation(RenderData->SkeletonBones[i].LocalBindPose.GetRotationVector());
+                BoneGizmoSceneComponent->SetupAttachment(BoneGizmoSceneComponents[Skeleton->BoneTree[i].ParentIndex]);
+                BoneGizmoSceneComponents[i]->SetRelativeLocation(Skeleton->BoneTree[i].BindTransform.GetTranslationVector());
+                BoneGizmoSceneComponents[i]->SetRelativeRotation(Skeleton->BoneTree[i].BindTransform.GetRotationVector());
             }
         }
     }
