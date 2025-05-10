@@ -2,18 +2,50 @@
     "Actors": [
         {
             "ActorClass": "ASkeletalMeshActor",
-            "ActorID": "ASkeletalMeshActor_277",
-            "ActorLabel": "OBJ_FBX_277",
+            "ActorID": "ASkeletalMeshActor_157",
+            "ActorLabel": "OBJ_FBX_157",
             "ActorTickInEditor": "true",
             "Components": [
                 {
                     "ComponentClass": "USceneComponent",
-                    "ComponentID": "USceneComponent_158",
+                    "ComponentID": "AnkleTip_L",
+                    "Properties": {
+                        "AttachParentID": "Left ankle",
+                        "ComponentClass": "USceneComponent",
+                        "ComponentName": "AnkleTip_L",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
+                        "ComponentOwnerClass": "ASkeletalMeshActor",
+                        "RelativeLocation": "X=0.228 Y=1.355 Z=-1.257",
+                        "RelativeRotation": "Pitch=-0.000 Yaw=0.000 Roll=63.743",
+                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
+                        "bAutoActive": "true",
+                        "bIsActive": "true"
+                    }
+                },
+                {
+                    "ComponentClass": "USceneComponent",
+                    "ComponentID": "Bone0434_Mid_Armor_Ctrl2_Jnt_Skin",
+                    "Properties": {
+                        "AttachParentID": "Chest",
+                        "ComponentClass": "USceneComponent",
+                        "ComponentName": "Bone0434_Mid_Armor_Ctrl2_Jnt_Skin",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
+                        "ComponentOwnerClass": "ASkeletalMeshActor",
+                        "RelativeLocation": "X=-0.000 Y=-1.048 Z=1.036",
+                        "RelativeRotation": "Pitch=0.000 Yaw=-0.000 Roll=13.104",
+                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
+                        "bAutoActive": "true",
+                        "bIsActive": "true"
+                    }
+                },
+                {
+                    "ComponentClass": "USceneComponent",
+                    "ComponentID": "USceneComponent_152",
                     "Properties": {
                         "AttachParentID": "nullptr",
                         "ComponentClass": "USceneComponent",
-                        "ComponentName": "USceneComponent_158",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
+                        "ComponentName": "USceneComponent_152",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
                         "ComponentOwnerClass": "ASkeletalMeshActor",
                         "RelativeLocation": "X=0.000 Y=0.000 Z=0.000",
                         "RelativeRotation": "Pitch=0.000 Yaw=0.000 Roll=-0.000",
@@ -23,127 +55,15 @@
                     }
                 },
                 {
-                    "ComponentClass": "USceneComponent",
-                    "ComponentID": "RingFinger3_L",
-                    "Properties": {
-                        "AttachParentID": "RingFinger2_L",
-                        "ComponentClass": "USceneComponent",
-                        "ComponentName": "RingFinger3_L",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
-                        "ComponentOwnerClass": "ASkeletalMeshActor",
-                        "RelativeLocation": "X=-0.000 Y=-0.000 Z=0.161",
-                        "RelativeRotation": "Pitch=0.001 Yaw=0.001 Roll=-0.001",
-                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
-                        "bAutoActive": "true",
-                        "bIsActive": "true"
-                    }
-                },
-                {
-                    "ComponentClass": "USceneComponent",
-                    "ComponentID": "HairC3",
-                    "Properties": {
-                        "AttachParentID": "HairC1",
-                        "ComponentClass": "USceneComponent",
-                        "ComponentName": "HairC3",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
-                        "ComponentOwnerClass": "ASkeletalMeshActor",
-                        "RelativeLocation": "X=-0.000 Y=0.000 Z=0.475",
-                        "RelativeRotation": "Pitch=-1.761 Yaw=-3.590 Roll=19.903",
-                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
-                        "bAutoActive": "true",
-                        "bIsActive": "true"
-                    }
-                },
-                {
-                    "ComponentClass": "USceneComponent",
-                    "ComponentID": "Right knee",
-                    "Properties": {
-                        "AttachParentID": "Right leg",
-                        "ComponentClass": "USceneComponent",
-                        "ComponentName": "Right knee",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
-                        "ComponentOwnerClass": "ASkeletalMeshActor",
-                        "RelativeLocation": "X=0.000 Y=0.000 Z=4.293",
-                        "RelativeRotation": "Pitch=0.000 Yaw=0.000 Roll=3.350",
-                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
-                        "bAutoActive": "true",
-                        "bIsActive": "true"
-                    }
-                },
-                {
-                    "ComponentClass": "USceneComponent",
-                    "ComponentID": "Spine",
-                    "Properties": {
-                        "AttachParentID": "Hips",
-                        "ComponentClass": "USceneComponent",
-                        "ComponentName": "Spine",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
-                        "ComponentOwnerClass": "ASkeletalMeshActor",
-                        "RelativeLocation": "X=-0.000 Y=0.000 Z=0.563",
-                        "RelativeRotation": "Pitch=0.000 Yaw=-0.000 Roll=5.357",
-                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
-                        "bAutoActive": "true",
-                        "bIsActive": "true"
-                    }
-                },
-                {
-                    "ComponentClass": "USceneComponent",
-                    "ComponentID": "HairG3",
-                    "Properties": {
-                        "AttachParentID": "HairG1",
-                        "ComponentClass": "USceneComponent",
-                        "ComponentName": "HairG3",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
-                        "ComponentOwnerClass": "ASkeletalMeshActor",
-                        "RelativeLocation": "X=0.000 Y=0.000 Z=0.772",
-                        "RelativeRotation": "Pitch=20.351 Yaw=16.307 Roll=-5.284",
-                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
-                        "bAutoActive": "true",
-                        "bIsActive": "true"
-                    }
-                },
-                {
-                    "ComponentClass": "USceneComponent",
-                    "ComponentID": "HairA5",
-                    "Properties": {
-                        "AttachParentID": "HairA3",
-                        "ComponentClass": "USceneComponent",
-                        "ComponentName": "HairA5",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
-                        "ComponentOwnerClass": "ASkeletalMeshActor",
-                        "RelativeLocation": "X=-0.000 Y=0.000 Z=0.572",
-                        "RelativeRotation": "Pitch=0.000 Yaw=-0.000 Roll=0.000",
-                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
-                        "bAutoActive": "true",
-                        "bIsActive": "true"
-                    }
-                },
-                {
-                    "ComponentClass": "USceneComponent",
-                    "ComponentID": "Left arm",
-                    "Properties": {
-                        "AttachParentID": "Left shoulder",
-                        "ComponentClass": "USceneComponent",
-                        "ComponentName": "Left arm",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
-                        "ComponentOwnerClass": "ASkeletalMeshActor",
-                        "RelativeLocation": "X=0.000 Y=-0.000 Z=0.711",
-                        "RelativeRotation": "Pitch=14.665 Yaw=21.001 Roll=-19.050",
-                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
-                        "bAutoActive": "true",
-                        "bIsActive": "true"
-                    }
-                },
-                {
                     "ComponentClass": "USkeletalMeshComponent",
-                    "ComponentID": "USkeletalMeshComponent_159",
+                    "ComponentID": "USkeletalMeshComponent_153",
                     "Properties": {
                         "AABB_max": "X=4.080 Y=3.503 Z=18.203",
                         "AABB_min": "X=-6.283 Y=-3.739 Z=0.011",
-                        "AttachParentID": "USkeletalMeshComponent_279",
+                        "AttachParentID": "USkeletalMeshComponent_159",
                         "ComponentClass": "USkeletalMeshComponent",
-                        "ComponentName": "USkeletalMeshComponent_159",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
+                        "ComponentName": "USkeletalMeshComponent_153",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
                         "ComponentOwnerClass": "ASkeletalMeshActor",
                         "RelativeLocation": "X=0.000 Y=0.000 Z=0.000",
                         "RelativeRotation": "Pitch=0.000 Yaw=0.000 Roll=-0.000",
@@ -156,47 +76,47 @@
                 },
                 {
                     "ComponentClass": "USceneComponent",
+                    "ComponentID": "Left knee",
+                    "Properties": {
+                        "AttachParentID": "Left leg",
+                        "ComponentClass": "USceneComponent",
+                        "ComponentName": "Left knee",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
+                        "ComponentOwnerClass": "ASkeletalMeshActor",
+                        "RelativeLocation": "X=0.000 Y=0.000 Z=4.293",
+                        "RelativeRotation": "Pitch=-0.000 Yaw=0.000 Roll=3.350",
+                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
+                        "bAutoActive": "true",
+                        "bIsActive": "true"
+                    }
+                },
+                {
+                    "ComponentClass": "USceneComponent",
+                    "ComponentID": "Bone0413_Chest_R",
+                    "Properties": {
+                        "AttachParentID": "Chest",
+                        "ComponentClass": "USceneComponent",
+                        "ComponentName": "Bone0413_Chest_R",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
+                        "ComponentOwnerClass": "ASkeletalMeshActor",
+                        "RelativeLocation": "X=-0.596 Y=0.510 Z=1.417",
+                        "RelativeRotation": "Pitch=0.000 Yaw=180.000 Roll=-103.104",
+                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
+                        "bAutoActive": "true",
+                        "bIsActive": "true"
+                    }
+                },
+                {
+                    "ComponentClass": "USceneComponent",
                     "ComponentID": "Hips",
                     "Properties": {
-                        "AttachParentID": "USkeletalMeshComponent_159",
+                        "AttachParentID": "USkeletalMeshComponent_153",
                         "ComponentClass": "USceneComponent",
                         "ComponentName": "Hips",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
                         "ComponentOwnerClass": "ASkeletalMeshActor",
                         "RelativeLocation": "X=0.000 Y=0.278 Z=9.772",
                         "RelativeRotation": "Pitch=0.000 Yaw=0.000 Roll=-0.000",
-                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
-                        "bAutoActive": "true",
-                        "bIsActive": "true"
-                    }
-                },
-                {
-                    "ComponentClass": "USceneComponent",
-                    "ComponentID": "HairG1",
-                    "Properties": {
-                        "AttachParentID": "Head",
-                        "ComponentClass": "USceneComponent",
-                        "ComponentName": "HairG1",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
-                        "ComponentOwnerClass": "ASkeletalMeshActor",
-                        "RelativeLocation": "X=0.745 Y=0.467 Z=1.623",
-                        "RelativeRotation": "Pitch=11.251 Yaw=14.564 Roll=-165.257",
-                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
-                        "bAutoActive": "true",
-                        "bIsActive": "true"
-                    }
-                },
-                {
-                    "ComponentClass": "USceneComponent",
-                    "ComponentID": "Right leg",
-                    "Properties": {
-                        "AttachParentID": "Hips",
-                        "ComponentClass": "USceneComponent",
-                        "ComponentName": "Right leg",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
-                        "ComponentOwnerClass": "ASkeletalMeshActor",
-                        "RelativeLocation": "X=-0.882 Y=-0.091 Z=-0.277",
-                        "RelativeRotation": "Pitch=0.000 Yaw=0.000 Roll=-178.284",
                         "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
                         "bAutoActive": "true",
                         "bIsActive": "true"
@@ -209,7 +129,7 @@
                         "AttachParentID": "Hips",
                         "ComponentClass": "USceneComponent",
                         "ComponentName": "Left leg",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
                         "ComponentOwnerClass": "ASkeletalMeshActor",
                         "RelativeLocation": "X=0.882 Y=-0.091 Z=-0.277",
                         "RelativeRotation": "Pitch=0.000 Yaw=0.000 Roll=-178.284",
@@ -220,15 +140,15 @@
                 },
                 {
                     "ComponentClass": "USceneComponent",
-                    "ComponentID": "Left knee",
+                    "ComponentID": "HairD5",
                     "Properties": {
-                        "AttachParentID": "Left leg",
+                        "AttachParentID": "HairD3",
                         "ComponentClass": "USceneComponent",
-                        "ComponentName": "Left knee",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
+                        "ComponentName": "HairD5",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
                         "ComponentOwnerClass": "ASkeletalMeshActor",
-                        "RelativeLocation": "X=0.000 Y=0.000 Z=4.293",
-                        "RelativeRotation": "Pitch=-0.000 Yaw=0.000 Roll=3.350",
+                        "RelativeLocation": "X=0.000 Y=0.000 Z=0.507",
+                        "RelativeRotation": "Pitch=22.658 Yaw=-10.915 Roll=17.600",
                         "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
                         "bAutoActive": "true",
                         "bIsActive": "true"
@@ -236,15 +156,111 @@
                 },
                 {
                     "ComponentClass": "USceneComponent",
-                    "ComponentID": "Arm1_R",
+                    "ComponentID": "Arm1_L",
                     "Properties": {
                         "AttachParentID": "Chest",
                         "ComponentClass": "USceneComponent",
-                        "ComponentName": "Arm1_R",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
+                        "ComponentName": "Arm1_L",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
                         "ComponentOwnerClass": "ASkeletalMeshActor",
-                        "RelativeLocation": "X=-0.339 Y=-1.039 Z=0.665",
-                        "RelativeRotation": "Pitch=19.344 Yaw=-66.442 Roll=-73.930",
+                        "RelativeLocation": "X=0.339 Y=-1.039 Z=0.665",
+                        "RelativeRotation": "Pitch=-19.342 Yaw=66.444 Roll=-73.934",
+                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
+                        "bAutoActive": "true",
+                        "bIsActive": "true"
+                    }
+                },
+                {
+                    "ComponentClass": "USceneComponent",
+                    "ComponentID": "Right leg",
+                    "Properties": {
+                        "AttachParentID": "Hips",
+                        "ComponentClass": "USceneComponent",
+                        "ComponentName": "Right leg",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
+                        "ComponentOwnerClass": "ASkeletalMeshActor",
+                        "RelativeLocation": "X=-0.882 Y=-0.091 Z=-0.277",
+                        "RelativeRotation": "Pitch=0.000 Yaw=0.000 Roll=-178.284",
+                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
+                        "bAutoActive": "true",
+                        "bIsActive": "true"
+                    }
+                },
+                {
+                    "ComponentClass": "USceneComponent",
+                    "ComponentID": "RingFinger3_R",
+                    "Properties": {
+                        "AttachParentID": "RingFinger2_R",
+                        "ComponentClass": "USceneComponent",
+                        "ComponentName": "RingFinger3_R",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
+                        "ComponentOwnerClass": "ASkeletalMeshActor",
+                        "RelativeLocation": "X=0.000 Y=-0.000 Z=0.162",
+                        "RelativeRotation": "Pitch=0.354 Yaw=2.953 Roll=3.397",
+                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
+                        "bAutoActive": "true",
+                        "bIsActive": "true"
+                    }
+                },
+                {
+                    "ComponentClass": "USceneComponent",
+                    "ComponentID": "Spine",
+                    "Properties": {
+                        "AttachParentID": "Hips",
+                        "ComponentClass": "USceneComponent",
+                        "ComponentName": "Spine",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
+                        "ComponentOwnerClass": "ASkeletalMeshActor",
+                        "RelativeLocation": "X=-0.000 Y=0.000 Z=0.563",
+                        "RelativeRotation": "Pitch=0.000 Yaw=-0.000 Roll=5.357",
+                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
+                        "bAutoActive": "true",
+                        "bIsActive": "true"
+                    }
+                },
+                {
+                    "ComponentClass": "USceneComponent",
+                    "ComponentID": "Bone0409_Chest_L",
+                    "Properties": {
+                        "AttachParentID": "Chest",
+                        "ComponentClass": "USceneComponent",
+                        "ComponentName": "Bone0409_Chest_L",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
+                        "ComponentOwnerClass": "ASkeletalMeshActor",
+                        "RelativeLocation": "X=0.596 Y=0.510 Z=1.417",
+                        "RelativeRotation": "Pitch=0.000 Yaw=180.000 Roll=-103.104",
+                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
+                        "bAutoActive": "true",
+                        "bIsActive": "true"
+                    }
+                },
+                {
+                    "ComponentClass": "USceneComponent",
+                    "ComponentID": "Right knee",
+                    "Properties": {
+                        "AttachParentID": "Right leg",
+                        "ComponentClass": "USceneComponent",
+                        "ComponentName": "Right knee",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
+                        "ComponentOwnerClass": "ASkeletalMeshActor",
+                        "RelativeLocation": "X=8.176 Y=2.860 Z=4.378",
+                        "RelativeRotation": "Pitch=0.000 Yaw=0.000 Roll=3.350",
+                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
+                        "bAutoActive": "true",
+                        "bIsActive": "true"
+                    }
+                },
+                {
+                    "ComponentClass": "USceneComponent",
+                    "ComponentID": "Bone0436_Lf_Armor_Ctrl1_Jnt_Skin",
+                    "Properties": {
+                        "AttachParentID": "Chest",
+                        "ComponentClass": "USceneComponent",
+                        "ComponentName": "Bone0436_Lf_Armor_Ctrl1_Jnt_Skin",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
+                        "ComponentOwnerClass": "ASkeletalMeshActor",
+                        "RelativeLocation": "X=0.395 Y=-0.932 Z=0.939",
+                        "RelativeRotation": "Pitch=0.000 Yaw=-0.000 Roll=13.104",
                         "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
                         "bAutoActive": "true",
                         "bIsActive": "true"
@@ -257,7 +273,7 @@
                         "AttachParentID": "Spine",
                         "ComponentClass": "USceneComponent",
                         "ComponentName": "Chest",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
                         "ComponentOwnerClass": "ASkeletalMeshActor",
                         "RelativeLocation": "X=-0.000 Y=0.000 Z=1.031",
                         "RelativeRotation": "Pitch=0.000 Yaw=0.000 Roll=-18.461",
@@ -273,7 +289,7 @@
                         "AttachParentID": "Left knee",
                         "ComponentClass": "USceneComponent",
                         "ComponentName": "Left ankle",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
                         "ComponentOwnerClass": "ASkeletalMeshActor",
                         "RelativeLocation": "X=0.000 Y=0.000 Z=4.562",
                         "RelativeRotation": "Pitch=0.000 Yaw=0.000 Roll=-68.809",
@@ -284,15 +300,15 @@
                 },
                 {
                     "ComponentClass": "USceneComponent",
-                    "ComponentID": "MiddleFinger1_R",
+                    "ComponentID": "Arm2_L",
                     "Properties": {
-                        "AttachParentID": "Right wrist",
+                        "AttachParentID": "Arm1_L",
                         "ComponentClass": "USceneComponent",
-                        "ComponentName": "MiddleFinger1_R",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
+                        "ComponentName": "Arm2_L",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
                         "ComponentOwnerClass": "ASkeletalMeshActor",
-                        "RelativeLocation": "X=-0.047 Y=-0.034 Z=0.675",
-                        "RelativeRotation": "Pitch=-0.082 Yaw=-1.979 Roll=-2.460",
+                        "RelativeLocation": "X=0.000 Y=0.000 Z=0.594",
+                        "RelativeRotation": "Pitch=63.089 Yaw=-9.623 Roll=-67.240",
                         "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
                         "bAutoActive": "true",
                         "bIsActive": "true"
@@ -300,31 +316,15 @@
                 },
                 {
                     "ComponentClass": "USceneComponent",
-                    "ComponentID": "HairE1",
+                    "ComponentID": "HairF5",
                     "Properties": {
-                        "AttachParentID": "Head",
+                        "AttachParentID": "HairF3",
                         "ComponentClass": "USceneComponent",
-                        "ComponentName": "HairE1",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
+                        "ComponentName": "HairF5",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
                         "ComponentOwnerClass": "ASkeletalMeshActor",
-                        "RelativeLocation": "X=0.634 Y=0.715 Z=1.588",
-                        "RelativeRotation": "Pitch=11.401 Yaw=14.147 Roll=-167.629",
-                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
-                        "bAutoActive": "true",
-                        "bIsActive": "true"
-                    }
-                },
-                {
-                    "ComponentClass": "USceneComponent",
-                    "ComponentID": "MiddleFinger3_L",
-                    "Properties": {
-                        "AttachParentID": "MiddleFinger2_L",
-                        "ComponentClass": "USceneComponent",
-                        "ComponentName": "MiddleFinger3_L",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
-                        "ComponentOwnerClass": "ASkeletalMeshActor",
-                        "RelativeLocation": "X=0.000 Y=0.000 Z=0.238",
-                        "RelativeRotation": "Pitch=0.000 Yaw=0.000 Roll=-0.000",
+                        "RelativeLocation": "X=-0.000 Y=-0.000 Z=0.588",
+                        "RelativeRotation": "Pitch=-25.348 Yaw=-25.451 Roll=6.388",
                         "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
                         "bAutoActive": "true",
                         "bIsActive": "true"
@@ -337,7 +337,7 @@
                         "AttachParentID": "Right knee",
                         "ComponentClass": "USceneComponent",
                         "ComponentName": "Right ankle",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
                         "ComponentOwnerClass": "ASkeletalMeshActor",
                         "RelativeLocation": "X=-0.000 Y=0.000 Z=4.562",
                         "RelativeRotation": "Pitch=0.000 Yaw=0.000 Roll=-68.809",
@@ -348,15 +348,15 @@
                 },
                 {
                     "ComponentClass": "USceneComponent",
-                    "ComponentID": "HairA1",
+                    "ComponentID": "Left wrist",
                     "Properties": {
-                        "AttachParentID": "Head",
+                        "AttachParentID": "Left elbow",
                         "ComponentClass": "USceneComponent",
-                        "ComponentName": "HairA1",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
+                        "ComponentName": "Left wrist",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
                         "ComponentOwnerClass": "ASkeletalMeshActor",
-                        "RelativeLocation": "X=-0.371 Y=0.903 Z=1.996",
-                        "RelativeRotation": "Pitch=-13.260 Yaw=11.669 Roll=7.364",
+                        "RelativeLocation": "X=0.000 Y=0.000 Z=2.566",
+                        "RelativeRotation": "Pitch=0.000 Yaw=0.000 Roll=-0.000",
                         "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
                         "bAutoActive": "true",
                         "bIsActive": "true"
@@ -369,26 +369,10 @@
                         "AttachParentID": "Chest",
                         "ComponentClass": "USceneComponent",
                         "ComponentName": "Neck",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
                         "ComponentOwnerClass": "ASkeletalMeshActor",
                         "RelativeLocation": "X=-0.000 Y=-0.000 Z=2.652",
                         "RelativeRotation": "Pitch=0.000 Yaw=-0.000 Roll=16.147",
-                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
-                        "bAutoActive": "true",
-                        "bIsActive": "true"
-                    }
-                },
-                {
-                    "ComponentClass": "USceneComponent",
-                    "ComponentID": "MiddleFinger2_R",
-                    "Properties": {
-                        "AttachParentID": "MiddleFinger1_R",
-                        "ComponentClass": "USceneComponent",
-                        "ComponentName": "MiddleFinger2_R",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
-                        "ComponentOwnerClass": "ASkeletalMeshActor",
-                        "RelativeLocation": "X=0.000 Y=-0.000 Z=0.280",
-                        "RelativeRotation": "Pitch=0.002 Yaw=0.003 Roll=0.003",
                         "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
                         "bAutoActive": "true",
                         "bIsActive": "true"
@@ -401,42 +385,10 @@
                         "AttachParentID": "Chest",
                         "ComponentClass": "USceneComponent",
                         "ComponentName": "Left shoulder",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
                         "ComponentOwnerClass": "ASkeletalMeshActor",
                         "RelativeLocation": "X=0.410 Y=-0.058 Z=2.430",
                         "RelativeRotation": "Pitch=-2.114 Yaw=87.838 Roll=-100.908",
-                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
-                        "bAutoActive": "true",
-                        "bIsActive": "true"
-                    }
-                },
-                {
-                    "ComponentClass": "USceneComponent",
-                    "ComponentID": "LittleFinger1_R",
-                    "Properties": {
-                        "AttachParentID": "Right wrist",
-                        "ComponentClass": "USceneComponent",
-                        "ComponentName": "LittleFinger1_R",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
-                        "ComponentOwnerClass": "ASkeletalMeshActor",
-                        "RelativeLocation": "X=0.256 Y=0.040 Z=0.639",
-                        "RelativeRotation": "Pitch=-2.202 Yaw=-2.515 Roll=-1.633",
-                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
-                        "bAutoActive": "true",
-                        "bIsActive": "true"
-                    }
-                },
-                {
-                    "ComponentClass": "USceneComponent",
-                    "ComponentID": "Arm3_L",
-                    "Properties": {
-                        "AttachParentID": "Arm2_L",
-                        "ComponentClass": "USceneComponent",
-                        "ComponentName": "Arm3_L",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
-                        "ComponentOwnerClass": "ASkeletalMeshActor",
-                        "RelativeLocation": "X=-0.000 Y=-0.000 Z=3.782",
-                        "RelativeRotation": "Pitch=-29.235 Yaw=3.416 Roll=-51.981",
                         "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
                         "bAutoActive": "true",
                         "bIsActive": "true"
@@ -449,7 +401,7 @@
                         "AttachParentID": "Chest",
                         "ComponentClass": "USceneComponent",
                         "ComponentName": "Right shoulder",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
                         "ComponentOwnerClass": "ASkeletalMeshActor",
                         "RelativeLocation": "X=-0.410 Y=-0.058 Z=2.430",
                         "RelativeRotation": "Pitch=2.114 Yaw=-87.838 Roll=-100.908",
@@ -460,47 +412,15 @@
                 },
                 {
                     "ComponentClass": "USceneComponent",
-                    "ComponentID": "HairF3",
-                    "Properties": {
-                        "AttachParentID": "HairF1",
-                        "ComponentClass": "USceneComponent",
-                        "ComponentName": "HairF3",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
-                        "ComponentOwnerClass": "ASkeletalMeshActor",
-                        "RelativeLocation": "X=0.000 Y=0.000 Z=0.773",
-                        "RelativeRotation": "Pitch=-22.320 Yaw=-18.101 Roll=-3.451",
-                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
-                        "bAutoActive": "true",
-                        "bIsActive": "true"
-                    }
-                },
-                {
-                    "ComponentClass": "USceneComponent",
-                    "ComponentID": "Arm1_L",
+                    "ComponentID": "Arm1_R",
                     "Properties": {
                         "AttachParentID": "Chest",
                         "ComponentClass": "USceneComponent",
-                        "ComponentName": "Arm1_L",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
+                        "ComponentName": "Arm1_R",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
                         "ComponentOwnerClass": "ASkeletalMeshActor",
-                        "RelativeLocation": "X=0.339 Y=-1.039 Z=0.665",
-                        "RelativeRotation": "Pitch=-19.342 Yaw=66.444 Roll=-73.934",
-                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
-                        "bAutoActive": "true",
-                        "bIsActive": "true"
-                    }
-                },
-                {
-                    "ComponentClass": "USceneComponent",
-                    "ComponentID": "MiddleFinger1_L",
-                    "Properties": {
-                        "AttachParentID": "Left wrist",
-                        "ComponentClass": "USceneComponent",
-                        "ComponentName": "MiddleFinger1_L",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
-                        "ComponentOwnerClass": "ASkeletalMeshActor",
-                        "RelativeLocation": "X=0.037 Y=-0.060 Z=0.674",
-                        "RelativeRotation": "Pitch=0.000 Yaw=0.000 Roll=-0.000",
+                        "RelativeLocation": "X=-0.339 Y=-1.039 Z=0.665",
+                        "RelativeRotation": "Pitch=19.344 Yaw=-66.442 Roll=-73.930",
                         "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
                         "bAutoActive": "true",
                         "bIsActive": "true"
@@ -513,7 +433,7 @@
                         "AttachParentID": "Chest",
                         "ComponentClass": "USceneComponent",
                         "ComponentName": "Bone0431_Rt_Armor_Ctrl2_Jnt_Skin",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
                         "ComponentOwnerClass": "ASkeletalMeshActor",
                         "RelativeLocation": "X=-0.365 Y=-1.172 Z=0.665",
                         "RelativeRotation": "Pitch=0.000 Yaw=-0.000 Roll=13.104",
@@ -529,7 +449,7 @@
                         "AttachParentID": "Chest",
                         "ComponentClass": "USceneComponent",
                         "ComponentName": "Bone0432_Lf_Armor_Ctrl2_Jnt_Skin",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
                         "ComponentOwnerClass": "ASkeletalMeshActor",
                         "RelativeLocation": "X=0.365 Y=-1.172 Z=0.665",
                         "RelativeRotation": "Pitch=0.000 Yaw=-0.000 Roll=13.104",
@@ -545,42 +465,10 @@
                         "AttachParentID": "Chest",
                         "ComponentClass": "USceneComponent",
                         "ComponentName": "Bone0433_Rt_Armor_Ctrl1_Jnt_Skin",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
                         "ComponentOwnerClass": "ASkeletalMeshActor",
                         "RelativeLocation": "X=-0.395 Y=-0.932 Z=0.939",
                         "RelativeRotation": "Pitch=0.000 Yaw=-0.000 Roll=13.104",
-                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
-                        "bAutoActive": "true",
-                        "bIsActive": "true"
-                    }
-                },
-                {
-                    "ComponentClass": "USceneComponent",
-                    "ComponentID": "Bone0434_Mid_Armor_Ctrl2_Jnt_Skin",
-                    "Properties": {
-                        "AttachParentID": "Chest",
-                        "ComponentClass": "USceneComponent",
-                        "ComponentName": "Bone0434_Mid_Armor_Ctrl2_Jnt_Skin",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
-                        "ComponentOwnerClass": "ASkeletalMeshActor",
-                        "RelativeLocation": "X=-0.000 Y=-1.048 Z=1.036",
-                        "RelativeRotation": "Pitch=0.000 Yaw=-0.000 Roll=13.104",
-                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
-                        "bAutoActive": "true",
-                        "bIsActive": "true"
-                    }
-                },
-                {
-                    "ComponentClass": "USceneComponent",
-                    "ComponentID": "HairI3",
-                    "Properties": {
-                        "AttachParentID": "HairI1",
-                        "ComponentClass": "USceneComponent",
-                        "ComponentName": "HairI3",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
-                        "ComponentOwnerClass": "ASkeletalMeshActor",
-                        "RelativeLocation": "X=-0.000 Y=-0.000 Z=0.626",
-                        "RelativeRotation": "Pitch=28.992 Yaw=19.846 Roll=-79.163",
                         "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
                         "bAutoActive": "true",
                         "bIsActive": "true"
@@ -593,282 +481,10 @@
                         "AttachParentID": "Chest",
                         "ComponentClass": "USceneComponent",
                         "ComponentName": "Bone0435_Mid_Armor_Ctrl1_Jnt_Skin",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
                         "ComponentOwnerClass": "ASkeletalMeshActor",
                         "RelativeLocation": "X=-0.000 Y=-0.705 Z=0.978",
                         "RelativeRotation": "Pitch=0.000 Yaw=-0.000 Roll=13.104",
-                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
-                        "bAutoActive": "true",
-                        "bIsActive": "true"
-                    }
-                },
-                {
-                    "ComponentClass": "USceneComponent",
-                    "ComponentID": "Arm4_R",
-                    "Properties": {
-                        "AttachParentID": "Arm3_R",
-                        "ComponentClass": "USceneComponent",
-                        "ComponentName": "Arm4_R",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
-                        "ComponentOwnerClass": "ASkeletalMeshActor",
-                        "RelativeLocation": "X=0.000 Y=0.000 Z=2.762",
-                        "RelativeRotation": "Pitch=52.337 Yaw=64.101 Roll=13.087",
-                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
-                        "bAutoActive": "true",
-                        "bIsActive": "true"
-                    }
-                },
-                {
-                    "ComponentClass": "USceneComponent",
-                    "ComponentID": "Bone0436_Lf_Armor_Ctrl1_Jnt_Skin",
-                    "Properties": {
-                        "AttachParentID": "Chest",
-                        "ComponentClass": "USceneComponent",
-                        "ComponentName": "Bone0436_Lf_Armor_Ctrl1_Jnt_Skin",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
-                        "ComponentOwnerClass": "ASkeletalMeshActor",
-                        "RelativeLocation": "X=0.395 Y=-0.932 Z=0.939",
-                        "RelativeRotation": "Pitch=0.000 Yaw=-0.000 Roll=13.104",
-                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
-                        "bAutoActive": "true",
-                        "bIsActive": "true"
-                    }
-                },
-                {
-                    "ComponentClass": "USceneComponent",
-                    "ComponentID": "HairD5",
-                    "Properties": {
-                        "AttachParentID": "HairD3",
-                        "ComponentClass": "USceneComponent",
-                        "ComponentName": "HairD5",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
-                        "ComponentOwnerClass": "ASkeletalMeshActor",
-                        "RelativeLocation": "X=0.000 Y=0.000 Z=0.507",
-                        "RelativeRotation": "Pitch=22.658 Yaw=-10.915 Roll=17.600",
-                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
-                        "bAutoActive": "true",
-                        "bIsActive": "true"
-                    }
-                },
-                {
-                    "ComponentClass": "USceneComponent",
-                    "ComponentID": "Right toe",
-                    "Properties": {
-                        "AttachParentID": "Right ankle",
-                        "ComponentClass": "USceneComponent",
-                        "ComponentName": "Right toe",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
-                        "ComponentOwnerClass": "ASkeletalMeshActor",
-                        "RelativeLocation": "X=0.000 Y=-0.000 Z=0.994",
-                        "RelativeRotation": "Pitch=0.000 Yaw=180.000 Roll=26.258",
-                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
-                        "bAutoActive": "true",
-                        "bIsActive": "true"
-                    }
-                },
-                {
-                    "ComponentClass": "USceneComponent",
-                    "ComponentID": "Bone0409_Chest_L",
-                    "Properties": {
-                        "AttachParentID": "Chest",
-                        "ComponentClass": "USceneComponent",
-                        "ComponentName": "Bone0409_Chest_L",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
-                        "ComponentOwnerClass": "ASkeletalMeshActor",
-                        "RelativeLocation": "X=0.596 Y=0.510 Z=1.417",
-                        "RelativeRotation": "Pitch=0.000 Yaw=-180.000 Roll=-103.104",
-                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
-                        "bAutoActive": "true",
-                        "bIsActive": "true"
-                    }
-                },
-                {
-                    "ComponentClass": "USceneComponent",
-                    "ComponentID": "Bone0413_Chest_R",
-                    "Properties": {
-                        "AttachParentID": "Chest",
-                        "ComponentClass": "USceneComponent",
-                        "ComponentName": "Bone0413_Chest_R",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
-                        "ComponentOwnerClass": "ASkeletalMeshActor",
-                        "RelativeLocation": "X=-0.596 Y=0.510 Z=1.417",
-                        "RelativeRotation": "Pitch=0.000 Yaw=-180.000 Roll=-103.104",
-                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
-                        "bAutoActive": "true",
-                        "bIsActive": "true"
-                    }
-                },
-                {
-                    "ComponentClass": "USceneComponent",
-                    "ComponentID": "AnkleTip_L",
-                    "Properties": {
-                        "AttachParentID": "Left ankle",
-                        "ComponentClass": "USceneComponent",
-                        "ComponentName": "AnkleTip_L",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
-                        "ComponentOwnerClass": "ASkeletalMeshActor",
-                        "RelativeLocation": "X=-0.000 Y=-0.000 Z=1.490",
-                        "RelativeRotation": "Pitch=-0.000 Yaw=0.000 Roll=63.743",
-                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
-                        "bAutoActive": "true",
-                        "bIsActive": "true"
-                    }
-                },
-                {
-                    "ComponentClass": "USceneComponent",
-                    "ComponentID": "HairF1",
-                    "Properties": {
-                        "AttachParentID": "Head",
-                        "ComponentClass": "USceneComponent",
-                        "ComponentName": "HairF1",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
-                        "ComponentOwnerClass": "ASkeletalMeshActor",
-                        "RelativeLocation": "X=-0.626 Y=0.708 Z=1.603",
-                        "RelativeRotation": "Pitch=-11.391 Yaw=-14.740 Roll=-165.267",
-                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
-                        "bAutoActive": "true",
-                        "bIsActive": "true"
-                    }
-                },
-                {
-                    "ComponentClass": "USceneComponent",
-                    "ComponentID": "Left toe",
-                    "Properties": {
-                        "AttachParentID": "Left ankle",
-                        "ComponentClass": "USceneComponent",
-                        "ComponentName": "Left toe",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
-                        "ComponentOwnerClass": "ASkeletalMeshActor",
-                        "RelativeLocation": "X=-0.000 Y=-0.000 Z=0.994",
-                        "RelativeRotation": "Pitch=0.000 Yaw=-180.000 Roll=26.258",
-                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
-                        "bAutoActive": "true",
-                        "bIsActive": "true"
-                    }
-                },
-                {
-                    "ComponentClass": "USceneComponent",
-                    "ComponentID": "HairD3",
-                    "Properties": {
-                        "AttachParentID": "HairD1",
-                        "ComponentClass": "USceneComponent",
-                        "ComponentName": "HairD3",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
-                        "ComponentOwnerClass": "ASkeletalMeshActor",
-                        "RelativeLocation": "X=-0.000 Y=0.000 Z=0.521",
-                        "RelativeRotation": "Pitch=27.670 Yaw=-34.573 Roll=63.002",
-                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
-                        "bAutoActive": "true",
-                        "bIsActive": "true"
-                    }
-                },
-                {
-                    "ComponentClass": "USceneComponent",
-                    "ComponentID": "AnkleTip_R",
-                    "Properties": {
-                        "AttachParentID": "Right ankle",
-                        "ComponentClass": "USceneComponent",
-                        "ComponentName": "AnkleTip_R",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
-                        "ComponentOwnerClass": "ASkeletalMeshActor",
-                        "RelativeLocation": "X=0.000 Y=-0.000 Z=1.490",
-                        "RelativeRotation": "Pitch=0.000 Yaw=0.000 Roll=63.743",
-                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
-                        "bAutoActive": "true",
-                        "bIsActive": "true"
-                    }
-                },
-                {
-                    "ComponentClass": "USceneComponent",
-                    "ComponentID": "Head",
-                    "Properties": {
-                        "AttachParentID": "Neck",
-                        "ComponentClass": "USceneComponent",
-                        "ComponentName": "Head",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
-                        "ComponentOwnerClass": "ASkeletalMeshActor",
-                        "RelativeLocation": "X=-0.000 Y=0.000 Z=0.781",
-                        "RelativeRotation": "Pitch=0.000 Yaw=0.000 Roll=-3.044",
-                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
-                        "bAutoActive": "true",
-                        "bIsActive": "true"
-                    }
-                },
-                {
-                    "ComponentClass": "USceneComponent",
-                    "ComponentID": "Right arm",
-                    "Properties": {
-                        "AttachParentID": "Right shoulder",
-                        "ComponentClass": "USceneComponent",
-                        "ComponentName": "Right arm",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
-                        "ComponentOwnerClass": "ASkeletalMeshActor",
-                        "RelativeLocation": "X=0.000 Y=-0.000 Z=0.711",
-                        "RelativeRotation": "Pitch=-14.665 Yaw=-21.001 Roll=-19.050",
-                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
-                        "bAutoActive": "true",
-                        "bIsActive": "true"
-                    }
-                },
-                {
-                    "ComponentClass": "USceneComponent",
-                    "ComponentID": "IndexFinger2_R",
-                    "Properties": {
-                        "AttachParentID": "IndexFinger1_R",
-                        "ComponentClass": "USceneComponent",
-                        "ComponentName": "IndexFinger2_R",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
-                        "ComponentOwnerClass": "ASkeletalMeshActor",
-                        "RelativeLocation": "X=-0.000 Y=-0.000 Z=0.266",
-                        "RelativeRotation": "Pitch=-0.001 Yaw=-0.003 Roll=-0.002",
-                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
-                        "bAutoActive": "true",
-                        "bIsActive": "true"
-                    }
-                },
-                {
-                    "ComponentClass": "USceneComponent",
-                    "ComponentID": "Arm2_R",
-                    "Properties": {
-                        "AttachParentID": "Arm1_R",
-                        "ComponentClass": "USceneComponent",
-                        "ComponentName": "Arm2_R",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
-                        "ComponentOwnerClass": "ASkeletalMeshActor",
-                        "RelativeLocation": "X=-0.000 Y=0.000 Z=0.594",
-                        "RelativeRotation": "Pitch=-63.096 Yaw=9.651 Roll=-67.218",
-                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
-                        "bAutoActive": "true",
-                        "bIsActive": "true"
-                    }
-                },
-                {
-                    "ComponentClass": "USceneComponent",
-                    "ComponentID": "Arm2_L",
-                    "Properties": {
-                        "AttachParentID": "Arm1_L",
-                        "ComponentClass": "USceneComponent",
-                        "ComponentName": "Arm2_L",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
-                        "ComponentOwnerClass": "ASkeletalMeshActor",
-                        "RelativeLocation": "X=0.000 Y=0.000 Z=0.594",
-                        "RelativeRotation": "Pitch=63.089 Yaw=-9.623 Roll=-67.240",
-                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
-                        "bAutoActive": "true",
-                        "bIsActive": "true"
-                    }
-                },
-                {
-                    "ComponentClass": "USceneComponent",
-                    "ComponentID": "HairE3",
-                    "Properties": {
-                        "AttachParentID": "HairE1",
-                        "ComponentClass": "USceneComponent",
-                        "ComponentName": "HairE3",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
-                        "ComponentOwnerClass": "ASkeletalMeshActor",
-                        "RelativeLocation": "X=-0.000 Y=-0.000 Z=0.756",
-                        "RelativeRotation": "Pitch=22.642 Yaw=19.213 Roll=-2.504",
                         "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
                         "bAutoActive": "true",
                         "bIsActive": "true"
@@ -881,10 +497,170 @@
                         "AttachParentID": "Head",
                         "ComponentClass": "USceneComponent",
                         "ComponentName": "Eye_L",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
                         "ComponentOwnerClass": "ASkeletalMeshActor",
                         "RelativeLocation": "X=0.271 Y=0.422 Z=0.537",
                         "RelativeRotation": "Pitch=0.000 Yaw=159.842 Roll=-90.000",
+                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
+                        "bAutoActive": "true",
+                        "bIsActive": "true"
+                    }
+                },
+                {
+                    "ComponentClass": "USceneComponent",
+                    "ComponentID": "Arm5_L",
+                    "Properties": {
+                        "AttachParentID": "Arm4_L",
+                        "ComponentClass": "USceneComponent",
+                        "ComponentName": "Arm5_L",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
+                        "ComponentOwnerClass": "ASkeletalMeshActor",
+                        "RelativeLocation": "X=-0.000 Y=0.000 Z=2.619",
+                        "RelativeRotation": "Pitch=35.878 Yaw=64.764 Roll=49.285",
+                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
+                        "bAutoActive": "true",
+                        "bIsActive": "true"
+                    }
+                },
+                {
+                    "ComponentClass": "USceneComponent",
+                    "ComponentID": "Left toe",
+                    "Properties": {
+                        "AttachParentID": "Left ankle",
+                        "ComponentClass": "USceneComponent",
+                        "ComponentName": "Left toe",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
+                        "ComponentOwnerClass": "ASkeletalMeshActor",
+                        "RelativeLocation": "X=-0.000 Y=-0.000 Z=0.994",
+                        "RelativeRotation": "Pitch=0.000 Yaw=180.000 Roll=26.258",
+                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
+                        "bAutoActive": "true",
+                        "bIsActive": "true"
+                    }
+                },
+                {
+                    "ComponentClass": "USceneComponent",
+                    "ComponentID": "AnkleTip_R",
+                    "Properties": {
+                        "AttachParentID": "Right ankle",
+                        "ComponentClass": "USceneComponent",
+                        "ComponentName": "AnkleTip_R",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
+                        "ComponentOwnerClass": "ASkeletalMeshActor",
+                        "RelativeLocation": "X=2.558 Y=-5.436 Z=-6.372",
+                        "RelativeRotation": "Pitch=0.000 Yaw=0.000 Roll=63.743",
+                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
+                        "bAutoActive": "true",
+                        "bIsActive": "true"
+                    }
+                },
+                {
+                    "ComponentClass": "USceneComponent",
+                    "ComponentID": "Right toe",
+                    "Properties": {
+                        "AttachParentID": "Right ankle",
+                        "ComponentClass": "USceneComponent",
+                        "ComponentName": "Right toe",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
+                        "ComponentOwnerClass": "ASkeletalMeshActor",
+                        "RelativeLocation": "X=0.000 Y=-0.000 Z=0.994",
+                        "RelativeRotation": "Pitch=0.000 Yaw=-180.000 Roll=26.258",
+                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
+                        "bAutoActive": "true",
+                        "bIsActive": "true"
+                    }
+                },
+                {
+                    "ComponentClass": "USceneComponent",
+                    "ComponentID": "Head",
+                    "Properties": {
+                        "AttachParentID": "Neck",
+                        "ComponentClass": "USceneComponent",
+                        "ComponentName": "Head",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
+                        "ComponentOwnerClass": "ASkeletalMeshActor",
+                        "RelativeLocation": "X=-0.000 Y=0.000 Z=0.781",
+                        "RelativeRotation": "Pitch=0.000 Yaw=0.000 Roll=-3.044",
+                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
+                        "bAutoActive": "true",
+                        "bIsActive": "true"
+                    }
+                },
+                {
+                    "ComponentClass": "USceneComponent",
+                    "ComponentID": "Left arm",
+                    "Properties": {
+                        "AttachParentID": "Left shoulder",
+                        "ComponentClass": "USceneComponent",
+                        "ComponentName": "Left arm",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
+                        "ComponentOwnerClass": "ASkeletalMeshActor",
+                        "RelativeLocation": "X=0.000 Y=-0.000 Z=0.711",
+                        "RelativeRotation": "Pitch=14.665 Yaw=21.001 Roll=-19.050",
+                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
+                        "bAutoActive": "true",
+                        "bIsActive": "true"
+                    }
+                },
+                {
+                    "ComponentClass": "USceneComponent",
+                    "ComponentID": "Right arm",
+                    "Properties": {
+                        "AttachParentID": "Right shoulder",
+                        "ComponentClass": "USceneComponent",
+                        "ComponentName": "Right arm",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
+                        "ComponentOwnerClass": "ASkeletalMeshActor",
+                        "RelativeLocation": "X=0.000 Y=-0.000 Z=0.711",
+                        "RelativeRotation": "Pitch=-14.665 Yaw=-21.001 Roll=-19.050",
+                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
+                        "bAutoActive": "true",
+                        "bIsActive": "true"
+                    }
+                },
+                {
+                    "ComponentClass": "USceneComponent",
+                    "ComponentID": "Arm2_R",
+                    "Properties": {
+                        "AttachParentID": "Arm1_R",
+                        "ComponentClass": "USceneComponent",
+                        "ComponentName": "Arm2_R",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
+                        "ComponentOwnerClass": "ASkeletalMeshActor",
+                        "RelativeLocation": "X=-0.000 Y=0.000 Z=0.594",
+                        "RelativeRotation": "Pitch=-63.096 Yaw=9.651 Roll=-67.218",
+                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
+                        "bAutoActive": "true",
+                        "bIsActive": "true"
+                    }
+                },
+                {
+                    "ComponentClass": "USceneComponent",
+                    "ComponentID": "Right elbow",
+                    "Properties": {
+                        "AttachParentID": "Right arm",
+                        "ComponentClass": "USceneComponent",
+                        "ComponentName": "Right elbow",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
+                        "ComponentOwnerClass": "ASkeletalMeshActor",
+                        "RelativeLocation": "X=-0.000 Y=0.000 Z=2.354",
+                        "RelativeRotation": "Pitch=0.000 Yaw=0.000 Roll=-0.000",
+                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
+                        "bAutoActive": "true",
+                        "bIsActive": "true"
+                    }
+                },
+                {
+                    "ComponentClass": "USceneComponent",
+                    "ComponentID": "HairI11",
+                    "Properties": {
+                        "AttachParentID": "HairI9",
+                        "ComponentClass": "USceneComponent",
+                        "ComponentName": "HairI11",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
+                        "ComponentOwnerClass": "ASkeletalMeshActor",
+                        "RelativeLocation": "X=-0.000 Y=0.000 Z=0.892",
+                        "RelativeRotation": "Pitch=1.790 Yaw=1.831 Roll=-2.300",
                         "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
                         "bAutoActive": "true",
                         "bIsActive": "true"
@@ -897,10 +673,26 @@
                         "AttachParentID": "Head",
                         "ComponentClass": "USceneComponent",
                         "ComponentName": "Eye_R",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
                         "ComponentOwnerClass": "ASkeletalMeshActor",
                         "RelativeLocation": "X=-0.271 Y=0.422 Z=0.537",
                         "RelativeRotation": "Pitch=0.000 Yaw=-159.842 Roll=-90.000",
+                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
+                        "bAutoActive": "true",
+                        "bIsActive": "true"
+                    }
+                },
+                {
+                    "ComponentClass": "USceneComponent",
+                    "ComponentID": "HairA1",
+                    "Properties": {
+                        "AttachParentID": "Head",
+                        "ComponentClass": "USceneComponent",
+                        "ComponentName": "HairA1",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
+                        "ComponentOwnerClass": "ASkeletalMeshActor",
+                        "RelativeLocation": "X=-0.371 Y=0.903 Z=1.996",
+                        "RelativeRotation": "Pitch=-13.260 Yaw=11.669 Roll=7.364",
                         "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
                         "bAutoActive": "true",
                         "bIsActive": "true"
@@ -913,7 +705,7 @@
                         "AttachParentID": "Head",
                         "ComponentClass": "USceneComponent",
                         "ComponentName": "HairB1",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
                         "ComponentOwnerClass": "ASkeletalMeshActor",
                         "RelativeLocation": "X=-0.540 Y=0.877 Z=1.890",
                         "RelativeRotation": "Pitch=45.703 Yaw=-121.669 Roll=-63.530",
@@ -929,7 +721,7 @@
                         "AttachParentID": "Head",
                         "ComponentClass": "USceneComponent",
                         "ComponentName": "HairC1",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
                         "ComponentOwnerClass": "ASkeletalMeshActor",
                         "RelativeLocation": "X=-0.029 Y=1.046 Z=1.430",
                         "RelativeRotation": "Pitch=1.875 Yaw=1.709 Roll=174.724",
@@ -945,7 +737,7 @@
                         "AttachParentID": "Head",
                         "ComponentClass": "USceneComponent",
                         "ComponentName": "HairD1",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
                         "ComponentOwnerClass": "ASkeletalMeshActor",
                         "RelativeLocation": "X=-0.083 Y=1.104 Z=1.757",
                         "RelativeRotation": "Pitch=35.676 Yaw=46.794 Roll=-163.279",
@@ -956,15 +748,63 @@
                 },
                 {
                     "ComponentClass": "USceneComponent",
-                    "ComponentID": "Right wrist",
+                    "ComponentID": "HairE1",
                     "Properties": {
-                        "AttachParentID": "Right elbow",
+                        "AttachParentID": "Head",
                         "ComponentClass": "USceneComponent",
-                        "ComponentName": "Right wrist",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
+                        "ComponentName": "HairE1",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
                         "ComponentOwnerClass": "ASkeletalMeshActor",
-                        "RelativeLocation": "X=0.000 Y=-0.000 Z=2.566",
-                        "RelativeRotation": "Pitch=0.000 Yaw=0.000 Roll=-0.000",
+                        "RelativeLocation": "X=0.634 Y=0.715 Z=1.588",
+                        "RelativeRotation": "Pitch=11.401 Yaw=14.147 Roll=-167.629",
+                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
+                        "bAutoActive": "true",
+                        "bIsActive": "true"
+                    }
+                },
+                {
+                    "ComponentClass": "USceneComponent",
+                    "ComponentID": "HairB5",
+                    "Properties": {
+                        "AttachParentID": "HairB3",
+                        "ComponentClass": "USceneComponent",
+                        "ComponentName": "HairB5",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
+                        "ComponentOwnerClass": "ASkeletalMeshActor",
+                        "RelativeLocation": "X=0.000 Y=-0.000 Z=0.481",
+                        "RelativeRotation": "Pitch=0.002 Yaw=-0.005 Roll=-0.002",
+                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
+                        "bAutoActive": "true",
+                        "bIsActive": "true"
+                    }
+                },
+                {
+                    "ComponentClass": "USceneComponent",
+                    "ComponentID": "HairF1",
+                    "Properties": {
+                        "AttachParentID": "Head",
+                        "ComponentClass": "USceneComponent",
+                        "ComponentName": "HairF1",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
+                        "ComponentOwnerClass": "ASkeletalMeshActor",
+                        "RelativeLocation": "X=-0.626 Y=0.708 Z=1.603",
+                        "RelativeRotation": "Pitch=-11.391 Yaw=-14.740 Roll=-165.267",
+                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
+                        "bAutoActive": "true",
+                        "bIsActive": "true"
+                    }
+                },
+                {
+                    "ComponentClass": "USceneComponent",
+                    "ComponentID": "HairG1",
+                    "Properties": {
+                        "AttachParentID": "Head",
+                        "ComponentClass": "USceneComponent",
+                        "ComponentName": "HairG1",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
+                        "ComponentOwnerClass": "ASkeletalMeshActor",
+                        "RelativeLocation": "X=0.745 Y=0.467 Z=1.623",
+                        "RelativeRotation": "Pitch=11.251 Yaw=14.564 Roll=-165.257",
                         "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
                         "bAutoActive": "true",
                         "bIsActive": "true"
@@ -977,7 +817,7 @@
                         "AttachParentID": "Head",
                         "ComponentClass": "USceneComponent",
                         "ComponentName": "HairH1",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
                         "ComponentOwnerClass": "ASkeletalMeshActor",
                         "RelativeLocation": "X=-0.745 Y=0.453 Z=1.621",
                         "RelativeRotation": "Pitch=-11.482 Yaw=-14.900 Roll=-165.107",
@@ -993,7 +833,7 @@
                         "AttachParentID": "Head",
                         "ComponentClass": "USceneComponent",
                         "ComponentName": "HairI1",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
                         "ComponentOwnerClass": "ASkeletalMeshActor",
                         "RelativeLocation": "X=1.023 Y=-0.448 Z=1.723",
                         "RelativeRotation": "Pitch=-4.276 Yaw=48.933 Roll=-80.619",
@@ -1009,42 +849,10 @@
                         "AttachParentID": "Left arm",
                         "ComponentClass": "USceneComponent",
                         "ComponentName": "Left elbow",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
                         "ComponentOwnerClass": "ASkeletalMeshActor",
                         "RelativeLocation": "X=0.000 Y=0.000 Z=2.354",
                         "RelativeRotation": "Pitch=-66.748 Yaw=-89.749 Roll=49.322",
-                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
-                        "bAutoActive": "true",
-                        "bIsActive": "true"
-                    }
-                },
-                {
-                    "ComponentClass": "USceneComponent",
-                    "ComponentID": "HairB5",
-                    "Properties": {
-                        "AttachParentID": "HairB3",
-                        "ComponentClass": "USceneComponent",
-                        "ComponentName": "HairB5",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
-                        "ComponentOwnerClass": "ASkeletalMeshActor",
-                        "RelativeLocation": "X=0.000 Y=-0.000 Z=0.481",
-                        "RelativeRotation": "Pitch=0.002 Yaw=-0.005 Roll=-0.002",
-                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
-                        "bAutoActive": "true",
-                        "bIsActive": "true"
-                    }
-                },
-                {
-                    "ComponentClass": "USceneComponent",
-                    "ComponentID": "Right elbow",
-                    "Properties": {
-                        "AttachParentID": "Right arm",
-                        "ComponentClass": "USceneComponent",
-                        "ComponentName": "Right elbow",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
-                        "ComponentOwnerClass": "ASkeletalMeshActor",
-                        "RelativeLocation": "X=-0.000 Y=0.000 Z=2.354",
-                        "RelativeRotation": "Pitch=0.000 Yaw=0.000 Roll=-0.000",
                         "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
                         "bAutoActive": "true",
                         "bIsActive": "true"
@@ -1057,10 +865,42 @@
                         "AttachParentID": "Arm2_R",
                         "ComponentClass": "USceneComponent",
                         "ComponentName": "Arm3_R",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
                         "ComponentOwnerClass": "ASkeletalMeshActor",
                         "RelativeLocation": "X=-0.000 Y=0.000 Z=3.782",
                         "RelativeRotation": "Pitch=29.231 Yaw=-3.420 Roll=-51.973",
+                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
+                        "bAutoActive": "true",
+                        "bIsActive": "true"
+                    }
+                },
+                {
+                    "ComponentClass": "USceneComponent",
+                    "ComponentID": "RingFinger1_R",
+                    "Properties": {
+                        "AttachParentID": "Right wrist",
+                        "ComponentClass": "USceneComponent",
+                        "ComponentName": "RingFinger1_R",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
+                        "ComponentOwnerClass": "ASkeletalMeshActor",
+                        "RelativeLocation": "X=0.106 Y=0.028 Z=0.662",
+                        "RelativeRotation": "Pitch=-0.526 Yaw=-2.925 Roll=-3.373",
+                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
+                        "bAutoActive": "true",
+                        "bIsActive": "true"
+                    }
+                },
+                {
+                    "ComponentClass": "USceneComponent",
+                    "ComponentID": "Arm3_L",
+                    "Properties": {
+                        "AttachParentID": "Arm2_L",
+                        "ComponentClass": "USceneComponent",
+                        "ComponentName": "Arm3_L",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
+                        "ComponentOwnerClass": "ASkeletalMeshActor",
+                        "RelativeLocation": "X=-0.000 Y=-0.000 Z=3.782",
+                        "RelativeRotation": "Pitch=-29.235 Yaw=3.416 Roll=-51.981",
                         "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
                         "bAutoActive": "true",
                         "bIsActive": "true"
@@ -1073,7 +913,7 @@
                         "AttachParentID": "HairA1",
                         "ComponentClass": "USceneComponent",
                         "ComponentName": "HairA3",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
                         "ComponentOwnerClass": "ASkeletalMeshActor",
                         "RelativeLocation": "X=0.000 Y=0.000 Z=0.447",
                         "RelativeRotation": "Pitch=5.973 Yaw=-4.958 Roll=-15.215",
@@ -1089,7 +929,7 @@
                         "AttachParentID": "HairB1",
                         "ComponentClass": "USceneComponent",
                         "ComponentName": "HairB3",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
                         "ComponentOwnerClass": "ASkeletalMeshActor",
                         "RelativeLocation": "X=-0.000 Y=0.000 Z=0.457",
                         "RelativeRotation": "Pitch=-9.263 Yaw=-4.905 Roll=-6.677",
@@ -1100,15 +940,111 @@
                 },
                 {
                     "ComponentClass": "USceneComponent",
-                    "ComponentID": "HairH3",
+                    "ComponentID": "HairC3",
                     "Properties": {
-                        "AttachParentID": "HairH1",
+                        "AttachParentID": "HairC1",
                         "ComponentClass": "USceneComponent",
-                        "ComponentName": "HairH3",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
+                        "ComponentName": "HairC3",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
                         "ComponentOwnerClass": "ASkeletalMeshActor",
-                        "RelativeLocation": "X=0.000 Y=0.000 Z=0.739",
-                        "RelativeRotation": "Pitch=-19.710 Yaw=-15.815 Roll=-5.328",
+                        "RelativeLocation": "X=-0.000 Y=0.000 Z=0.475",
+                        "RelativeRotation": "Pitch=-1.761 Yaw=-3.590 Roll=19.903",
+                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
+                        "bAutoActive": "true",
+                        "bIsActive": "true"
+                    }
+                },
+                {
+                    "ComponentClass": "USceneComponent",
+                    "ComponentID": "Arm4_R",
+                    "Properties": {
+                        "AttachParentID": "Arm3_R",
+                        "ComponentClass": "USceneComponent",
+                        "ComponentName": "Arm4_R",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
+                        "ComponentOwnerClass": "ASkeletalMeshActor",
+                        "RelativeLocation": "X=0.000 Y=0.000 Z=2.762",
+                        "RelativeRotation": "Pitch=52.337 Yaw=64.101 Roll=13.087",
+                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
+                        "bAutoActive": "true",
+                        "bIsActive": "true"
+                    }
+                },
+                {
+                    "ComponentClass": "USceneComponent",
+                    "ComponentID": "HairD3",
+                    "Properties": {
+                        "AttachParentID": "HairD1",
+                        "ComponentClass": "USceneComponent",
+                        "ComponentName": "HairD3",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
+                        "ComponentOwnerClass": "ASkeletalMeshActor",
+                        "RelativeLocation": "X=-0.000 Y=0.000 Z=0.521",
+                        "RelativeRotation": "Pitch=27.670 Yaw=-34.573 Roll=63.002",
+                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
+                        "bAutoActive": "true",
+                        "bIsActive": "true"
+                    }
+                },
+                {
+                    "ComponentClass": "USceneComponent",
+                    "ComponentID": "HairE3",
+                    "Properties": {
+                        "AttachParentID": "HairE1",
+                        "ComponentClass": "USceneComponent",
+                        "ComponentName": "HairE3",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
+                        "ComponentOwnerClass": "ASkeletalMeshActor",
+                        "RelativeLocation": "X=-0.000 Y=-0.000 Z=0.756",
+                        "RelativeRotation": "Pitch=22.642 Yaw=19.213 Roll=-2.504",
+                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
+                        "bAutoActive": "true",
+                        "bIsActive": "true"
+                    }
+                },
+                {
+                    "ComponentClass": "USceneComponent",
+                    "ComponentID": "MiddleFinger2_L",
+                    "Properties": {
+                        "AttachParentID": "MiddleFinger1_L",
+                        "ComponentClass": "USceneComponent",
+                        "ComponentName": "MiddleFinger2_L",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
+                        "ComponentOwnerClass": "ASkeletalMeshActor",
+                        "RelativeLocation": "X=0.000 Y=-0.000 Z=0.280",
+                        "RelativeRotation": "Pitch=0.000 Yaw=-0.000 Roll=0.000",
+                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
+                        "bAutoActive": "true",
+                        "bIsActive": "true"
+                    }
+                },
+                {
+                    "ComponentClass": "USceneComponent",
+                    "ComponentID": "HairF3",
+                    "Properties": {
+                        "AttachParentID": "HairF1",
+                        "ComponentClass": "USceneComponent",
+                        "ComponentName": "HairF3",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
+                        "ComponentOwnerClass": "ASkeletalMeshActor",
+                        "RelativeLocation": "X=0.000 Y=0.000 Z=0.773",
+                        "RelativeRotation": "Pitch=-22.320 Yaw=-18.101 Roll=-3.451",
+                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
+                        "bAutoActive": "true",
+                        "bIsActive": "true"
+                    }
+                },
+                {
+                    "ComponentClass": "USceneComponent",
+                    "ComponentID": "HairG3",
+                    "Properties": {
+                        "AttachParentID": "HairG1",
+                        "ComponentClass": "USceneComponent",
+                        "ComponentName": "HairG3",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
+                        "ComponentOwnerClass": "ASkeletalMeshActor",
+                        "RelativeLocation": "X=0.000 Y=0.000 Z=0.772",
+                        "RelativeRotation": "Pitch=20.351 Yaw=16.307 Roll=-5.284",
                         "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
                         "bAutoActive": "true",
                         "bIsActive": "true"
@@ -1121,7 +1057,7 @@
                         "AttachParentID": "Arm3_L",
                         "ComponentClass": "USceneComponent",
                         "ComponentName": "Arm4_L",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
                         "ComponentOwnerClass": "ASkeletalMeshActor",
                         "RelativeLocation": "X=-0.000 Y=0.000 Z=2.762",
                         "RelativeRotation": "Pitch=-52.289 Yaw=-64.195 Roll=13.164",
@@ -1132,15 +1068,79 @@
                 },
                 {
                     "ComponentClass": "USceneComponent",
-                    "ComponentID": "Left wrist",
+                    "ComponentID": "HairH3",
                     "Properties": {
-                        "AttachParentID": "Left elbow",
+                        "AttachParentID": "HairH1",
                         "ComponentClass": "USceneComponent",
-                        "ComponentName": "Left wrist",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
+                        "ComponentName": "HairH3",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
                         "ComponentOwnerClass": "ASkeletalMeshActor",
-                        "RelativeLocation": "X=0.000 Y=0.000 Z=2.566",
+                        "RelativeLocation": "X=0.000 Y=0.000 Z=0.739",
+                        "RelativeRotation": "Pitch=-19.710 Yaw=-15.815 Roll=-5.328",
+                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
+                        "bAutoActive": "true",
+                        "bIsActive": "true"
+                    }
+                },
+                {
+                    "ComponentClass": "USceneComponent",
+                    "ComponentID": "Thumb2_R",
+                    "Properties": {
+                        "AttachParentID": "Thumb1_R",
+                        "ComponentClass": "USceneComponent",
+                        "ComponentName": "Thumb2_R",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
+                        "ComponentOwnerClass": "ASkeletalMeshActor",
+                        "RelativeLocation": "X=0.000 Y=-0.000 Z=0.279",
+                        "RelativeRotation": "Pitch=-0.987 Yaw=-8.130 Roll=-8.032",
+                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
+                        "bAutoActive": "true",
+                        "bIsActive": "true"
+                    }
+                },
+                {
+                    "ComponentClass": "USceneComponent",
+                    "ComponentID": "HairI3",
+                    "Properties": {
+                        "AttachParentID": "HairI1",
+                        "ComponentClass": "USceneComponent",
+                        "ComponentName": "HairI3",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
+                        "ComponentOwnerClass": "ASkeletalMeshActor",
+                        "RelativeLocation": "X=-0.000 Y=-0.000 Z=0.626",
+                        "RelativeRotation": "Pitch=28.992 Yaw=19.846 Roll=-79.163",
+                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
+                        "bAutoActive": "true",
+                        "bIsActive": "true"
+                    }
+                },
+                {
+                    "ComponentClass": "USceneComponent",
+                    "ComponentID": "Right wrist",
+                    "Properties": {
+                        "AttachParentID": "Right elbow",
+                        "ComponentClass": "USceneComponent",
+                        "ComponentName": "Right wrist",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
+                        "ComponentOwnerClass": "ASkeletalMeshActor",
+                        "RelativeLocation": "X=0.000 Y=-0.000 Z=2.566",
                         "RelativeRotation": "Pitch=0.000 Yaw=0.000 Roll=-0.000",
+                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
+                        "bAutoActive": "true",
+                        "bIsActive": "true"
+                    }
+                },
+                {
+                    "ComponentClass": "USceneComponent",
+                    "ComponentID": "HairA5",
+                    "Properties": {
+                        "AttachParentID": "HairA3",
+                        "ComponentClass": "USceneComponent",
+                        "ComponentName": "HairA5",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
+                        "ComponentOwnerClass": "ASkeletalMeshActor",
+                        "RelativeLocation": "X=-0.000 Y=0.000 Z=0.572",
+                        "RelativeRotation": "Pitch=0.000 Yaw=-0.000 Roll=0.000",
                         "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
                         "bAutoActive": "true",
                         "bIsActive": "true"
@@ -1153,26 +1153,10 @@
                         "AttachParentID": "HairE3",
                         "ComponentClass": "USceneComponent",
                         "ComponentName": "HairE5",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
                         "ComponentOwnerClass": "ASkeletalMeshActor",
                         "RelativeLocation": "X=-0.000 Y=0.000 Z=0.631",
                         "RelativeRotation": "Pitch=22.230 Yaw=25.857 Roll=11.483",
-                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
-                        "bAutoActive": "true",
-                        "bIsActive": "true"
-                    }
-                },
-                {
-                    "ComponentClass": "USceneComponent",
-                    "ComponentID": "HairF5",
-                    "Properties": {
-                        "AttachParentID": "HairF3",
-                        "ComponentClass": "USceneComponent",
-                        "ComponentName": "HairF5",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
-                        "ComponentOwnerClass": "ASkeletalMeshActor",
-                        "RelativeLocation": "X=-0.000 Y=-0.000 Z=0.588",
-                        "RelativeRotation": "Pitch=-25.348 Yaw=-25.451 Roll=6.388",
                         "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
                         "bAutoActive": "true",
                         "bIsActive": "true"
@@ -1185,7 +1169,7 @@
                         "AttachParentID": "HairG3",
                         "ComponentClass": "USceneComponent",
                         "ComponentName": "HairG5",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
                         "ComponentOwnerClass": "ASkeletalMeshActor",
                         "RelativeLocation": "X=-0.000 Y=0.000 Z=0.726",
                         "RelativeRotation": "Pitch=27.437 Yaw=30.389 Roll=10.694",
@@ -1201,7 +1185,7 @@
                         "AttachParentID": "HairH3",
                         "ComponentClass": "USceneComponent",
                         "ComponentName": "HairH5",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
                         "ComponentOwnerClass": "ASkeletalMeshActor",
                         "RelativeLocation": "X=-0.000 Y=-0.000 Z=0.739",
                         "RelativeRotation": "Pitch=-29.868 Yaw=-30.547 Roll=6.924",
@@ -1217,10 +1201,26 @@
                         "AttachParentID": "HairI3",
                         "ComponentClass": "USceneComponent",
                         "ComponentName": "HairI5",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
                         "ComponentOwnerClass": "ASkeletalMeshActor",
                         "RelativeLocation": "X=0.000 Y=-0.000 Z=1.469",
                         "RelativeRotation": "Pitch=29.481 Yaw=27.200 Roll=-5.979",
+                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
+                        "bAutoActive": "true",
+                        "bIsActive": "true"
+                    }
+                },
+                {
+                    "ComponentClass": "USceneComponent",
+                    "ComponentID": "MiddleFinger1_L",
+                    "Properties": {
+                        "AttachParentID": "Left wrist",
+                        "ComponentClass": "USceneComponent",
+                        "ComponentName": "MiddleFinger1_L",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
+                        "ComponentOwnerClass": "ASkeletalMeshActor",
+                        "RelativeLocation": "X=0.037 Y=-0.060 Z=0.674",
+                        "RelativeRotation": "Pitch=0.000 Yaw=0.000 Roll=-0.000",
                         "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
                         "bAutoActive": "true",
                         "bIsActive": "true"
@@ -1233,7 +1233,7 @@
                         "AttachParentID": "Left wrist",
                         "ComponentClass": "USceneComponent",
                         "ComponentName": "Thumb0_L",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
                         "ComponentOwnerClass": "ASkeletalMeshActor",
                         "RelativeLocation": "X=0.099 Y=-0.106 Z=0.123",
                         "RelativeRotation": "Pitch=25.441 Yaw=41.615 Roll=-54.839",
@@ -1249,7 +1249,7 @@
                         "AttachParentID": "Left wrist",
                         "ComponentClass": "USceneComponent",
                         "ComponentName": "IndexFinger1_L",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
                         "ComponentOwnerClass": "ASkeletalMeshActor",
                         "RelativeLocation": "X=0.181 Y=-0.163 Z=0.680",
                         "RelativeRotation": "Pitch=0.000 Yaw=0.000 Roll=-0.000",
@@ -1265,7 +1265,7 @@
                         "AttachParentID": "Left wrist",
                         "ComponentClass": "USceneComponent",
                         "ComponentName": "LittleFinger1_L",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
                         "ComponentOwnerClass": "ASkeletalMeshActor",
                         "RelativeLocation": "X=-0.274 Y=0.019 Z=0.638",
                         "RelativeRotation": "Pitch=0.000 Yaw=0.000 Roll=-0.000",
@@ -1281,10 +1281,26 @@
                         "AttachParentID": "Left wrist",
                         "ComponentClass": "USceneComponent",
                         "ComponentName": "RingFinger1_L",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
                         "ComponentOwnerClass": "ASkeletalMeshActor",
                         "RelativeLocation": "X=-0.117 Y=-0.003 Z=0.661",
                         "RelativeRotation": "Pitch=0.000 Yaw=0.000 Roll=-0.000",
+                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
+                        "bAutoActive": "true",
+                        "bIsActive": "true"
+                    }
+                },
+                {
+                    "ComponentClass": "USceneComponent",
+                    "ComponentID": "MiddleFinger1_R",
+                    "Properties": {
+                        "AttachParentID": "Right wrist",
+                        "ComponentClass": "USceneComponent",
+                        "ComponentName": "MiddleFinger1_R",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
+                        "ComponentOwnerClass": "ASkeletalMeshActor",
+                        "RelativeLocation": "X=-0.047 Y=-0.034 Z=0.675",
+                        "RelativeRotation": "Pitch=-0.082 Yaw=-1.979 Roll=-2.460",
                         "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
                         "bAutoActive": "true",
                         "bIsActive": "true"
@@ -1297,7 +1313,7 @@
                         "AttachParentID": "Right wrist",
                         "ComponentClass": "USceneComponent",
                         "ComponentName": "Thumb0_R",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
                         "ComponentOwnerClass": "ASkeletalMeshActor",
                         "RelativeLocation": "X=-0.099 Y=-0.106 Z=0.124",
                         "RelativeRotation": "Pitch=-25.440 Yaw=-41.615 Roll=-54.840",
@@ -1313,7 +1329,7 @@
                         "AttachParentID": "Right wrist",
                         "ComponentClass": "USceneComponent",
                         "ComponentName": "IndexFinger1_R",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
                         "ComponentOwnerClass": "ASkeletalMeshActor",
                         "RelativeLocation": "X=-0.195 Y=-0.124 Z=0.680",
                         "RelativeRotation": "Pitch=-1.439 Yaw=-4.857 Roll=-5.272",
@@ -1324,15 +1340,15 @@
                 },
                 {
                     "ComponentClass": "USceneComponent",
-                    "ComponentID": "RingFinger1_R",
+                    "ComponentID": "LittleFinger1_R",
                     "Properties": {
                         "AttachParentID": "Right wrist",
                         "ComponentClass": "USceneComponent",
-                        "ComponentName": "RingFinger1_R",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
+                        "ComponentName": "LittleFinger1_R",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
                         "ComponentOwnerClass": "ASkeletalMeshActor",
-                        "RelativeLocation": "X=0.106 Y=0.028 Z=0.662",
-                        "RelativeRotation": "Pitch=-0.526 Yaw=-2.925 Roll=-3.373",
+                        "RelativeLocation": "X=0.256 Y=0.040 Z=0.639",
+                        "RelativeRotation": "Pitch=-2.202 Yaw=-2.515 Roll=-1.633",
                         "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
                         "bAutoActive": "true",
                         "bIsActive": "true"
@@ -1345,26 +1361,10 @@
                         "AttachParentID": "Arm4_R",
                         "ComponentClass": "USceneComponent",
                         "ComponentName": "Arm5_R",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
                         "ComponentOwnerClass": "ASkeletalMeshActor",
                         "RelativeLocation": "X=0.000 Y=-0.000 Z=2.619",
                         "RelativeRotation": "Pitch=-35.392 Yaw=-62.974 Roll=46.735",
-                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
-                        "bAutoActive": "true",
-                        "bIsActive": "true"
-                    }
-                },
-                {
-                    "ComponentClass": "USceneComponent",
-                    "ComponentID": "Arm5_L",
-                    "Properties": {
-                        "AttachParentID": "Arm4_L",
-                        "ComponentClass": "USceneComponent",
-                        "ComponentName": "Arm5_L",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
-                        "ComponentOwnerClass": "ASkeletalMeshActor",
-                        "RelativeLocation": "X=-0.000 Y=0.000 Z=2.619",
-                        "RelativeRotation": "Pitch=35.878 Yaw=64.764 Roll=49.285",
                         "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
                         "bAutoActive": "true",
                         "bIsActive": "true"
@@ -1377,7 +1377,7 @@
                         "AttachParentID": "HairA5",
                         "ComponentClass": "USceneComponent",
                         "ComponentName": "HairA6",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
                         "ComponentOwnerClass": "ASkeletalMeshActor",
                         "RelativeLocation": "X=0.000 Y=-0.000 Z=0.218",
                         "RelativeRotation": "Pitch=0.000 Yaw=0.000 Roll=-0.000",
@@ -1393,7 +1393,7 @@
                         "AttachParentID": "HairB5",
                         "ComponentClass": "USceneComponent",
                         "ComponentName": "HairB6",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
                         "ComponentOwnerClass": "ASkeletalMeshActor",
                         "RelativeLocation": "X=-0.000 Y=0.000 Z=0.218",
                         "RelativeRotation": "Pitch=-0.001 Yaw=0.003 Roll=0.001",
@@ -1409,26 +1409,10 @@
                         "AttachParentID": "HairI5",
                         "ComponentClass": "USceneComponent",
                         "ComponentName": "HairI7",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
                         "ComponentOwnerClass": "ASkeletalMeshActor",
                         "RelativeLocation": "X=-0.000 Y=0.000 Z=1.265",
                         "RelativeRotation": "Pitch=-17.190 Yaw=-24.412 Roll=22.051",
-                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
-                        "bAutoActive": "true",
-                        "bIsActive": "true"
-                    }
-                },
-                {
-                    "ComponentClass": "USceneComponent",
-                    "ComponentID": "MiddleFinger2_L",
-                    "Properties": {
-                        "AttachParentID": "MiddleFinger1_L",
-                        "ComponentClass": "USceneComponent",
-                        "ComponentName": "MiddleFinger2_L",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
-                        "ComponentOwnerClass": "ASkeletalMeshActor",
-                        "RelativeLocation": "X=0.000 Y=-0.000 Z=0.280",
-                        "RelativeRotation": "Pitch=0.000 Yaw=-0.000 Roll=0.000",
                         "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
                         "bAutoActive": "true",
                         "bIsActive": "true"
@@ -1441,7 +1425,7 @@
                         "AttachParentID": "Thumb0_L",
                         "ComponentClass": "USceneComponent",
                         "ComponentName": "Thumb1_L",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
                         "ComponentOwnerClass": "ASkeletalMeshActor",
                         "RelativeLocation": "X=-0.000 Y=-0.000 Z=0.236",
                         "RelativeRotation": "Pitch=-2.395 Yaw=-2.141 Roll=-4.584",
@@ -1457,7 +1441,7 @@
                         "AttachParentID": "IndexFinger1_L",
                         "ComponentClass": "USceneComponent",
                         "ComponentName": "IndexFinger2_L",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
                         "ComponentOwnerClass": "ASkeletalMeshActor",
                         "RelativeLocation": "X=0.000 Y=0.000 Z=0.265",
                         "RelativeRotation": "Pitch=0.000 Yaw=0.000 Roll=-0.000",
@@ -1473,7 +1457,7 @@
                         "AttachParentID": "LittleFinger1_L",
                         "ComponentClass": "USceneComponent",
                         "ComponentName": "LittleFinger2_L",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
                         "ComponentOwnerClass": "ASkeletalMeshActor",
                         "RelativeLocation": "X=0.000 Y=0.000 Z=0.204",
                         "RelativeRotation": "Pitch=0.001 Yaw=0.000 Roll=0.001",
@@ -1489,10 +1473,26 @@
                         "AttachParentID": "RingFinger1_L",
                         "ComponentClass": "USceneComponent",
                         "ComponentName": "RingFinger2_L",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
                         "ComponentOwnerClass": "ASkeletalMeshActor",
                         "RelativeLocation": "X=0.000 Y=0.000 Z=0.284",
                         "RelativeRotation": "Pitch=0.000 Yaw=0.000 Roll=-0.000",
+                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
+                        "bAutoActive": "true",
+                        "bIsActive": "true"
+                    }
+                },
+                {
+                    "ComponentClass": "USceneComponent",
+                    "ComponentID": "MiddleFinger2_R",
+                    "Properties": {
+                        "AttachParentID": "MiddleFinger1_R",
+                        "ComponentClass": "USceneComponent",
+                        "ComponentName": "MiddleFinger2_R",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
+                        "ComponentOwnerClass": "ASkeletalMeshActor",
+                        "RelativeLocation": "X=0.000 Y=-0.000 Z=0.280",
+                        "RelativeRotation": "Pitch=0.002 Yaw=0.003 Roll=0.003",
                         "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
                         "bAutoActive": "true",
                         "bIsActive": "true"
@@ -1505,10 +1505,26 @@
                         "AttachParentID": "Thumb0_R",
                         "ComponentClass": "USceneComponent",
                         "ComponentName": "Thumb1_R",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
                         "ComponentOwnerClass": "ASkeletalMeshActor",
                         "RelativeLocation": "X=0.000 Y=-0.000 Z=0.236",
                         "RelativeRotation": "Pitch=2.394 Yaw=2.140 Roll=-4.584",
+                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
+                        "bAutoActive": "true",
+                        "bIsActive": "true"
+                    }
+                },
+                {
+                    "ComponentClass": "USceneComponent",
+                    "ComponentID": "IndexFinger2_R",
+                    "Properties": {
+                        "AttachParentID": "IndexFinger1_R",
+                        "ComponentClass": "USceneComponent",
+                        "ComponentName": "IndexFinger2_R",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
+                        "ComponentOwnerClass": "ASkeletalMeshActor",
+                        "RelativeLocation": "X=-0.000 Y=-0.000 Z=0.266",
+                        "RelativeRotation": "Pitch=-0.001 Yaw=-0.003 Roll=-0.002",
                         "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
                         "bAutoActive": "true",
                         "bIsActive": "true"
@@ -1521,7 +1537,7 @@
                         "AttachParentID": "LittleFinger1_R",
                         "ComponentClass": "USceneComponent",
                         "ComponentName": "LittleFinger2_R",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
                         "ComponentOwnerClass": "ASkeletalMeshActor",
                         "RelativeLocation": "X=0.000 Y=0.000 Z=0.204",
                         "RelativeRotation": "Pitch=0.003 Yaw=0.004 Roll=0.004",
@@ -1537,7 +1553,7 @@
                         "AttachParentID": "RingFinger1_R",
                         "ComponentClass": "USceneComponent",
                         "ComponentName": "RingFinger2_R",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
                         "ComponentOwnerClass": "ASkeletalMeshActor",
                         "RelativeLocation": "X=-0.000 Y=0.000 Z=0.285",
                         "RelativeRotation": "Pitch=-0.002 Yaw=-0.002 Roll=-0.002",
@@ -1553,7 +1569,7 @@
                         "AttachParentID": "Arm5_R",
                         "ComponentClass": "USceneComponent",
                         "ComponentName": "Arm6_R",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
                         "ComponentOwnerClass": "ASkeletalMeshActor",
                         "RelativeLocation": "X=0.000 Y=-0.000 Z=0.201",
                         "RelativeRotation": "Pitch=-21.800 Yaw=-18.729 Roll=32.123",
@@ -1569,7 +1585,7 @@
                         "AttachParentID": "Arm5_L",
                         "ComponentClass": "USceneComponent",
                         "ComponentName": "Arm6_L",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
                         "ComponentOwnerClass": "ASkeletalMeshActor",
                         "RelativeLocation": "X=0.000 Y=0.000 Z=0.201",
                         "RelativeRotation": "Pitch=21.675 Yaw=18.367 Roll=32.202",
@@ -1585,10 +1601,26 @@
                         "AttachParentID": "HairI7",
                         "ComponentClass": "USceneComponent",
                         "ComponentName": "HairI9",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
                         "ComponentOwnerClass": "ASkeletalMeshActor",
                         "RelativeLocation": "X=-0.000 Y=-0.000 Z=1.199",
                         "RelativeRotation": "Pitch=-4.175 Yaw=-5.056 Roll=6.395",
+                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
+                        "bAutoActive": "true",
+                        "bIsActive": "true"
+                    }
+                },
+                {
+                    "ComponentClass": "USceneComponent",
+                    "ComponentID": "MiddleFinger3_L",
+                    "Properties": {
+                        "AttachParentID": "MiddleFinger2_L",
+                        "ComponentClass": "USceneComponent",
+                        "ComponentName": "MiddleFinger3_L",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
+                        "ComponentOwnerClass": "ASkeletalMeshActor",
+                        "RelativeLocation": "X=0.000 Y=0.000 Z=0.238",
+                        "RelativeRotation": "Pitch=0.000 Yaw=0.000 Roll=-0.000",
                         "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
                         "bAutoActive": "true",
                         "bIsActive": "true"
@@ -1601,7 +1633,7 @@
                         "AttachParentID": "Thumb1_L",
                         "ComponentClass": "USceneComponent",
                         "ComponentName": "Thumb2_L",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
                         "ComponentOwnerClass": "ASkeletalMeshActor",
                         "RelativeLocation": "X=0.000 Y=0.000 Z=0.279",
                         "RelativeRotation": "Pitch=0.987 Yaw=8.131 Roll=-8.033",
@@ -1617,7 +1649,7 @@
                         "AttachParentID": "IndexFinger2_L",
                         "ComponentClass": "USceneComponent",
                         "ComponentName": "IndexFinger3_L",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
                         "ComponentOwnerClass": "ASkeletalMeshActor",
                         "RelativeLocation": "X=0.000 Y=0.000 Z=0.199",
                         "RelativeRotation": "Pitch=0.000 Yaw=-0.000 Roll=0.000",
@@ -1633,10 +1665,26 @@
                         "AttachParentID": "LittleFinger2_L",
                         "ComponentClass": "USceneComponent",
                         "ComponentName": "LittleFinger3_L",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
                         "ComponentOwnerClass": "ASkeletalMeshActor",
                         "RelativeLocation": "X=-0.000 Y=0.000 Z=0.134",
                         "RelativeRotation": "Pitch=0.000 Yaw=0.000 Roll=-0.001",
+                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
+                        "bAutoActive": "true",
+                        "bIsActive": "true"
+                    }
+                },
+                {
+                    "ComponentClass": "USceneComponent",
+                    "ComponentID": "RingFinger3_L",
+                    "Properties": {
+                        "AttachParentID": "RingFinger2_L",
+                        "ComponentClass": "USceneComponent",
+                        "ComponentName": "RingFinger3_L",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
+                        "ComponentOwnerClass": "ASkeletalMeshActor",
+                        "RelativeLocation": "X=-0.000 Y=-0.000 Z=0.161",
+                        "RelativeRotation": "Pitch=0.001 Yaw=0.001 Roll=-0.001",
                         "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
                         "bAutoActive": "true",
                         "bIsActive": "true"
@@ -1649,26 +1697,10 @@
                         "AttachParentID": "MiddleFinger2_R",
                         "ComponentClass": "USceneComponent",
                         "ComponentName": "MiddleFinger3_R",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
                         "ComponentOwnerClass": "ASkeletalMeshActor",
                         "RelativeLocation": "X=-0.000 Y=-0.000 Z=0.238",
                         "RelativeRotation": "Pitch=-0.005 Yaw=1.977 Roll=2.458",
-                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
-                        "bAutoActive": "true",
-                        "bIsActive": "true"
-                    }
-                },
-                {
-                    "ComponentClass": "USceneComponent",
-                    "ComponentID": "Thumb2_R",
-                    "Properties": {
-                        "AttachParentID": "Thumb1_R",
-                        "ComponentClass": "USceneComponent",
-                        "ComponentName": "Thumb2_R",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
-                        "ComponentOwnerClass": "ASkeletalMeshActor",
-                        "RelativeLocation": "X=0.000 Y=-0.000 Z=0.279",
-                        "RelativeRotation": "Pitch=-0.987 Yaw=-8.130 Roll=-8.032",
                         "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
                         "bAutoActive": "true",
                         "bIsActive": "true"
@@ -1681,7 +1713,7 @@
                         "AttachParentID": "IndexFinger2_R",
                         "ComponentClass": "USceneComponent",
                         "ComponentName": "IndexFinger3_R",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
                         "ComponentOwnerClass": "ASkeletalMeshActor",
                         "RelativeLocation": "X=0.000 Y=0.000 Z=0.200",
                         "RelativeRotation": "Pitch=0.983 Yaw=4.972 Roll=5.379",
@@ -1697,7 +1729,7 @@
                         "AttachParentID": "LittleFinger2_R",
                         "ComponentClass": "USceneComponent",
                         "ComponentName": "LittleFinger3_R",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
                         "ComponentOwnerClass": "ASkeletalMeshActor",
                         "RelativeLocation": "X=-0.000 Y=-0.000 Z=0.134",
                         "RelativeRotation": "Pitch=2.124 Yaw=2.574 Roll=1.726",
@@ -1707,45 +1739,33 @@
                     }
                 },
                 {
-                    "ComponentClass": "USceneComponent",
-                    "ComponentID": "RingFinger3_R",
+                    "ComponentClass": "USkeletalMeshComponent",
+                    "ComponentID": "USkeletalMeshComponent_155",
                     "Properties": {
-                        "AttachParentID": "RingFinger2_R",
-                        "ComponentClass": "USceneComponent",
-                        "ComponentName": "RingFinger3_R",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
+                        "AABB_max": "X=4.080 Y=3.503 Z=18.203",
+                        "AABB_min": "X=-6.283 Y=-3.739 Z=0.011",
+                        "AttachParentID": "USkeletalMeshComponent_159",
+                        "ComponentClass": "USkeletalMeshComponent",
+                        "ComponentName": "USkeletalMeshComponent_155",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
                         "ComponentOwnerClass": "ASkeletalMeshActor",
-                        "RelativeLocation": "X=0.000 Y=-0.000 Z=0.162",
-                        "RelativeRotation": "Pitch=0.354 Yaw=2.953 Roll=3.397",
+                        "RelativeLocation": "X=0.000 Y=0.000 Z=0.000",
+                        "RelativeRotation": "Pitch=0.000 Yaw=0.000 Roll=-0.000",
                         "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
+                        "SkeletalMeshPath": "Contents/Sharkry_NoTwist.fbx",
                         "bAutoActive": "true",
-                        "bIsActive": "true"
+                        "bIsActive": "true",
+                        "m_Type": ""
                     }
                 },
                 {
                     "ComponentClass": "USceneComponent",
-                    "ComponentID": "HairI11",
-                    "Properties": {
-                        "AttachParentID": "HairI9",
-                        "ComponentClass": "USceneComponent",
-                        "ComponentName": "HairI11",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
-                        "ComponentOwnerClass": "ASkeletalMeshActor",
-                        "RelativeLocation": "X=-0.000 Y=0.000 Z=0.892",
-                        "RelativeRotation": "Pitch=1.790 Yaw=1.831 Roll=-2.300",
-                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
-                        "bAutoActive": "true",
-                        "bIsActive": "true"
-                    }
-                },
-                {
-                    "ComponentClass": "USceneComponent",
-                    "ComponentID": "USceneComponent_278",
+                    "ComponentID": "USceneComponent_158",
                     "Properties": {
                         "AttachParentID": "nullptr",
                         "ComponentClass": "USceneComponent",
-                        "ComponentName": "USceneComponent_278",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
+                        "ComponentName": "USceneComponent_158",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
                         "ComponentOwnerClass": "ASkeletalMeshActor",
                         "RelativeLocation": "X=0.000 Y=0.000 Z=0.000",
                         "RelativeRotation": "Pitch=0.000 Yaw=0.000 Roll=-0.000",
@@ -1756,26 +1776,42 @@
                 },
                 {
                     "ComponentClass": "USkeletalMeshComponent",
-                    "ComponentID": "USkeletalMeshComponent_279",
+                    "ComponentID": "USkeletalMeshComponent_159",
                     "Properties": {
                         "AABB_max": "X=4.080 Y=3.503 Z=18.203",
                         "AABB_min": "X=-6.283 Y=-3.739 Z=0.011",
                         "AttachParentID": "nullptr",
                         "ComponentClass": "USkeletalMeshComponent",
-                        "ComponentName": "USkeletalMeshComponent_279",
-                        "ComponentOwner": "ASkeletalMeshActor_277",
+                        "ComponentName": "USkeletalMeshComponent_159",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
                         "ComponentOwnerClass": "ASkeletalMeshActor",
                         "RelativeLocation": "X=0.000 Y=0.000 Z=0.000",
-                        "RelativeRotation": "Pitch=0.000 Yaw=-127.733 Roll=0.000",
+                        "RelativeRotation": "Pitch=0.000 Yaw=119.723 Roll=-0.000",
                         "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
                         "SkeletalMeshPath": "Contents/Sharkry_NoTwist.fbx",
                         "bAutoActive": "true",
                         "bIsActive": "true",
                         "m_Type": ""
                     }
+                },
+                {
+                    "ComponentClass": "USceneComponent",
+                    "ComponentID": "USceneComponent_154",
+                    "Properties": {
+                        "AttachParentID": "nullptr",
+                        "ComponentClass": "USceneComponent",
+                        "ComponentName": "USceneComponent_154",
+                        "ComponentOwner": "ASkeletalMeshActor_157",
+                        "ComponentOwnerClass": "ASkeletalMeshActor",
+                        "RelativeLocation": "X=0.000 Y=0.000 Z=0.000",
+                        "RelativeRotation": "Pitch=0.000 Yaw=0.000 Roll=-0.000",
+                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
+                        "bAutoActive": "true",
+                        "bIsActive": "true"
+                    }
                 }
             ],
-            "RootComponentID": "USkeletalMeshComponent_279"
+            "RootComponentID": "USkeletalMeshComponent_159"
         }
     ],
     "NextUUID": 0,
