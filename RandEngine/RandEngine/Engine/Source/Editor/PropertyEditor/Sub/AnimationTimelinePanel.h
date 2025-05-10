@@ -4,6 +4,7 @@
 #include "Container/Array.h"
 #include "Container/Set.h"
 #include "UObject/NameTypes.h"
+#include "UnrealEd/EditorPanel.h"
 
 #include "Imgui/imgui.h"
 #include "Imgui/imgui_internal.h"
@@ -76,12 +77,12 @@ enum class EEditorTimelineTrackType
 struct FEditorTimelineTrack
 {
     EEditorTimelineTrackType TrackType;
-    FString DisplayName;
+    std::string DisplayName;
     int TrackId;
     int Depth;
     bool bIsExpanded;
 
-    FEditorTimelineTrack(EEditorTimelineTrackType InType, const FString& InBaseName, int InDepth = 0)
+    FEditorTimelineTrack(EEditorTimelineTrackType InType, const std::string& InBaseName, int InDepth = 0)
         : TrackType(InType), Depth(InDepth), bIsExpanded(true)
     {
         TrackId = NextTrackIdCounter++;
@@ -96,11 +97,19 @@ struct FEditorTimelineTrack
 };
 
 
-class SAnimationTimelinePanel : public ImSequencer::SequenceInterface
+class SAnimationTimelinePanel : public ImSequencer::SequenceInterface, public UEditorPanel
 {
+    MockAnimSequence* MocdkAnimSequence; //for Text
 public:
     SAnimationTimelinePanel();
-
+    ~SAnimationTimelinePanel()
+    {
+        if (MocdkAnimSequence)
+        {
+            delete MocdkAnimSequence;
+            MocdkAnimSequence = nullptr;
+        }
+    }
     // --- Public Interface Methods ---
     void SetTargetSequence(MockAnimSequence* sequence); 
 
@@ -140,6 +149,8 @@ public:
 
     virtual void CustomDrawCompact(int displayTrackIndex, ImDrawList* drawList, const ImRect& rc, const ImRect& clippingRect) override;
     
+    virtual void Render() override;
+    virtual void OnResize(HWND hWnd) override;
 private:
     // --- Private Helper Methods for UI Rendering ---
     void FitTimelineToView();
@@ -180,4 +191,6 @@ public:
     ImVec2 DraggingStartMousePosInTrack;
 
     float LastSequencerAreaWidth = 400.f;
+
+    float Width = 800, Height = 600;
 };

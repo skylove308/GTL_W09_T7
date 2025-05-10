@@ -489,10 +489,10 @@ LRESULT CALLBACK FEngineLoop::AppWndProc(HWND hWnd, uint32 Msg, WPARAM wParam, L
                 if (GEngineLoop.GetUnrealEditor())
                 {
                     SkeletalViewerGD.Resize(hWnd, FullWidth, FullHeight);
-                    GEngineLoop.GetUnrealEditor()->OnResize(hWnd, true);
+                    GEngineLoop.GetUnrealEditor()->OnResize(hWnd, EWindowType::WT_SkeletalSubWindow);
                 }
                 GEngineLoop.SkeletalViewerSubEngine->ViewportClient->AspectRatio = (FullWidth * 0.75f) / FullHeight;
-            }
+             }
             return 0;
         case WM_CLOSE:
             // GEngineLoop.SelectSkeletalMesh(nullptr);
@@ -528,8 +528,8 @@ LRESULT CALLBACK FEngineLoop::AppWndProc(HWND hWnd, uint32 Msg, WPARAM wParam, L
                 
                 if (GEngineLoop.GetUnrealEditor())
                 {
-                    SkeletalViewerGD.Resize(hWnd, FullWidth, FullHeight);
-                    GEngineLoop.GetUnrealEditor()->OnResize(hWnd, true);
+                    AnimationViewerGD.Resize(hWnd, FullWidth, FullHeight);
+                    GEngineLoop.GetUnrealEditor()->OnResize(hWnd, EWindowType::WT_AnimationSubWindow);
                 }
                 GEngineLoop.AnimationViewerSubEngine->ViewportClient->AspectRatio = (FullWidth * 0.75f) / FullHeight;
             }

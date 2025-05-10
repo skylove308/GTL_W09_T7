@@ -204,7 +204,7 @@ xcopy /y /d "$(SolutionDir)$(ProjectName)\Engine\Source\ThirdParty\FBX\lib\x64\$
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Engine\Source\Editor\PropertyEditor\Animation\AnimationTimelinePanel.cpp" />
+    <ClCompile Include="Engine\Source\Editor\PropertyEditor\Sub\AnimationTimelinePanel.cpp" />
     <ClCompile Include="Engine\Source\Contents\Actors\Fish.cpp" />
     <ClCompile Include="Engine\Source\Contents\Actors\GoalPlatformActor.cpp" />
     <ClCompile Include="Engine\Source\Contents\Actors\ItemActor.cpp" />
@@ -484,7 +484,7 @@ xcopy /y /d "$(SolutionDir)$(ProjectName)\Engine\Source\ThirdParty\FBX\lib\x64\$
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Engine\Source\Editor\PropertyEditor\Animation\AnimationTimelinePanel.h" />
+    <ClInclude Include="Engine\Source\Editor\PropertyEditor\Sub\AnimationTimelinePanel.h" />
     <ClInclude Include="Engine\Source\Contents\Actors\Fish.h" />
     <ClInclude Include="Engine\Source\Contents\Actors\GoalPlatformActor.h" />
     <ClInclude Include="Engine\Source\Contents\Actors\ItemActor.h" />

@@ -11,7 +11,8 @@
 enum EWindowType : uint8
 {
     WT_Main,
-    WT_Sub
+    WT_SkeletalSubWindow,
+    WT_AnimationSubWindow,
 };
 
 class UEditorPanel

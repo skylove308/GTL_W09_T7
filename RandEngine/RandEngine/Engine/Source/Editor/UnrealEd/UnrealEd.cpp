@@ -1,52 +1,94 @@
-﻿#include "UnrealEd.h"
+#include "UnrealEd.h"
 #include "EditorPanel.h"
 
 #include "PropertyEditor/ControlEditorPanel.h"
 #include "PropertyEditor/OutlinerEditorPanel.h"
 #include "PropertyEditor/PropertyEditorPanel.h"
 #include "PropertyEditor/Sub/SkeletalViewerPanel.h"
+#include "PropertyEditor/Sub/AnimationTimelinePanel.h"
 
 void UnrealEd::Initialize()
 {
     auto ControlPanel = std::make_shared<ControlEditorPanel>();
     AddEditorPanel("ControlPanel", ControlPanel);
-    
+
     auto OutlinerPanel = std::make_shared<OutlinerEditorPanel>();
     AddEditorPanel("OutlinerPanel", OutlinerPanel);
-    
+
     auto PropertyPanel = std::make_shared<PropertyEditorPanel>();
     AddEditorPanel("PropertyPanel", PropertyPanel);
-    
+
     auto SubSkeletalViewerPanel = std::make_shared<SkeletalViewerPanel>();
-    AddEditorPanel("SubSkeletalViewerPanel", SubSkeletalViewerPanel, true);
+    AddEditorPanel("SubSkeletalViewerPanel", SubSkeletalViewerPanel, EWindowType::WT_SkeletalSubWindow);
+
+    auto SubAnimationViewerPanel = std::make_shared<SAnimationTimelinePanel>();
+    auto SubSkeletalViewerPanel2 = std::make_shared<SkeletalViewerPanel>();
+    AddEditorPanel("SubAnimationViewerPanel", SubAnimationViewerPanel, EWindowType::WT_AnimationSubWindow);
+    AddEditorPanel("SubSkeletalViewerPanel", SubSkeletalViewerPanel2, EWindowType::WT_AnimationSubWindow);
+ 
 }
 
-void UnrealEd::Render() const
+void UnrealEd::Render(EWindowType WindowType) const
 {
-    for (const auto& Panel : Panels)
+    TMap<FString, std::shared_ptr<UEditorPanel>> TargetPanels;
+
+    switch (WindowType)
+    {
+    case EWindowType::WT_Main:
+        TargetPanels = Panels;
+        break;
+    case EWindowType::WT_SkeletalSubWindow:
+        TargetPanels = SkeletalSubPanels;
+        break;
+    case EWindowType::WT_AnimationSubWindow:
+        TargetPanels = AnimationSubPanels;
+        break;
+    }
+
+    for (const auto& Panel : TargetPanels)
     {
         Panel.Value->Render();
     }
 }
 
-void UnrealEd::RenderSkeletalSubWindowPanel() const
+void UnrealEd::AddEditorPanel(const FString& PanelId, const std::shared_ptr<UEditorPanel>& EditorPanel, EWindowType WindowType)
 {
-    for (const auto& Panel : SkeletalSubPanels)
+    switch (WindowType)
     {
-        Panel.Value->Render();
+    case EWindowType::WT_Main:
+        Panels[PanelId] = EditorPanel;
+        break;
+    case EWindowType::WT_SkeletalSubWindow:
+        SkeletalSubPanels[PanelId] = EditorPanel;
+        break;
+    case EWindowType::WT_AnimationSubWindow:
+        AnimationSubPanels[PanelId] = EditorPanel;
+        break;
+    default:
+        break;
     }
+
 }
 
-void UnrealEd::AddEditorPanel(const FString& PanelId, const std::shared_ptr<UEditorPanel>& EditorPanel, bool bSubWindow)
+void UnrealEd::OnResize(HWND hWnd, EWindowType WindowType) const
 {
-    (bSubWindow ? SkeletalSubPanels : Panels)[PanelId] = EditorPanel;
-}
+    
+    TMap<FString, std::shared_ptr<UEditorPanel>> TargetPanels;
 
-void UnrealEd::OnResize(HWND hWnd, bool bSubWindow) const
-{
-    auto& targetPanels = bSubWindow ? SkeletalSubPanels : Panels;
+    switch (WindowType)
+    {
+    case EWindowType::WT_Main:
+        TargetPanels = Panels;
+        break;
+    case EWindowType::WT_SkeletalSubWindow:
+        TargetPanels = SkeletalSubPanels;
+        break;
+    case EWindowType::WT_AnimationSubWindow:
+        TargetPanels = AnimationSubPanels;
+        break;
+    }
 
-    for (auto& PanelPair : targetPanels)
+    for (auto& PanelPair : TargetPanels)
     {
         if (PanelPair.Value)
         {

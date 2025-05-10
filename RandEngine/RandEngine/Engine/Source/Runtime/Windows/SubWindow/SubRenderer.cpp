@@ -7,7 +7,7 @@
 #include "D3D11RHI/GraphicDevice.h"
 #include "Engine/Asset/SkeletalMeshAsset.h"
 #include "UnrealEd/EditorViewportClient.h"
-#include "Editor/PropertyEditor/Animation/AnimationTimelinePanel.h"
+
 FSubRenderer::~FSubRenderer()
 {
     Release();

@@ -25,6 +25,15 @@ SAnimationTimelinePanel::SAnimationTimelinePanel()
     , FramePixelWidth(6.0f) // 적절한 초기값 설정
     , FramePixelWidth_BeforeChange(6.0f) // FramePixelWidth와 동일하게 초기
 {
+
+    MocdkAnimSequence = new MockAnimSequence();
+
+  
+    MocdkAnimSequence->FrameRate = 30.0f;
+    MocdkAnimSequence->SequenceLength = 2.0f;
+    MocdkAnimSequence->AddNotify(1.0f, FName("Footstep_L"));
+    MocdkAnimSequence->AddNotify(1.6f, FName("Footstep_R"));
+    SetTargetSequence(MocdkAnimSequence);
 }
 
 void SAnimationTimelinePanel::SetTargetSequence(MockAnimSequence* sequence)
@@ -106,7 +115,7 @@ const char* SAnimationTimelinePanel::GetItemLabel(int index) const
 {
     if (index >= 0 && index < DisplayableTracks.Num())
     {
-        return DisplayableTracks[index].DisplayName.ToAnsiString().c_str();
+        return DisplayableTracks[index].DisplayName.c_str();
     }
     return "";
 }
@@ -185,6 +194,22 @@ void SAnimationTimelinePanel::CustomDrawCompact(int displayTrackIndex, ImDrawLis
             RenderNotifyTrackItems(filteredNotifies, drawList, rc, clippingRect, true);
         }
     }
+}
+
+void SAnimationTimelinePanel::Render()
+{
+    
+    UpdatePlayback(0.01666);
+    RenderTimelineEditor();
+
+}
+
+void SAnimationTimelinePanel::OnResize(HWND hWnd)
+{
+    RECT ClientRect;
+    GetClientRect(hWnd, &ClientRect);
+    Width = ClientRect.right - ClientRect.left;
+    Height = ClientRect.bottom - ClientRect.top;
 }
 
 
@@ -417,10 +442,6 @@ void SAnimationTimelinePanel::CenterViewOnFrame(int targetFrame)
     ClampFirstVisibleFrame();
 }
 
-// --- 분리된 UI 렌더링 함수들 ---
-// SAnimationTimelinePanel.cpp
-
-// ... (다른 함수들은 이전과 동일) ...
 
 void SAnimationTimelinePanel::RenderPlaybackControls()
 {
