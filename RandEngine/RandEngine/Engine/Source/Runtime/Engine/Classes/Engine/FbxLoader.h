@@ -16,6 +16,7 @@
 #include "Asset/SkeletalMeshAsset.h"
 
 #include "SkeletalMeshDebugger.h"
+#include "Animation/AnimSequence.h"
 
 struct FFbxLoadResult;
 struct FAnimationCurveData;
@@ -49,7 +50,7 @@ namespace std
 
 struct FFBXLoader
 {
-    static void LoadFbxAnimation(FbxScene* InScene);
+    static void LoadFbxAnimation(FbxScene* InScene, UAnimSequence*& OutAnimSequence);
     static void ExtractCurveData(FbxAnimStack* AnimStack, FbxScene* Scene, TArray<FBoneAnimationTrack>& OutBoneTracks, FAnimationCurveData& OutCurveData, int32
                                  & OutTotalKeyCount);
     static void TraverseNodeBoneTrack(FbxNode* Node, TArray<FBoneAnimationTrack>& OutBoneTracks, int32& OutTotalKeyCount, FbxTime::EMode TimeMode, int32
@@ -57,7 +58,7 @@ struct FFBXLoader
     static void TraverseNodeCurveData(FbxNode* Node, FbxAnimLayer* AnimLayer, FAnimationCurveData& OutCurveData);
 
     
-    static bool ParseFBX(const FString& FBXFilePath, FBX::FBXInfo& OutFBXInfo);
+    static bool ParseFBX(const FString& FBXFilePath, FBX::FBXInfo& OutFBXInfo, UAnimSequence*& OutAnimSequence);
 
     // Convert the Raw data to Cooked data (FSkeletalMeshRenderData)
     static bool ConvertToSkeletalMesh(const TArray<FBX::MeshRawData>& RawMeshData, const FBX::FBXInfo& FullFBXInfo, FSkeletalMeshRenderData& OutSkeletalMesh, USkeleton* OutSkeleton);
@@ -75,7 +76,7 @@ struct FManagerFBX
 public:
     static bool LoadFBX(const FString& InFilePath, FFbxLoadResult& OutResult);
 
-    static FSkeletalMeshRenderData* LoadFBXSkeletalMeshAsset(const FString& PathFileName, USkeleton* OutSkeleton);
+    static FSkeletalMeshRenderData* LoadFBXSkeletalMeshAsset(const FString& PathFileName, USkeleton* OutSkeleton, UAnimSequence*& OutAnimSequence);
 
     static void CombineMaterialIndex(FSkeletalMeshRenderData& OutFSkeletalMesh);
 
@@ -88,6 +89,5 @@ public:
     static UMaterial* GetMaterial(const FString& InName);
 
 private:
-    inline static TMap<FString, FSkeletalMeshRenderData*> SkeletalMeshRenderDataMap;
     inline static TMap<FString, UMaterial*> MaterialMap;
 };

@@ -24,6 +24,7 @@
 #include "Components/Mesh/SkeletalMeshComponent.h"
 #include "UObject/ObjectFactory.h"    // FManagerFBX 에서 사용
 #include "SkeletalMeshDebugger.h"   // FSkeletalMeshDebugger 클래스 사용
+#include "Animation/AnimSequence.h"
 #include "Animation/AnimData/AnimDataModel.h"
 #include "Animation/AnimData/IAnimationDataModel.h"
 
@@ -1032,7 +1033,7 @@ FString FbxTransformToString(const FbxAMatrix& Matrix)
         S[0], S[1], S[2]);
 }
 
-bool FFBXLoader::ParseFBX(const FString& FBXFilePath, FBX::FBXInfo& OutFBXInfo)
+bool FFBXLoader::ParseFBX(const FString& FBXFilePath, FBX::FBXInfo& OutFBXInfo, UAnimSequence*& OutAnimSequence)
 {
     using namespace ::FBX; // Use helpers from anonymous namespace
 
@@ -1043,7 +1044,7 @@ bool FFBXLoader::ParseFBX(const FString& FBXFilePath, FBX::FBXInfo& OutFBXInfo)
     struct SceneGuard { FbxScene*& Scn; ~SceneGuard() { if (Scn) Scn->Destroy(); } } ScnGuard{ Scene };
     FbxImporter* Importer = FbxImporter::Create(SdkManager, ""); if (!Importer) return false;
     struct ImporterGuard { FbxImporter*& Imp; ~ImporterGuard() { if (Imp) Imp->Destroy(); } } ImpGuard{ Importer };
-
+    
 #if USE_WIDECHAR
     std::string FilepathStdString = FBXFilePath.ToAnsiString();
 #else
@@ -1064,6 +1065,9 @@ bool FFBXLoader::ParseFBX(const FString& FBXFilePath, FBX::FBXInfo& OutFBXInfo)
     OutFBXInfo.FilePath = FBXFilePath; std::filesystem::path fsPath(FBXFilePath.ToWideString()); OutFBXInfo.FileDirectory = fsPath.parent_path().wstring().c_str();
     FbxNode* RootNode = Scene->GetRootNode();
     if (!RootNode) return false;
+    
+    // 일단 박아둠.
+    LoadFbxAnimation(Scene, OutAnimSequence);
 
     TMap<FbxSurfaceMaterial*, FName> MaterialPtrToNameMap; OutFBXInfo.Materials.Empty();
     int NumTotalNodes = Scene->GetNodeCount();
@@ -1659,48 +1663,47 @@ bool FManagerFBX::LoadFBX(const FString& InFilePath, FFbxLoadResult& OutResult)
     USkeletalMesh* NewMesh = FObjectFactory::ConstructObject<USkeletalMesh>(nullptr);
     NewMesh->Skeleton = FObjectFactory::ConstructObject<USkeleton>(NewMesh); // Outer를 NewMesh로 설정 예시
 
-    FSkeletalMeshRenderData* RenderData = LoadFBXSkeletalMeshAsset(InFilePath, NewMesh->Skeleton);
+    UAnimSequence* NewAnimSequence = nullptr;
+
+    FSkeletalMeshRenderData* RenderData = LoadFBXSkeletalMeshAsset(InFilePath, NewMesh->Skeleton, NewAnimSequence);
     if (!RenderData)
     {
+        if (NewAnimSequence)
+        {
+            GUObjectArray.MarkRemoveObject(NewAnimSequence);
+        }
         GUObjectArray.MarkRemoveObject(NewMesh->Skeleton);
         GUObjectArray.MarkRemoveObject(NewMesh);
         return false;
     }
-
+    
     NewMesh->SetData(RenderData);
 
     OutResult.SkeletalMeshes.Add(NewMesh);
-    return NewMesh;
+    if (NewAnimSequence)
+    {
+        OutResult.Animations.Add(NewAnimSequence);
+    }
+    return true;
 }
 
 // --- FManagerFBX Static Method Implementations ---
-FSkeletalMeshRenderData* FManagerFBX::LoadFBXSkeletalMeshAsset(const FString& PathFileName, USkeleton* OutSkeleton)
+FSkeletalMeshRenderData* FManagerFBX::LoadFBXSkeletalMeshAsset(const FString& PathFileName, USkeleton* OutSkeleton, UAnimSequence*& OutAnimSequence)
 {
     using namespace FBX;
     if (!OutSkeleton) return nullptr; // USkeleton 객체 필요
 
-    FSkeletalMeshRenderData** FoundDataPtr = SkeletalMeshRenderDataMap.Find(PathFileName);
-
-    if (FoundDataPtr)
-    {
-        // 캐시된 RenderData가 있으면, USkeleton 정보만 채워야 할 수도 있음
-        // TODO: 캐시된 RenderData와 함께 USkeleton을 어떻게 처리할지 정책 결정 필요
-        //       간단하게는 캐시 히트 시에도 파싱/변환을 다시 수행하거나,
-        //       캐시된 RenderData에서 스켈레톤 정보를 읽어 OutSkeleton을 채우는 로직 추가
-        // 여기서는 일단 캐시 히트 시 바로 반환 (USkeleton 채우는 로직 누락 가능성)
-        return *FoundDataPtr;
-    }
-
     FBXInfo ParsedInfo;
-    if (!FFBXLoader::ParseFBX(PathFileName, ParsedInfo)) return nullptr;
+    if (!FFBXLoader::ParseFBX(PathFileName, ParsedInfo, OutAnimSequence)) return nullptr;
     if (ParsedInfo.Meshes.IsEmpty()) return nullptr;
+    
     FSkeletalMeshRenderData* NewRenderData = new FSkeletalMeshRenderData();
     if (!FFBXLoader::ConvertToSkeletalMesh(ParsedInfo.Meshes, ParsedInfo, *NewRenderData, OutSkeleton))
     {
         delete NewRenderData;
         return nullptr;
     }
-    SkeletalMeshRenderDataMap.Add(PathFileName, NewRenderData);
+    
     return NewRenderData;
 }
 
@@ -1742,12 +1745,14 @@ UMaterial* FManagerFBX::CreateMaterial(const FFbxMaterialInfo& MaterialInfo)
 
 UMaterial* FManagerFBX::GetMaterial(const FString& InName) { UMaterial** Ptr = MaterialMap.Find(InName); return Ptr ? *Ptr : nullptr; }
 
-void FFBXLoader::LoadFbxAnimation(FbxScene* InScene)
-{    
+void FFBXLoader::LoadFbxAnimation(FbxScene* InScene, UAnimSequence*& OutAnimSequence)
+{
     int animStackCount = InScene->GetSrcObjectCount<FbxAnimStack>();
+    // int animStackCount = InScene->GetMemberCount<FbxAnimStack>();
     for (int i = 0; i < animStackCount; ++i)
     {
         FbxAnimStack* AnimStack = InScene->GetSrcObject<FbxAnimStack>(i);
+        // FbxAnimStack* AnimStack = InScene->GetMember<FbxAnimStack>(i);
         
         TArray<FBoneAnimationTrack> BoneTracks;
         FAnimationCurveData CurveData = {};
@@ -1762,9 +1767,9 @@ void FFBXLoader::LoadFbxAnimation(FbxScene* InScene)
         if (bBoneTrackExist || bCurveDataExist)
         {
             //UAssetManager::Get()
-            //UAnimSequence* AnimSequence = FObjectFactory::ConstructObject<UAnimSequence>(nullptr);
+            OutAnimSequence = FObjectFactory::ConstructObject<UAnimSequence>(nullptr);
             UAnimDataModel* AnimDataModel = FObjectFactory::ConstructObject<UAnimDataModel>(nullptr);
-            //AnimSequence->SetAnimDataModel(AnimDataModel);
+            OutAnimSequence->SetAnimDataModel(AnimDataModel);
 
             if (bBoneTrackExist)
             {
