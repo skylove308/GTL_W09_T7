@@ -13,7 +13,9 @@
 #include "UnrealEd/EditorViewportClient.h"
 #include "UObject/UObjectIterator.h"
 #include "Engine/EditorEngine.h"
-
+#include "Engine/SkeletalMeshActor.h"
+#include "Components/Mesh/SkeletalMeshComponent.h"
+#include "Components/Mesh/SkeletalMesh.h"
 
 void AEditorPlayer::Tick(float DeltaTime)
 {
@@ -365,6 +367,46 @@ void AEditorPlayer::ControlRotation(USceneComponent* Component, UGizmoBaseCompon
         }
         
         RotationDelta = FQuat(Axis, RotationAmount);
+    }
+
+    // Bone Rotating for SkeletalComponent
+    if (ASkeletalMeshActor* SkeletalMeshActor = Cast<ASkeletalMeshActor>(Component->GetOwner()))
+    {
+        USkeletalMeshComponent* SkeletalComp = SkeletalMeshActor->GetComponentByClass<USkeletalMeshComponent>();
+        USkeletalMesh* SkeletalMesh = SkeletalComp->GetSkeletalMesh();
+
+        if (!SkeletalMesh)
+        {
+            return;
+        };
+
+        USkeleton* Skeleton = SkeletalMesh->Skeleton;
+
+        if (!Skeleton)
+        {
+            return;
+        }
+
+        int32 BoneIndex = SkeletalMeshActor->BoneGizmoSceneComponents.Find(Component);
+
+        FMatrix CurrentLocalMatrix = SkeletalMesh->GetBoneLocalMatrix(BoneIndex);
+        FVector LocalPos = CurrentLocalMatrix.GetTranslationVector();
+        FRotator LocalRot = FRotator(CurrentLocalMatrix.ToQuat() * RotationDelta);
+        FVector LocalScale = CurrentLocalMatrix.GetScaleVector();
+
+        FMatrix NewLocalMatrix =
+            FMatrix::GetScaleMatrix(LocalScale) *
+            FMatrix::GetRotationMatrix(LocalRot) *
+            FMatrix::GetTranslationMatrix(LocalPos);
+
+        if (SkeletalMesh->SetBoneLocalMatrix(BoneIndex, NewLocalMatrix))
+        {
+            SkeletalMesh->UpdateWorldTransforms();
+            SkeletalMesh->UpdateAndApplySkinning();
+        }
+        //Component->SetWorldRotation(RotationDelta * CurrentRotation);
+        Component->SetRelativeRotation(LocalRot);
+        return;
     }
 
     // 쿼터니언의 곱 순서는 delta * current 가 맞음.
