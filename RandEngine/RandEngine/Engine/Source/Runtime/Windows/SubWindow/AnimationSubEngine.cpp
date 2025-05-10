@@ -1,5 +1,4 @@
-﻿#include "AnimationSubEngine.h"
-
+#include "AnimationSubEngine.h"
 #include "ImGuiManager.h"
 #include "ImGuiSubWindow.h"
 #include "SubRenderer.h"
@@ -106,10 +105,10 @@ void FAnimationSubEngine::Render()
         // Sub window rendering
         SubUI->BeginFrame();
 
-        UnrealEditor->RenderSkeletalSubWindowPanel();
-        
+        UnrealEditor->Render(EWindowType::WT_AnimationSubWindow);
+       
         SubUI->EndFrame();
-        
+         
         // Sub swap
         Graphics->SwapBuffer();
     }

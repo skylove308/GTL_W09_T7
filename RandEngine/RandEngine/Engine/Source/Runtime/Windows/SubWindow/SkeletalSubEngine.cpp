@@ -1,4 +1,4 @@
-﻿#include "SkeletalSubEngine.h"
+#include "SkeletalSubEngine.h"
 
 #include "ImGuiManager.h"
 #include "ImGuiSubWindow.h"
@@ -106,7 +106,7 @@ void FSkeletalSubEngine::Render()
         // Sub window rendering
         SubUI->BeginFrame();
 
-        UnrealEditor->RenderSkeletalSubWindowPanel();
+        UnrealEditor->Render(EWindowType::WT_SkeletalSubWindow);
         
         SubUI->EndFrame();
         

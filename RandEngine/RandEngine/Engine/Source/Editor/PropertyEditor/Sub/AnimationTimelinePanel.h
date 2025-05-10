@@ -4,6 +4,7 @@
 #include "Container/Array.h"
 #include "Container/Set.h"
 #include "UObject/NameTypes.h"
+#include "UnrealEd/EditorPanel.h"
 
 #include "Imgui/imgui.h"
 #include "Imgui/imgui_internal.h"
@@ -21,16 +22,28 @@ class UAnimSequence;
 // ---------------------------------------------------------
 struct FMockAnimNotifyEvent
 {
+    int EventId;
     float TriggerTime = 0.0f;
     FName NotifyName;
-    int EventId;
-    static int NextEventId;
+    FString NotifyDisplayName;
+    int UserInterfaceTrackId;
 
-    FMockAnimNotifyEvent(float time = 0.0f, const FName& name = FName("DefaultNotify"))
-        : TriggerTime(time), NotifyName(name), EventId(NextEventId++) {
+    FMockAnimNotifyEvent(float InTime, FName InName, int InUITrackId)
+        : TriggerTime(InTime), NotifyName(InName), UserInterfaceTrackId(InUITrackId)
+    {
+        EventId = NextEventId++;
+        NotifyDisplayName = NotifyName.ToString().ToAnsiString(); // 기본 표시 이름
     }
+ 
+    FMockAnimNotifyEvent(float InTime, FName InName) // 이 생성자는 특정 UI 트랙 ID가 없을 경우 사용
+        : TriggerTime(InTime), NotifyName(InName), UserInterfaceTrackId(-1) // -1은 특정 UI 트랙에 할당되지 않음을 의미 (예: 기본 Notifies 트랙)
+    {
+        EventId = NextEventId++;
+        NotifyDisplayName = NotifyName.ToString().ToAnsiString();
+    }
+    static int NextEventId;
 };
-// int FMockAnimNotifyEvent::NextEventId = 0; // .cpp 파일에 초기화
+
 
 class MockAnimSequence
 {
@@ -39,12 +52,7 @@ public:
     float SequenceLength = 10.0f; // 기본 길이 10초
     float FrameRate = 30.0f;      // 기본 프레임률 30 FPS
 
-    MockAnimSequence() {
-        // 테스트용 기본 노티파이 (선택 사항)
-        // AddNotify(1.0f, FName("Footstep_L"));
-        // AddNotify(1.5f, FName("Footstep_R"));
-        // AddNotify(3.0f, FName("WeaponSwing"));
-    }
+    MockAnimSequence() {}
 
     void AddNotify(float triggerTime, const FName& name) {
         Notifies.Add(FMockAnimNotifyEvent(triggerTime, name));
@@ -58,32 +66,50 @@ public:
             });
     }
 };
-// int FMockAnimNotifyEvent::NextEventId = 0; // .cpp 파일에 초기화
 
 // --- Editor Specific Data Structures (ImGui 연동용) ---
 enum class EEditorTimelineTrackType
 {
-    AnimNotify // 현재는 노티파이 트랙만 존재
+    AnimNotify_Root,
+    AnimNotify_Item
 };
 
 struct FEditorTimelineTrack
 {
-    int Id;
-    EEditorTimelineTrackType Type;
+    EEditorTimelineTrackType TrackType;
     std::string DisplayName;
-    static int NextTrackIdCounter;
+    int TrackId;
+    int Depth;
+    bool bIsExpanded;
 
-    FEditorTimelineTrack(EEditorTimelineTrackType type, const std::string& name)
-        : Id(NextTrackIdCounter++), Type(type), DisplayName(name) {
+    FEditorTimelineTrack(EEditorTimelineTrackType InType, const std::string& InBaseName, int InDepth = 0)
+        : TrackType(InType), Depth(InDepth), bIsExpanded(true)
+    {
+        TrackId = NextTrackIdCounter++;
+        std::string prefix = "";
+        for (int i = 0; i < Depth; ++i)
+        {
+            prefix += "  ";
+        }
+        DisplayName = prefix + InBaseName;
     }
+    static int NextTrackIdCounter;
 };
 
 
-class SAnimationTimelinePanel : public ImSequencer::SequenceInterface
+class SAnimationTimelinePanel : public ImSequencer::SequenceInterface, public UEditorPanel
 {
+    MockAnimSequence* MocdkAnimSequence; //for Text
 public:
     SAnimationTimelinePanel();
-
+    ~SAnimationTimelinePanel()
+    {
+        if (MocdkAnimSequence)
+        {
+            delete MocdkAnimSequence;
+            MocdkAnimSequence = nullptr;
+        }
+    }
     // --- Public Interface Methods ---
     void SetTargetSequence(MockAnimSequence* sequence); 
 
@@ -116,14 +142,23 @@ public:
     virtual void DoubleClick(int index) override {}
 
     // 노티파이 UI 그리기 (ImSequencer 인터페이스)
-    virtual void CustomDraw(int displayTrackIndex, ImDrawList* drawList, const ImRect& rc,
+    virtual void CustomDraw(int displayTrackIndex, 
+                            ImDrawList* drawList, const ImRect& rc, 
                             const ImRect& legendRect, const ImRect& clippingRect,
                             const ImRect& legendClippingRect) override;
-    virtual void CustomDrawCompact(int displayTrackIndex, ImDrawList* drawList, const ImRect& rc, const ImRect& clippingRect) override;
 
+    virtual void CustomDrawCompact(int displayTrackIndex, ImDrawList* drawList, const ImRect& rc, const ImRect& clippingRect) override;
+    
+    virtual void Render() override;
+    virtual void OnResize(HWND hWnd) override;
 private:
     // --- Private Helper Methods for UI Rendering ---
+    void FitTimelineToView();
     void RenderPlaybackControls();
+    void RenderViewControls();
+    void CenterViewOnFrame(int targetFrame);
+    void AdjustFirstFrameToKeepCenter();
+    void ClampFirstVisibleFrame();
     void RenderSequencerWidget();
     void RenderNotifyEditor();
 
@@ -134,7 +169,8 @@ public:
     MockAnimSequence* TargetSequence; // 편집 대상이 되는 모의 시퀀스 객체
 
     TArray<FEditorTimelineTrack> DisplayableTracks;
-
+    float FramePixelWidth = 10.0f;
+    float FramePixelWidth_BeforeChange;
     // Playback state
     bool IsPlaying = false;
     bool IsLooping = false;
@@ -153,4 +189,8 @@ public:
     bool bIsDraggingSelectedNotify = false;
     float DraggingNotifyOriginalTime = 0.0f;
     ImVec2 DraggingStartMousePosInTrack;
+
+    float LastSequencerAreaWidth = 400.f;
+
+    float Width = 800, Height = 600;
 };
