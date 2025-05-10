@@ -16,4 +16,6 @@ public:
 
     void SetSkeletalMesh(USkeletalMesh* InSkeletalMesh);    
     USkeletalMesh* SelectedSkeletalMesh;
+
+
 };

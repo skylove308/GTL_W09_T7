@@ -227,11 +227,10 @@ void FEngineLoop::Tick()
         Input();
         GEngine->Tick(DeltaTime);
         LevelEditor->Tick(DeltaTime);
-        
+
         /** Main window render */
         Render(DeltaTime);
-        SkeletalViewerSubEngine->Tick(DeltaTime);
-        AnimationViewerSubEngine->Tick(DeltaTime);
+
         /** Sub window render */
         // RenderSubWindow();
 
@@ -252,8 +251,13 @@ void FEngineLoop::Tick()
         // Main swap
         GraphicDevice.SwapBuffer();
 
+        if (SkeletalViewerSubEngine->bIsShowing)
+            SkeletalViewerSubEngine->Tick(DeltaTime);
+        if (AnimationViewerSubEngine->bIsShowing)
+            AnimationViewerSubEngine->Tick(DeltaTime);
 
-        /** Sub Window Flag */
+
+        /** Sub Window Tick */
         if (SkeletalViewerSubEngine->bIsShowSubWindow)
         {
             if (SkeletalViewerWnd)
@@ -509,6 +513,7 @@ LRESULT CALLBACK FEngineLoop::AppWndProc(HWND hWnd, uint32 Msg, WPARAM wParam, L
         case WM_CLOSE:
             // GEngineLoop.SelectSkeletalMesh(nullptr);
             GEngineLoop.SkeletalViewerSubEngine->ViewportClient->CameraReset();
+            GEngineLoop.SkeletalViewerSubEngine->RequestShowWindow(false);
             ::ShowWindow(hWnd, SW_HIDE);
             return 0;
         
@@ -549,6 +554,7 @@ LRESULT CALLBACK FEngineLoop::AppWndProc(HWND hWnd, uint32 Msg, WPARAM wParam, L
         case WM_CLOSE:
             // GEngineLoop.SelectSkeletalMesh(nullptr);
             GEngineLoop.AnimationViewerSubEngine->ViewportClient->CameraReset();
+            GEngineLoop.AnimationViewerSubEngine->RequestShowWindow(false);
             ::ShowWindow(hWnd, SW_HIDE);
             return 0;
         

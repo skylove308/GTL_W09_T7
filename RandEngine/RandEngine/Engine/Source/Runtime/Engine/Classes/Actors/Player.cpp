@@ -13,11 +13,16 @@
 #include "UnrealEd/EditorViewportClient.h"
 #include "UObject/UObjectIterator.h"
 #include "Engine/EditorEngine.h"
+#include "SubWindow/SubEngine.h"
 
 
 void AEditorPlayer::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
+    if (GetOuter() == GEngine)
+        ActiveViewport = GEngineLoop.GetLevelEditor()->GetActiveViewportClient().get();
+    else
+         ActiveViewport = Cast<USubEngine>(GetOuter())->ViewportClient;
     Input();
 }
 
@@ -36,8 +41,10 @@ void AEditorPlayer::Input()
             POINT mousePos;
             GetCursorPos(&mousePos);
             GetCursorPos(&m_LastMousePos);
-            ScreenToClient(GEngineLoop.AppWnd, &mousePos);
-
+            if (GetOuter() == GEngine)
+                ScreenToClient(GEngineLoop.AppWnd, &mousePos);
+            else
+                ScreenToClient(*Cast<USubEngine>(GetOuter())->Wnd, &mousePos);
             /*
             uint32 UUID = FEngineLoop::GraphicDevice.GetPixelUUID(mousePos);
             // TArray<UObject*> objectArr = GetWorld()->GetObjectArr();
@@ -51,9 +58,9 @@ void AEditorPlayer::Input()
 
             FVector pickPosition;
 
-            std::shared_ptr<FEditorViewportClient> ActiveViewport = GEngineLoop.GetLevelEditor()->GetActiveViewportClient();
+            // std::shared_ptr<FEditorViewportClient> ActiveViewport = GEngineLoop.GetLevelEditor()->GetActiveViewportClient();
             ScreenToViewSpace(mousePos.x, mousePos.y, ActiveViewport, pickPosition);
-            bool res = PickGizmo(pickPosition, ActiveViewport.get());
+            bool res = PickGizmo(pickPosition, ActiveViewport);
             if (!res) PickActor(pickPosition);
         }
         else
@@ -66,7 +73,7 @@ void AEditorPlayer::Input()
         if (bLeftMouseDown)
         {
             bLeftMouseDown = false;
-            std::shared_ptr<FEditorViewportClient> ActiveViewport = GEngineLoop.GetLevelEditor()->GetActiveViewportClient();
+            // std::shared_ptr<FEditorViewportClient> ActiveViewport = GEngineLoop.GetLevelEditor()->GetActiveViewportClient();
             ActiveViewport->SetPickedGizmoComponent(nullptr);
         }
     }
@@ -171,13 +178,29 @@ void AEditorPlayer::PickActor(const FVector& pickPosition)
     }
     if (Possible)
     {
-        Cast<UEditorEngine>(GEngine)->SelectActor(Possible->GetOwner());
-        Cast<UEditorEngine>(GEngine)->SelectComponent(Possible);
+        if (GEngine == GetOuter())
+        {
+            Cast<UEditorEngine>(GEngine)->SelectActor(Possible->GetOwner());
+            Cast<UEditorEngine>(GEngine)->SelectComponent(Possible);
+        }
+        else
+        {
+            Cast<USubEngine>(GetOuter())->SelectedActor=Possible->GetOwner();
+            Cast<USubEngine>(GetOuter())->SelectedComponent=Possible;
+        }
     }
     else
     {
-        Cast<UEditorEngine>(GEngine)->DeselectActor(Cast<UEditorEngine>(GEngine)->GetSelectedActor());
-        Cast<UEditorEngine>(GEngine)->DeselectComponent(Cast<UEditorEngine>(GEngine)->GetSelectedComponent());
+        if (GEngine == GetOuter())
+        {
+            Cast<UEditorEngine>(GEngine)->DeselectActor(Cast<UEditorEngine>(GEngine)->GetSelectedActor());
+            Cast<UEditorEngine>(GEngine)->DeselectComponent(Cast<UEditorEngine>(GEngine)->GetSelectedComponent());
+        }
+        else
+        {
+            Cast<USubEngine>(GetOuter())->SelectedActor=nullptr;
+            Cast<USubEngine>(GetOuter())->SelectedComponent= nullptr;
+        }
     }
 }
 
@@ -191,7 +214,7 @@ void AEditorPlayer::AddCoordiMode()
     CoordMode = static_cast<ECoordMode>((CoordMode + 1) % CDM_END);
 }
 
-void AEditorPlayer::ScreenToViewSpace(int32 ScreenX, int32 ScreenY, std::shared_ptr<FEditorViewportClient> ActiveViewport, FVector& RayOrigin)
+void AEditorPlayer::ScreenToViewSpace(int32 ScreenX, int32 ScreenY, FEditorViewportClient* ActiveViewport, FVector& RayOrigin)
 {
     FRect Rect = ActiveViewport->GetViewport()->GetRect();
     
@@ -203,7 +226,7 @@ void AEditorPlayer::ScreenToViewSpace(int32 ScreenX, int32 ScreenY, std::shared_
     RayOrigin.X = ((2.0f * ViewportX / Rect.Width) - 1) / ProjectionMatrix[0][0];
     RayOrigin.Y = -((2.0f * ViewportY / Rect.Height) - 1) / ProjectionMatrix[1][1];
     
-    if (GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->IsOrthographic())
+    if (ActiveViewport->IsOrthographic())
     {
         RayOrigin.Z = 0.0f;  // 오쏘 모드에서는 unproject 시 near plane 위치를 기준
     }
@@ -216,9 +239,9 @@ void AEditorPlayer::ScreenToViewSpace(int32 ScreenX, int32 ScreenY, std::shared_
 int AEditorPlayer::RayIntersectsObject(const FVector& PickPosition, USceneComponent* Component, float& HitDistance, int& IntersectCount)
 {
     FMatrix WorldMatrix = Component->GetWorldMatrix();
-    FMatrix ViewMatrix = GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->GetViewMatrix();
+    FMatrix ViewMatrix = ActiveViewport->GetViewMatrix();
     
-    bool bIsOrtho = GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->IsOrthographic();
+    bool bIsOrtho = ActiveViewport->IsOrthographic();
     
 
     if (bIsOrtho)
@@ -230,7 +253,7 @@ int AEditorPlayer::RayIntersectsObject(const FVector& PickPosition, USceneCompon
         // 오쏘에서는 픽킹 원점은 unproject된 픽셀의 위치
         FVector rayOrigin = worldPickPos;
         // 레이 방향은 카메라의 정면 방향 (평행)
-        FVector orthoRayDir = GEngineLoop.GetLevelEditor()->GetActiveViewportClient()->OrthogonalCamera.GetForwardVector().GetSafeNormal();
+        FVector orthoRayDir = ActiveViewport->OrthogonalCamera.GetForwardVector().GetSafeNormal();
 
         // 객체의 로컬 좌표계로 변환
         FMatrix LocalMatrix = FMatrix::Inverse(WorldMatrix);
@@ -272,15 +295,26 @@ int AEditorPlayer::RayIntersectsObject(const FVector& PickPosition, USceneCompon
 void AEditorPlayer::PickedObjControl()
 {
     UEditorEngine* Engine = Cast<UEditorEngine>(GEngine);
-    FEditorViewportClient* ActiveViewport = GEngineLoop.GetLevelEditor()->GetActiveViewportClient().get();
-    if (Engine && Engine->GetSelectedActor() && ActiveViewport->GetPickedGizmoComponent())
+    AActor* SelectedActor = nullptr;
+    if (GetOuter() == GEngine)
+        SelectedActor = Engine->GetSelectedActor();
+    else
+        SelectedActor = Cast<USubEngine>(GetOuter())->SelectedActor;
+    
+    // FEditorViewportClient* ActiveViewport = GEngineLoop.GetLevelEditor()->GetActiveViewportClient().get();
+    if (SelectedActor && ActiveViewport->GetPickedGizmoComponent())
     {
         POINT CurrentMousePos;
         GetCursorPos(&CurrentMousePos);
         const float DeltaX = static_cast<float>(CurrentMousePos.x - m_LastMousePos.x);
         const float DeltaY = static_cast<float>(CurrentMousePos.y - m_LastMousePos.y);
 
-        USceneComponent* TargetComponent = Engine->GetSelectedComponent();
+        
+        USceneComponent* TargetComponent;
+        if (GEngine == GetOuter())
+            TargetComponent = Engine->GetSelectedComponent();
+        else
+            TargetComponent =  Cast<USubEngine>(GetOuter())->SelectedComponent;
         if (!TargetComponent)
         {
             if (AActor* SelectedActor = Engine->GetSelectedActor())
@@ -315,7 +349,7 @@ void AEditorPlayer::PickedObjControl()
 
 void AEditorPlayer::ControlRotation(USceneComponent* Component, UGizmoBaseComponent* Gizmo, float DeltaX, float DeltaY)
 {
-    const auto ActiveViewport = GEngineLoop.GetLevelEditor()->GetActiveViewportClient();
+    // const auto ActiveViewport = GEngineLoop.GetLevelEditor()->GetActiveViewportClient();
     const FViewportCamera* ViewTransform = ActiveViewport->GetViewportType() == LVT_Perspective
                                                         ? &ActiveViewport->PerspectiveCamera
                                                         : &ActiveViewport->OrthogonalCamera;
@@ -373,7 +407,7 @@ void AEditorPlayer::ControlRotation(USceneComponent* Component, UGizmoBaseCompon
 
 void AEditorPlayer::ControlScale(USceneComponent* Component, UGizmoBaseComponent* Gizmo, float DeltaX, float DeltaY)
 {
-    const auto ActiveViewport = GEngineLoop.GetLevelEditor()->GetActiveViewportClient();
+    // const auto ActiveViewport = GEngineLoop.GetLevelEditor()->GetActiveViewportClient();
     const FViewportCamera* ViewTransform = ActiveViewport->GetViewportType() == LVT_Perspective
                                                         ? &ActiveViewport->PerspectiveCamera
                                                         : &ActiveViewport->OrthogonalCamera;

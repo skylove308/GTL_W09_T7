@@ -743,5 +743,5 @@ FVector FViewportCamera::GetUpVector() const
 void FEditorViewportClient::CameraReset()
 {
     PerspectiveCamera.SetLocation(FVector(0.0f, 30.0f, 30.0f));
-    PerspectiveCamera.SetRotation(FVector(60,0,90));
+    PerspectiveCamera.SetRotation(FVector(0,0,0));
 }

@@ -3,7 +3,7 @@
 
 class UAnimationSubEngine : public USubEngine
 {
-    DECLARE_CLASS(UAnimationSubEngine, UObject)
+    DECLARE_CLASS(UAnimationSubEngine, USubEngine)
 public:
     UAnimationSubEngine();
     ~UAnimationSubEngine();

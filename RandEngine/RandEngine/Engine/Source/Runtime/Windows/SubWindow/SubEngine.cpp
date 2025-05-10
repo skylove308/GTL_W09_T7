@@ -13,7 +13,8 @@ USubEngine::USubEngine() :
                          SubRenderer(nullptr),
                          UnrealEditor(nullptr),
                          SubUI(nullptr),
-                         bIsShowSubWindow(false)
+                         bIsShowSubWindow(false),
+                         EditorPlayer(nullptr)
 {
 }
 
@@ -46,4 +47,5 @@ void USubEngine::Release()
 void USubEngine::RequestShowWindow(bool bShow)
 {
     bIsShowSubWindow = bShow;
+    bIsShowing = bShow;
 }

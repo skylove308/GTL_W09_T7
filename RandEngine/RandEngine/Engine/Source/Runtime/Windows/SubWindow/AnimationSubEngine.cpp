@@ -5,7 +5,7 @@
 #include "SubRenderer.h"
 #include "UnrealClient.h"
 
-UAnimationSubEngine::UAnimationSubEngine() : USubEngine()
+UAnimationSubEngine::UAnimationSubEngine()
 {
 }
 
@@ -28,12 +28,14 @@ void UAnimationSubEngine::Initialize(HWND& hWnd, FGraphicsDevice* InGraphics, FD
     ViewportClient = new FEditorViewportClient();
     ViewportClient->Initialize(EViewScreenLocation::EVL_MAX, FRect(0,0,800,600));
     ViewportClient->CameraReset();
+    EditorPlayer = FObjectFactory::ConstructObject<AEditorPlayer>(this);
 }
 
 void UAnimationSubEngine::Tick(float DeltaTime)
 {
     Input(DeltaTime);
     ViewportClient->Tick(DeltaTime);
+    EditorPlayer->Tick(DeltaTime);
     Render();    
 }
 

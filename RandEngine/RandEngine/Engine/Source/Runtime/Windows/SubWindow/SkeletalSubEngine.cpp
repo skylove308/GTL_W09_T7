@@ -5,7 +5,7 @@
 #include "SubRenderer.h"
 #include "UnrealClient.h"
 
-USkeletalSubEngine::USkeletalSubEngine() : USubEngine()
+USkeletalSubEngine::USkeletalSubEngine()
 {
 }
 
@@ -36,6 +36,7 @@ void USkeletalSubEngine::Tick(float DeltaTime)
 {
     Input(DeltaTime);
     ViewportClient->Tick(DeltaTime);
+    EditorPlayer->Tick(DeltaTime);
     Render();    
 }
 

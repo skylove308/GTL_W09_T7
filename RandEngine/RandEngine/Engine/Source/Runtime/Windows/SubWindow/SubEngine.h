@@ -36,7 +36,10 @@ public:
 
     FEditorViewportClient* ViewportClient;
     bool bIsShowSubWindow;
+    bool bIsShowing = false;
 
+    AActor* SelectedActor = nullptr;
+    USceneComponent* SelectedComponent = nullptr;
 private:
 };
 

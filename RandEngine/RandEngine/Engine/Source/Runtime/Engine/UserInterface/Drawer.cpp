@@ -80,9 +80,12 @@ void FDrawer::RenderContentDrawer()
             static_cast<USkeletalSubEngine*>(GEngineLoop.SkeletalViewerSubEngine)->SetSkeletalMesh(Obj);
             GEngineLoop.SkeletalViewerSubEngine->SubRenderer->SetPreviewSkeletalMesh(Obj);
             GEngineLoop.SkeletalViewerSubEngine->RequestShowWindow(true);
+
             static_cast<UAnimationSubEngine*>(GEngineLoop.AnimationViewerSubEngine)->SetSkeletalMesh(Obj);
             GEngineLoop.AnimationViewerSubEngine->SubRenderer->SetPreviewSkeletalMesh(Obj);
             GEngineLoop.AnimationViewerSubEngine->RequestShowWindow(true);
+
+           
             break;
         }
     }
