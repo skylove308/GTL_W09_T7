@@ -1,11 +1,12 @@
 ﻿#pragma once
 #include "SubEngine.h"
 
-class FSkeletalSubEngine : public FSubEngine
+class USkeletalSubEngine : public USubEngine
 {
+    DECLARE_CLASS(USkeletalSubEngine, USubEngine)
 public:
-    FSkeletalSubEngine();
-    ~FSkeletalSubEngine();
+    USkeletalSubEngine();
+    ~USkeletalSubEngine();
 public:
     virtual void Initialize(HWND& hWnd, FGraphicsDevice* InGraphics, FDXDBufferManager* InBufferManager, UImGuiManager* InSubWindow,UnrealEd* InUnrealEd);
     virtual void Tick(float DeltaTime);

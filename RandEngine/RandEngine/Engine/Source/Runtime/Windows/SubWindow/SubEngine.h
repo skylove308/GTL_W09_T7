@@ -7,11 +7,12 @@
 #include "UnrealEd/UnrealEd.h"
 
 //자신의 꿈을 펼쳐볼 수 있는 서브 엔진입니다.
-class FSubEngine
+class USubEngine : public UObject
 {
+    DECLARE_CLASS(USubEngine, UObject)
 public:
-    FSubEngine();
-    ~FSubEngine();
+    USubEngine();
+    ~USubEngine();
 
     virtual void Initialize(HWND& hWnd, FGraphicsDevice* InGraphics, FDXDBufferManager* InBufferManager, UImGuiManager* InSubWindow,UnrealEd* InUnrealEd);
     virtual void Tick(float DeltaTime);
@@ -27,7 +28,8 @@ public:
     FSubRenderer* SubRenderer;
     UnrealEd* UnrealEditor;
     FImGuiSubWindow* SubUI;
-
+    
+    AEditorPlayer* EditorPlayer;
     
     POINT LastMousePos;
     bool bRBClicked =false;

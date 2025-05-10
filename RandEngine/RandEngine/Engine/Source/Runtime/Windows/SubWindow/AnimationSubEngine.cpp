@@ -5,15 +5,15 @@
 #include "SubRenderer.h"
 #include "UnrealClient.h"
 
-FAnimationSubEngine::FAnimationSubEngine() : FSubEngine()
+UAnimationSubEngine::UAnimationSubEngine() : USubEngine()
 {
 }
 
-FAnimationSubEngine::~FAnimationSubEngine()
+UAnimationSubEngine::~UAnimationSubEngine()
 {
 }
 
-void FAnimationSubEngine::Initialize(HWND& hWnd, FGraphicsDevice* InGraphics, FDXDBufferManager* InBufferManager, UImGuiManager* InSubWindow,
+void UAnimationSubEngine::Initialize(HWND& hWnd, FGraphicsDevice* InGraphics, FDXDBufferManager* InBufferManager, UImGuiManager* InSubWindow,
     UnrealEd* InUnrealEd)
 {
     Graphics = InGraphics;
@@ -30,14 +30,14 @@ void FAnimationSubEngine::Initialize(HWND& hWnd, FGraphicsDevice* InGraphics, FD
     ViewportClient->CameraReset();
 }
 
-void FAnimationSubEngine::Tick(float DeltaTime)
+void UAnimationSubEngine::Tick(float DeltaTime)
 {
     Input(DeltaTime);
     ViewportClient->Tick(DeltaTime);
     Render();    
 }
 
-void FAnimationSubEngine::Input(float DeltaTime)
+void UAnimationSubEngine::Input(float DeltaTime)
 {
     if (::GetForegroundWindow() != *Wnd)
         return;
@@ -93,7 +93,7 @@ void FAnimationSubEngine::Input(float DeltaTime)
     }
 }
 
-void FAnimationSubEngine::Render()
+void UAnimationSubEngine::Render()
 {
     if (Wnd && IsWindowVisible(*Wnd) && Graphics->Device)
     {
@@ -115,9 +115,9 @@ void FAnimationSubEngine::Render()
     }
 }
 
-void FAnimationSubEngine::Release()
+void UAnimationSubEngine::Release()
 {
-    FSubEngine::Release();
+    USubEngine::Release();
     if (SubUI)
     {
         SubUI->Shutdown();
@@ -132,7 +132,7 @@ void FAnimationSubEngine::Release()
     }
 }
 
-void FAnimationSubEngine::SetSkeletalMesh(USkeletalMesh* InSkeletalMesh)
+void UAnimationSubEngine::SetSkeletalMesh(USkeletalMesh* InSkeletalMesh)
 {
     SelectedSkeletalMesh = InSkeletalMesh;
     if (SubRenderer)

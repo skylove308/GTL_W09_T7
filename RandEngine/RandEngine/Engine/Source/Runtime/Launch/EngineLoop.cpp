@@ -31,6 +31,7 @@ FResourceMgr FEngineLoop::ResourceManager;
 FEngineLoop::FEngineLoop()
     : AppWnd(nullptr)
     , SkeletalViewerWnd(nullptr)
+    , AnimationViewerWnd(nullptr)
     , FUIManager(nullptr)
     , CurrentImGuiContext(nullptr)
     , LevelEditor(nullptr)
@@ -105,9 +106,9 @@ int32 FEngineLoop::Init(HINSTANCE hInstance)
     FUIManager->Initialize(AppWnd, GraphicDevice.Device, GraphicDevice.DeviceContext);
     ResourceManager.Initialize(&Renderer, &GraphicDevice);
     
-    SkeletalViewerSubEngine = new FSkeletalSubEngine();
+    SkeletalViewerSubEngine =  FObjectFactory::ConstructObject<USkeletalSubEngine>(nullptr);
     SkeletalViewerSubEngine->Initialize(SkeletalViewerWnd, &SkeletalViewerGD, BufferManager,FUIManager,UnrealEditor);
-    AnimationViewerSubEngine = new FAnimationSubEngine();
+    AnimationViewerSubEngine = FObjectFactory::ConstructObject<UAnimationSubEngine>(nullptr);
     AnimationViewerSubEngine->Initialize(AnimationViewerWnd, &AnimationViewerGD, BufferManager,FUIManager,UnrealEditor);
 
     
@@ -290,6 +291,7 @@ void FEngineLoop::GetClientSize(uint32& OutWidth, uint32& OutHeight) const
 void FEngineLoop::Exit()
 {
     SkeletalViewerSubEngine->Release();
+    AnimationViewerSubEngine->Release();
     CleanupSubWindow();
     
     LevelEditor->Release();
@@ -345,6 +347,16 @@ void FEngineLoop::CleanupSubWindow()
     {
         DestroyWindow(SkeletalViewerWnd);
         SkeletalViewerWnd = nullptr;
+    }
+    if (AnimationViewerGD.Device)
+    {
+        AnimationViewerGD.Release();
+    }
+    
+    if (AnimationViewerWnd && IsWindow(AnimationViewerWnd))
+    {
+        DestroyWindow(AnimationViewerWnd);
+        AnimationViewerWnd = nullptr;
     }
 }
 

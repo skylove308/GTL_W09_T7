@@ -5,15 +5,15 @@
 #include "SubRenderer.h"
 #include "UnrealClient.h"
 
-FSkeletalSubEngine::FSkeletalSubEngine() : FSubEngine()
+USkeletalSubEngine::USkeletalSubEngine() : USubEngine()
 {
 }
 
-FSkeletalSubEngine::~FSkeletalSubEngine()
+USkeletalSubEngine::~USkeletalSubEngine()
 {
 }
 
-void FSkeletalSubEngine::Initialize(HWND& hWnd, FGraphicsDevice* InGraphics, FDXDBufferManager* InBufferManager, UImGuiManager* InSubWindow,
+void USkeletalSubEngine::Initialize(HWND& hWnd, FGraphicsDevice* InGraphics, FDXDBufferManager* InBufferManager, UImGuiManager* InSubWindow,
                                     UnrealEd* InUnrealEd)
 {
     Graphics = InGraphics;
@@ -28,16 +28,18 @@ void FSkeletalSubEngine::Initialize(HWND& hWnd, FGraphicsDevice* InGraphics, FDX
     ViewportClient = new FEditorViewportClient();
     ViewportClient->Initialize(EViewScreenLocation::EVL_MAX, FRect(0,0,800,600));
     ViewportClient->CameraReset();
+
+    EditorPlayer = FObjectFactory::ConstructObject<AEditorPlayer>(this);
 }
 
-void FSkeletalSubEngine::Tick(float DeltaTime)
+void USkeletalSubEngine::Tick(float DeltaTime)
 {
     Input(DeltaTime);
     ViewportClient->Tick(DeltaTime);
     Render();    
 }
 
-void FSkeletalSubEngine::Input(float DeltaTime)
+void USkeletalSubEngine::Input(float DeltaTime)
 {
     if (::GetForegroundWindow() != *Wnd)
         return;
@@ -93,7 +95,7 @@ void FSkeletalSubEngine::Input(float DeltaTime)
     }
 }
 
-void FSkeletalSubEngine::Render()
+void USkeletalSubEngine::Render()
 {
     if (Wnd && IsWindowVisible(*Wnd) && Graphics->Device)
     {
@@ -115,9 +117,9 @@ void FSkeletalSubEngine::Render()
     }
 }
 
-void FSkeletalSubEngine::Release()
+void USkeletalSubEngine::Release()
 {
-    FSubEngine::Release();
+    USubEngine::Release();
     if (SubUI)
     {
         SubUI->Shutdown();
@@ -132,7 +134,7 @@ void FSkeletalSubEngine::Release()
     }
 }
 
-void FSkeletalSubEngine::SetSkeletalMesh(USkeletalMesh* InSkeletalMesh)
+void USkeletalSubEngine::SetSkeletalMesh(USkeletalMesh* InSkeletalMesh)
 {
     SelectedSkeletalMesh = InSkeletalMesh;
     if (SubRenderer)

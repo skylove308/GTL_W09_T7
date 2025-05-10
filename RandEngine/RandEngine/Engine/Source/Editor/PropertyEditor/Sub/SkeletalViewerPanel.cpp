@@ -31,7 +31,7 @@ void SkeletalViewerPanel::OnResize(HWND hWnd)
 
 void SkeletalViewerPanel::CreateSkeletalTreeNode()
 {
-    USkeletalMesh* Selected = static_cast<FSkeletalSubEngine*>(GEngineLoop.SkeletalViewerSubEngine)->SelectedSkeletalMesh;
+    USkeletalMesh* Selected = static_cast<USkeletalSubEngine*>(GEngineLoop.SkeletalViewerSubEngine)->SelectedSkeletalMesh;
 
     if (Selected == nullptr) return;
 

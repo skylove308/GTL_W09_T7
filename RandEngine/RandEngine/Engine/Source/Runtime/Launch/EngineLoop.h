@@ -8,7 +8,7 @@
 #include "Stats/GPUTimingManager.h"
 
 
-class FSubEngine;
+class USubEngine;
 class FSubCamera;
 class FSubRenderer;
 class USkeletalMesh;
@@ -64,8 +64,8 @@ public:
     void CleanupSubWindow();
 
     
-    FSubEngine* SkeletalViewerSubEngine;
-    FSubEngine* AnimationViewerSubEngine;
+    USubEngine* SkeletalViewerSubEngine;
+    USubEngine* AnimationViewerSubEngine;
 private:
     UImGuiManager* FUIManager;
     ImGuiContext* CurrentImGuiContext;
