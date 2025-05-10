@@ -1,6 +1,7 @@
 #include "AnimationTimelinePanel.h"
 #include "Imgui/imgui.h"
 #include "Imgui/imgui_internal.h"
+#include "Container/Map.h"
 
 // ... (Static Member Initializations) ...
 #if !defined(FNAME_DEFINED) || !defined(MOCK_GLOBALS_DEFINED)
@@ -10,7 +11,19 @@ int FEditorTimelineTrack::NextTrackIdCounter = 0;
 #endif
 
 SAnimationTimelinePanel::SAnimationTimelinePanel()
-    : TargetSequence(nullptr), IsSequencerExpanded(true)
+    : TargetSequence(nullptr)
+    , IsSequencerExpanded(true)
+    , IsPlaying(false)
+    , IsLooping(false)
+    , PlaybackSpeed(1.0f)
+    , CurrentTimeSeconds(0.0f)
+    , SequencerSelectedEntry(-1)
+    , SequencerFirstVisibleFrame(0)
+    , SelectedNotifyEventId(-1)
+    , bIsDraggingSelectedNotify(false)
+    , DraggingNotifyOriginalTime(0.0f)
+    , FramePixelWidth(6.0f) // 적절한 초기값 설정
+    , FramePixelWidth_BeforeChange(6.0f) // FramePixelWidth와 동일하게 초기
 {
 }
 
@@ -29,7 +42,7 @@ void SAnimationTimelinePanel::SetTargetSequence(MockAnimSequence* sequence)
 
     if (TargetSequence)
     {
-        DisplayableTracks.Add(FEditorTimelineTrack(EEditorTimelineTrackType::AnimNotify, "Notifies"));
+        DisplayableTracks.Add(FEditorTimelineTrack(EEditorTimelineTrackType::AnimNotify_Root, "Notifies", 0));
         SequencerSelectedEntry = 0;
     }
 }
@@ -46,7 +59,8 @@ float SAnimationTimelinePanel::GetSequenceFrameRate() const
 
 int SAnimationTimelinePanel::GetSequenceTotalFrames() const
 {
-    if (!TargetSequence || GetSequenceDurationSeconds() <= 0.0f || GetSequenceFrameRate() <= 0.0f) {
+    if (!TargetSequence || GetSequenceDurationSeconds() <= 0.0f || GetSequenceFrameRate() <= 0.0f)
+    {
         return 0;
     }
     return static_cast<int>(GetSequenceDurationSeconds() * GetSequenceFrameRate());
@@ -92,7 +106,7 @@ const char* SAnimationTimelinePanel::GetItemLabel(int index) const
 {
     if (index >= 0 && index < DisplayableTracks.Num())
     {
-        return DisplayableTracks[index].DisplayName.c_str();
+        return DisplayableTracks[index].DisplayName.ToAnsiString().c_str();
     }
     return "";
 }
@@ -110,7 +124,7 @@ void SAnimationTimelinePanel::Get(int index, int** start, int** end, int* type, 
 
     if (start) *start = &trackStart;
     if (end)   *end = &trackEnd;
-    if (type)  *type = (int)DisplayableTracks[index].Type;
+    if (type)  *type = (int)DisplayableTracks[index].TrackType;
     if (color) *color = 0xFF808080;
 }
 
@@ -123,9 +137,24 @@ void SAnimationTimelinePanel::CustomDraw(int displayTrackIndex, ImDrawList* draw
         return;
     }
     const FEditorTimelineTrack& uiTrack = DisplayableTracks[displayTrackIndex];
-    if (uiTrack.Type == EEditorTimelineTrackType::AnimNotify)
+    if (uiTrack.TrackType == EEditorTimelineTrackType::AnimNotify_Root)
     {
-        RenderNotifyTrackItems(TargetSequence->Notifies, drawList, rc, clippingRect, false);
+    }
+    else if (uiTrack.TrackType == EEditorTimelineTrackType::AnimNotify_Item)
+    {
+        TArray<FMockAnimNotifyEvent> filteredNotifies;
+        for (const auto& notifyEvent : TargetSequence->Notifies)
+        {
+            // 함수 호출 대신 직접 조건 비교
+            if (notifyEvent.UserInterfaceTrackId == uiTrack.TrackId)
+            {
+                filteredNotifies.Add(notifyEvent);
+            }
+        }
+        if (filteredNotifies.Num() > 0)
+        {
+            RenderNotifyTrackItems(filteredNotifies, drawList, rc, clippingRect, false);
+        }
     }
 }
 
@@ -137,11 +166,27 @@ void SAnimationTimelinePanel::CustomDrawCompact(int displayTrackIndex, ImDrawLis
         return;
     }
     const FEditorTimelineTrack& uiTrack = DisplayableTracks[displayTrackIndex];
-    if (uiTrack.Type == EEditorTimelineTrackType::AnimNotify)
+    if (uiTrack.TrackType == EEditorTimelineTrackType::AnimNotify_Root)
     {
-        RenderNotifyTrackItems(TargetSequence->Notifies, drawList, rc, clippingRect, true);
+    }
+    else if (uiTrack.TrackType == EEditorTimelineTrackType::AnimNotify_Item)
+    {
+        TArray<FMockAnimNotifyEvent> filteredNotifies;
+        for (const auto& notifyEvent : TargetSequence->Notifies)
+        {
+            // 함수 호출 대신 직접 조건 비교
+            if (notifyEvent.UserInterfaceTrackId == uiTrack.TrackId)
+            {
+                filteredNotifies.Add(notifyEvent);
+            }
+        }
+        if (filteredNotifies.Num() > 0)
+        {
+            RenderNotifyTrackItems(filteredNotifies, drawList, rc, clippingRect, true);
+        }
     }
 }
+
 
 void SAnimationTimelinePanel::RenderNotifyTrackItems(const TArray<FMockAnimNotifyEvent>& notifies, ImDrawList* drawList,
     const ImRect& rc, const ImRect& clippingRect, bool isCompact)
@@ -264,7 +309,7 @@ void SAnimationTimelinePanel::UpdatePlayback(float DeltaSeconds)
     float previousTimeSeconds = CurrentTimeSeconds;
     CurrentTimeSeconds += DeltaSeconds * PlaybackSpeed;
 
-    if (CurrentTimeSeconds >= GetSequenceDurationSeconds()) 
+    if (CurrentTimeSeconds >= GetSequenceDurationSeconds())
     {
         if (IsLooping)
         {
@@ -277,7 +322,7 @@ void SAnimationTimelinePanel::UpdatePlayback(float DeltaSeconds)
             IsPlaying = false;
         }
     }
-    else if (CurrentTimeSeconds < 0.0f) 
+    else if (CurrentTimeSeconds < 0.0f)
     {
         if (IsLooping)
         {
@@ -291,31 +336,125 @@ void SAnimationTimelinePanel::UpdatePlayback(float DeltaSeconds)
         }
     }
 }
+void SAnimationTimelinePanel::FitTimelineToView()
+{
+    if (!TargetSequence || GetSequenceTotalFrames() <= 0)
+    {
+        return;
+    }
+    float availableWidth = LastSequencerAreaWidth; // *** 새 코드 ***
 
+    SequencerFirstVisibleFrame = 0;
+    FramePixelWidth = availableWidth / (float)GetSequenceTotalFrames();
+
+    // 최소/최대 FramePixelWidth 제한은 그대로 유지하거나 필요에 맞게 조정
+    if (FramePixelWidth < 0.01f) FramePixelWidth = 0.01f; // 더 작게 허용 가능
+
+    ConvertFrameToTimeAndSet(ConvertTimeToFrame()); // 현재 프레임 유지 시도
+}
+
+// 줌 레벨 변경 시 현재 보이는 중앙 프레임을 유지하도록 FirstVisibleFrame 조정
+void SAnimationTimelinePanel::AdjustFirstFrameToKeepCenter()
+{
+    if (!TargetSequence || FramePixelWidth <= 0.0f) return;
+
+    // 현재 보이는 화면의 중앙에 어떤 프레임이 있는지 계산
+    // (RenderTimelineEditor에서 계산된 timelineWidgetRect.GetWidth() 사용 필요)
+    float viewWidth = ImGui::GetContentRegionAvail().x; // 또는 마지막으로 그린 시퀀서 폭
+    if (viewWidth < 100) viewWidth = 800; // 임시
+
+    float viewCenterX = viewWidth * 0.5f;
+    float centerFrameCurrentlyVisible = (float)SequencerFirstVisibleFrame + (viewCenterX / FramePixelWidth_BeforeChange);
+
+    // 새로운 FramePixelWidth로 새로운 FirstVisibleFrame 계산
+    SequencerFirstVisibleFrame = static_cast<int>(roundf(centerFrameCurrentlyVisible - (viewCenterX / FramePixelWidth)));
+
+    ConvertFrameToTimeAndSet(ConvertTimeToFrame());
+    // FitTimelineToView 호출 후에는 FramePixelWidth_BeforeChange도 현재 값으로 동기화하는 것이 좋을 수 있습니다.
+    FramePixelWidth_BeforeChange = FramePixelWidth;
+    ClampFirstVisibleFrame(); // SequencerFirstVisibleFrame이 0으로 설정되었으므로 호출
+}
+void SAnimationTimelinePanel::ClampFirstVisibleFrame()
+{
+    if (!TargetSequence) return;
+    int totalFrames = GetSequenceTotalFrames();
+    if (totalFrames <= 0)
+    {
+        SequencerFirstVisibleFrame = 0;
+        return;
+    }
+
+    float viewWidth = ImGui::GetContentRegionAvail().x; // 또는 마지막으로 그린 시퀀서 폭
+    if (viewWidth < 100) viewWidth = 800; // 임시
+
+    int visibleFramesOnScreen = static_cast<int>(floorf(viewWidth / FramePixelWidth));
+    if (visibleFramesOnScreen < 1) visibleFramesOnScreen = 1;
+
+    if (SequencerFirstVisibleFrame + visibleFramesOnScreen > totalFrames)
+    {
+        SequencerFirstVisibleFrame = totalFrames - visibleFramesOnScreen;
+    }
+    if (SequencerFirstVisibleFrame < 0)
+    {
+        SequencerFirstVisibleFrame = 0;
+    }
+    if (totalFrames <= visibleFramesOnScreen) // 전체가 다 보이면 항상 0부터 시작
+    {
+        SequencerFirstVisibleFrame = 0;
+    }
+}
+
+// (선택 사항) 특정 프레임이 뷰의 중앙에 오도록 SequencerFirstVisibleFrame 조정
+void SAnimationTimelinePanel::CenterViewOnFrame(int targetFrame)
+{
+    if (!TargetSequence || FramePixelWidth <= 0.0f) return;
+
+    float viewWidth = ImGui::GetContentRegionAvail().x; // 또는 마지막으로 그린 시퀀서 폭
+    if (viewWidth < 100) viewWidth = 800; // 임시
+
+    float viewCenterX = viewWidth * 0.5f;
+    SequencerFirstVisibleFrame = static_cast<int>(roundf((float)targetFrame - (viewCenterX / FramePixelWidth)));
+    ClampFirstVisibleFrame();
+}
 
 // --- 분리된 UI 렌더링 함수들 ---
+// SAnimationTimelinePanel.cpp
+
+// ... (다른 함수들은 이전과 동일) ...
+
 void SAnimationTimelinePanel::RenderPlaybackControls()
 {
     if (!TargetSequence) return;
 
-    ImGui::BeginChild("TimelineTopControls", ImVec2(0, ImGui::GetFrameHeightWithSpacing() * 2.0f), false, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
-    if (IsPlaying) {
-        if (ImGui::Button("Pause##Playback")) IsPlaying = false;
+    // BeginChild의 높이를 충분히 확보하거나, 요소들이 넘치지 않도록 크기 조절
+    // 예: ImGui::GetFrameHeightWithSpacing() * 2.0f (한 줄 기준) 또는 * 3.0f (두 줄 기준)
+    ImGui::BeginChild("TimelineTopControlsArea", ImVec2(0, ImGui::GetFrameHeightWithSpacing() * 3.0f), false, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+
+    // --- 첫 번째 줄: 재생 컨트롤 ---
+    // 각 버튼에 고유 ID를 명시적으로 부여 (##ID 사용)
+    if (IsPlaying)
+    {
+        if (ImGui::Button("Pause##PlaybackBtn")) { IsPlaying = false; }
     }
-    else {
-        if (ImGui::Button("Play##Playback")) {
+    else
+    {
+        if (ImGui::Button("Play##PlaybackBtn")) // 버튼 ID 확인
+        {
             IsPlaying = true;
-            if (CurrentTimeSeconds >= GetSequenceDurationSeconds() - FLT_EPSILON && GetSequenceDurationSeconds() > 0.f) {
+            if (CurrentTimeSeconds >= GetSequenceDurationSeconds() - FLT_EPSILON && GetSequenceDurationSeconds() > 0.f)
+            {
                 CurrentTimeSeconds = 0.0f;
                 TriggeredNotifyEventIdsThisPlayback.Empty();
             }
-            else if (CurrentTimeSeconds < FLT_EPSILON) {
+            else if (CurrentTimeSeconds < FLT_EPSILON)
+            {
                 TriggeredNotifyEventIdsThisPlayback.Empty();
             }
         }
     }
-    ImGui::SameLine();
-    if (ImGui::Button("Stop##Playback")) {
+    ImGui::SameLine(); // 같은 줄에 다음 요소 배치
+    if (ImGui::Button("Stop##PlaybackBtn"))
+    {
         IsPlaying = false;
         CurrentTimeSeconds = 0.0f;
         TriggeredNotifyEventIdsThisPlayback.Empty();
@@ -323,36 +462,190 @@ void SAnimationTimelinePanel::RenderPlaybackControls()
     ImGui::SameLine();
     ImGui::Checkbox("Loop##Playback", &IsLooping);
     ImGui::SameLine();
-    ImGui::PushItemWidth(80);
+
+    ImGui::PushItemWidth(80); // 고정 너비
     ImGui::DragFloat("Speed##Playback", &PlaybackSpeed, 0.01f, 0.01f, 10.0f, "%.2fx");
     ImGui::PopItemWidth();
     ImGui::SameLine();
+
+    // Time 텍스트가 다른 요소에 밀리지 않도록 충분한 공간 확보
+    // 또는 ImGui::SetNextItemWidth(-100) 등으로 남은 공간의 일부를 사용하게 할 수도 있음
     ImGui::Text("Time: %.2f / %.2f s", CurrentTimeSeconds, GetSequenceDurationSeconds());
+
+    // --- 두 번째 줄: 뷰 컨트롤 및 프레임 슬라이더 ---
+    // 명시적으로 줄바꿈을 원하면 ImGui::NewLine() 또는 ImGui::Separator() 사용
+    // 여기서는 요소들이 자동으로 다음 줄로 넘어가도록 배치
+    // ImGui::Separator(); // 구분선 추가
+
+    if (ImGui::Button("Fit To View##ViewCtrl"))
+    {
+        FitTimelineToView();
+    }
+    ImGui::SameLine();
+
+    ImGui::PushItemWidth(150); // 줌 슬라이더 너비
+    float oldFramePixelWidth = FramePixelWidth;
+    if (ImGui::SliderFloat("Zoom##ViewCtrl", &FramePixelWidth, 0.1f, 200.0f, "%.1f px/fr", ImGuiSliderFlags_Logarithmic))
+    {
+        if (fabs(FramePixelWidth - oldFramePixelWidth) > FLT_EPSILON)
+        {
+            FramePixelWidth_BeforeChange = oldFramePixelWidth;
+            AdjustFirstFrameToKeepCenter();
+        }
+    }
+    ImGui::PopItemWidth();
     ImGui::SameLine();
 
     int currentFrameDisplay = ConvertTimeToFrame();
     int totalFramesDisplay = GetSequenceTotalFrames();
-    ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x * 0.3f);
-    if (totalFramesDisplay > 0) {
-        if (ImGui::SliderInt("Frame##Playback", &currentFrameDisplay, 0, totalFramesDisplay)) {
+    // 프레임 슬라이더 너비 조절
+    // float frameSliderWidth = ImGui::GetContentRegionAvail().x; // 남은 공간 모두 사용
+    // if (frameSliderWidth < 50.0f) frameSliderWidth = 50.0f; // 최소 너비 보장
+    ImGui::PushItemWidth(150); // 또는 고정 너비
+    if (totalFramesDisplay > 0)
+    {
+        if (ImGui::SliderInt("Frame##Scroll", &currentFrameDisplay, 0, totalFramesDisplay - 1 < 0 ? 0 : totalFramesDisplay - 1))
+        {
             ConvertFrameToTimeAndSet(currentFrameDisplay);
             if (IsPlaying) IsPlaying = false;
             TriggeredNotifyEventIdsThisPlayback.Empty();
         }
     }
-    else {
+    else
+    {
         ImGui::TextUnformatted("(No frames)");
     }
     ImGui::PopItemWidth();
-    ImGui::EndChild(); // TimelineTopControls
+
+    ImGui::EndChild(); // TimelineTopControlsArea
+}
+void SAnimationTimelinePanel::RenderViewControls() // 새로운 뷰 컨트롤 함수
+{
+    if (!TargetSequence) return;
+
+    // --- 뷰 컨트롤 (전체 보기 및 줌 슬라이더) ---
+    if (ImGui::Button("Fit To View##ViewCtrl"))
+    {
+        FitTimelineToView();
+    }
+    ImGui::SameLine();
+
+    ImGui::PushItemWidth(150);
+    float oldFramePixelWidth = FramePixelWidth;
+    if (ImGui::SliderFloat("Zoom##ViewCtrl", &FramePixelWidth, 0.1f, 200.0f, "%.1f px/fr", ImGuiSliderFlags_Logarithmic))
+    {
+        if (fabs(FramePixelWidth - oldFramePixelWidth) > FLT_EPSILON)
+        {
+            FramePixelWidth_BeforeChange = oldFramePixelWidth;
+            AdjustFirstFrameToKeepCenter();
+        }
+    }
+    ImGui::PopItemWidth();
+    ImGui::SameLine();
+
+    // --- 프레임 스크롤/이동 슬라이더 ---
+    int currentFrameDisplay = ConvertTimeToFrame();
+    int totalFramesDisplay = GetSequenceTotalFrames();
+    // float frameSliderWidth = ImGui::GetContentRegionAvail().x;
+    // if (frameSliderWidth < 100.0f) frameSliderWidth = 100.0f;
+    // ImGui::PushItemWidth(frameSliderWidth);
+    ImGui::PushItemWidth(150); // 또는 고정 너비
+    if (totalFramesDisplay > 0)
+    {
+        if (ImGui::SliderInt("Frame##Scroll", &currentFrameDisplay, 0, totalFramesDisplay - 1 < 0 ? 0 : totalFramesDisplay - 1))
+        {
+            ConvertFrameToTimeAndSet(currentFrameDisplay);
+            if (IsPlaying)
+            {
+                IsPlaying = false;
+            }
+            TriggeredNotifyEventIdsThisPlayback.Empty();
+            CenterViewOnFrame(currentFrameDisplay); // 선택 사항
+        }
+    }
+    else
+    {
+        ImGui::TextUnformatted("(No frames)");
+    }
+    ImGui::PopItemWidth();
 }
 
+
+void SAnimationTimelinePanel::RenderTimelineEditor()
+{
+    if (!TargetSequence)
+    {
+        ImGui::Text("No MockAnimSequence set. Please call SetTargetSequence().");
+        return;
+    }
+
+
+
+
+    const ImGuiViewport* mainViewport = ImGui::GetMainViewport();
+    if (!mainViewport) // 뷰포트 정보가 없으면 (매우 예외적인 상황) 아무것도 하지 않음
+    {
+        return;
+    }
+
+    const float timelinePanelHeight = 300.0f;
+
+    ImVec2 windowPos = ImVec2(mainViewport->WorkPos.x, mainViewport->WorkPos.y + mainViewport->WorkSize.y - timelinePanelHeight);
+    ImVec2 windowSize = ImVec2(mainViewport->WorkSize.x, timelinePanelHeight);
+    ImGui::SetNextWindowPos(windowPos);
+    ImGui::SetNextWindowSize(windowSize);
+
+    ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoTitleBar |
+        ImGuiWindowFlags_NoResize |
+        ImGuiWindowFlags_NoMove |
+        ImGuiWindowFlags_NoScrollbar |
+        ImGuiWindowFlags_NoCollapse |
+        ImGuiWindowFlags_NoSavedSettings;
+
+    if (mainViewport->WorkSize.y <= timelinePanelHeight)
+    {
+        // 뷰포트 세로 크기가 타임라인 패널 높이보다 작거나 같으면,
+        // 타임라인 패널을 그리지 않거나 매우 작게 그리는 등의 예외 처리 가능
+        // 여기서는 그냥 진행하지만, 실제로는 UI가 이상하게 보일 수 있음
+    }
+
+    if (ImGui::Begin("AnimationTimelineHost", nullptr, windowFlags))
+    {
+
+        // 상단 컨트롤들을 그리기 위한 자식 창
+        ImGui::BeginChild("TimelineTopControlsArea", ImVec2(0, ImGui::GetFrameHeightWithSpacing() * 2.5f),
+            false,
+            ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+
+
+        float currentMainAreaWidth = ImGui::GetContentRegionAvail().x;
+        if (currentMainAreaWidth >= 50.0f) // 매우 작은 값 방지 (최소 50px 이라고 가정)
+        {
+            LastSequencerAreaWidth = currentMainAreaWidth;
+        }
+
+
+        RenderPlaybackControls(); // 재생 컨트롤 그리기
+
+        RenderViewControls();     // 뷰 컨트롤 그리기
+
+        ImGui::EndChild();        // TimelineTopControlsArea
+
+        ImGui::BeginChild("TimelineMainArea");
+        RenderSequencerWidget();
+        RenderNotifyEditor();
+        ImGui::EndChild();
+        ImGui::End();
+    }
+}
 void SAnimationTimelinePanel::RenderSequencerWidget()
 {
     if (!TargetSequence) return;
 
     int currentFrameForSequencer = ConvertTimeToFrame();
-    ImSequencer::Sequencer(this, &currentFrameForSequencer, &IsSequencerExpanded, &SequencerSelectedEntry, &SequencerFirstVisibleFrame, 0);
+    ImSequencer::Sequencer(this, &currentFrameForSequencer,
+        &IsSequencerExpanded, &SequencerSelectedEntry, &SequencerFirstVisibleFrame, 0);
+
     if (currentFrameForSequencer != ConvertTimeToFrame())
     {
         ConvertFrameToTimeAndSet(currentFrameForSequencer);
@@ -369,7 +662,8 @@ void SAnimationTimelinePanel::RenderNotifyEditor()
     }
 
     ImGui::Separator();
-    if (ImGui::Button("Add Mock Notify At Current Time")) {
+    if (ImGui::Button("Add Mock Notify At Current Time"))
+    {
         if (TargetSequence)
         {
             TargetSequence->AddNotify(CurrentTimeSeconds, FName("MockEvent"));
@@ -392,20 +686,4 @@ void SAnimationTimelinePanel::RenderNotifyEditor()
             // 여기에 선택된 노티파이의 상세 편집 UI 추가 가능
         }
     }
-}
-
-void SAnimationTimelinePanel::RenderTimelineEditor()
-{
-    if (!TargetSequence)
-    {
-        ImGui::Text("No MockAnimSequence set. Please call SetTargetSequence().");
-        return;
-    }
-
-    RenderPlaybackControls(); // 분리된 함수 호출
-
-    ImGui::BeginChild("TimelineMainArea"); // 하단 메인 영역 시작
-    RenderSequencerWidget(); // 분리된 함수 호출
-    RenderNotifyEditor();    // 분리된 함수 호출
-    ImGui::EndChild();       // 하단 메인 영역 끝
 }

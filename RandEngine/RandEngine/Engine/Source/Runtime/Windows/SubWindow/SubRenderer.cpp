@@ -104,7 +104,7 @@ void FSubRenderer::Render(FSubCamera& Camera)
         AnimationTimelinePanel = new SAnimationTimelinePanel();
         MockAnimSequence* MocdkAnimSequence = new MockAnimSequence();
         MocdkAnimSequence->FrameRate = 30.0f;
-        MocdkAnimSequence->SequenceLength = 10.0f;
+        MocdkAnimSequence->SequenceLength = 2.0f;
         MocdkAnimSequence->AddNotify(1.0f, FName("Footstep_L"));
         MocdkAnimSequence->AddNotify(1.6f, FName("Footstep_R"));
         AnimationTimelinePanel->SetTargetSequence(MocdkAnimSequence);
