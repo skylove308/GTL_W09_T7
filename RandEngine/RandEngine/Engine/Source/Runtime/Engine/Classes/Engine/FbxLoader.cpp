@@ -523,7 +523,7 @@ namespace  FBX {
             OutPolygonVertexUVs.Add(FVector2D(0, 0));    // 기본값
         }
 
-        // --- 법선 데이터 처리 ---
+        // 법선 데이터 처리
         const MeshRawData::AttributeData& NormalData = RawMeshData.NormalData;
         if (NormalData.MappingMode != FbxLayerElement::eNone)
         {
@@ -544,7 +544,6 @@ namespace  FBX {
                     for (int32 i = 0; i < LoopCount; ++i) {
                         OutControlPointNormals[i] = GetNormalValue(i);
                     }
-
                 }
                 else if (NormalData.ReferenceMode == FbxLayerElement::eIndexToDirect)
                 {
@@ -567,7 +566,6 @@ namespace  FBX {
                     {
                         OutPolygonVertexNormals[i] = GetNormalValue(i);
                     }
-
                 }
                 else if (NormalData.ReferenceMode == FbxLayerElement::eIndexToDirect)
                 {
@@ -576,7 +574,6 @@ namespace  FBX {
                         int idx = NormalData.IndexArray[i];
                         OutPolygonVertexNormals[i] = GetNormalValue(idx);
                     }
-
                 }
             }
         }
@@ -599,7 +596,6 @@ namespace  FBX {
                     int32 LoopCount = FMath::Min(ControlPointCount, UVData.DataVec2.Num());
                     for (int32 i = 0; i < LoopCount; ++i)
                         OutControlPointUVs[i] = GetUVValue(i);
-                    if (LoopCount < ControlPointCount) { /* 로그 */ }
                 }
                 else if (UVData.ReferenceMode == FbxLayerElement::eIndexToDirect)
                 {
@@ -608,7 +604,6 @@ namespace  FBX {
                         int idx = UVData.IndexArray[i];
                         OutControlPointUVs[i] = GetUVValue(idx);
                     }
-                    if (LoopCount < ControlPointCount) { /* 로그 */ }
                 }
             }
             else if (UVData.MappingMode == FbxLayerElement::eByPolygonVertex)
@@ -618,7 +613,6 @@ namespace  FBX {
                     int32 LoopCount = FMath::Min(PolygonVertexCount, UVData.DataVec2.Num());
                     for (int32 i = 0; i < LoopCount; ++i)
                         OutPolygonVertexUVs[i] = GetUVValue(i);
-                    if (LoopCount < PolygonVertexCount) { /* 로그 */ }
                 }
                 else if (UVData.ReferenceMode == FbxLayerElement::eIndexToDirect)
                 {
@@ -627,7 +621,6 @@ namespace  FBX {
                         int idx = UVData.IndexArray[i];
                         OutPolygonVertexUVs[i] = GetUVValue(idx);
                     }
-                    if (LoopCount < PolygonVertexCount) { /* 로그 */ }
                 }
             }
         }
@@ -745,7 +738,7 @@ namespace  FBX {
             bHandled = true; // eByPolygon 처리 완료
         }
 
-        // --- Case 2: eAllSame 모드 또는 eByPolygon 실패 또는 다른 모드 ---
+        // Case 2: eAllSame 모드 또는 eByPolygon 실패 또는 다른 모드
         // bHandled 플래그를 사용하여 위에서 처리되지 않은 경우 이 로직 실행
         if (!bHandled)
         {
@@ -772,7 +765,7 @@ namespace  FBX {
             bHandled = true; // 처리 완료
         }
 
-        // --- 최종 유효성 검사 ---
+        // 최종 유효성 검사
         uint32 TotalSubsetIndices = 0;
         for (const auto& sub : OutSkeletalMesh.Subsets)
         {
@@ -876,7 +869,7 @@ namespace  FBX {
                 OutSkeleton->CurrentPose.GlobalTransforms[BoneIndex] = LocalBindPose;
             }
 
-            // 3. 현재 포즈의 스키닝 행렬 계산 (모든 본에 대해 루프 끝에서 한 번만)
+            // 현재 포즈의 스키닝 행렬 계산 (모든 본에 대해 루프 끝에서 한 번만)
             OutSkeleton->CurrentPose.SkinningMatrices[BoneIndex] =
                 OutSkeleton->CalculateSkinningMatrix(BoneIndex, OutSkeleton->CurrentPose.GlobalTransforms[BoneIndex]);
         }
@@ -884,15 +877,15 @@ namespace  FBX {
 
     void ConvertFbxMaterialToObjMaterial(const FFbxMaterialInfo& FbxInfo, FObjMaterialInfo& OutObjInfo)
     {
-        // --- 기본 정보 매핑 ---
+        // 기본 정보 매핑
         OutObjInfo.MaterialName = FbxInfo.MaterialName.ToString(); // FName -> FString
         OutObjInfo.bTransparent = FbxInfo.bIsTransparent;
 
-        // --- 색상 매핑 ---
+        // 색상 매핑
         OutObjInfo.DiffuseColor = FbxInfo.BaseColorFactor.ToVector3(); // BaseColor -> Diffuse (Kd)
         OutObjInfo.EmissiveColor = FbxInfo.EmissiveFactor.ToVector3(); // Emissive -> Emissive (Ke)
 
-        // --- 워크플로우에 따른 Specular 및 Shininess 매핑 ---
+        // 워크플로우에 따른 Specular 및 Shininess 매핑
         if (FbxInfo.bUsePBRWorkflow)
         {
             // PBR -> Traditional 근사 변환
@@ -919,13 +912,10 @@ namespace  FBX {
         // Ka (Ambient Color): 보통 Diffuse의 일부 또는 작은 기본값 사용
         OutObjInfo.AmbientColor = OutObjInfo.DiffuseColor * 0.1f; // Diffuse의 10%를 Ambient로 사용 (예시)
 
-        // --- 스칼라 값 매핑 ---
+        // 스칼라 값 매핑
         // d/Tr (Transparency): OpacityFactor (1=불투명, 0=투명) -> Transparency (1=불투명, 0=투명)
         // OBJ의 d는 불투명도, Tr은 투명도인 경우가 많으므로 주의. 여기서는 d (불투명도) 기준으로 변환.
         OutObjInfo.Transparency = FbxInfo.OpacityFactor;
-        // Ni (Optical Density/IOR): FBX 정보에 직접 매핑되는 값 없음. 기본값 사용.
-        //OutObjInfo.DensityScalar = 1.0f; // 기본값
-        // -bm (Bump Multiplier): FBX 정보에 직접 매핑되는 값 없음. 기본값 사용.
         OutObjInfo.BumpMultiplier = 1.0f; // 기본값
         // illum (Illumination Model): PBR 여부에 따라 기본 모델 선택 가능.
         OutObjInfo.IlluminanceModel = FbxInfo.bUsePBRWorkflow ? 2 : 2; // 예: 기본적으로 Phong 모델(2) 사용
@@ -933,11 +923,10 @@ namespace  FBX {
         // --- 텍스처 경로 매핑 ---
         // 이름만 복사, 경로는 그대로 사용
         OutObjInfo.DiffuseTexturePath = FbxInfo.BaseColorTexturePath;
-        // FbxInfo.BaseColorTexturePath에서 파일 이름만 추출하여 DiffuseTextureName 설정 (필요 시)
         if (!FbxInfo.BaseColorTexturePath.empty())
         {
             std::filesystem::path p(FbxInfo.BaseColorTexturePath);
-            OutObjInfo.DiffuseTextureName = FString(p.filename().string().c_str()); // std::string -> FString
+            OutObjInfo.DiffuseTextureName = FString(p.filename().string().c_str());
         }
         else { OutObjInfo.DiffuseTextureName.Empty(); }
 
@@ -949,7 +938,7 @@ namespace  FBX {
         }
         else { OutObjInfo.BumpTextureName.Empty(); }
 
-        OutObjInfo.SpecularTexturePath = FbxInfo.SpecularTexturePath; // Traditional Specular
+        OutObjInfo.SpecularTexturePath = FbxInfo.SpecularTexturePath;
         if (!FbxInfo.SpecularTexturePath.empty())
         {
             std::filesystem::path p(FbxInfo.SpecularTexturePath);
@@ -974,7 +963,7 @@ namespace  FBX {
         }
         else { OutObjInfo.AmbientTextureName.Empty(); }
 
-        // --- TextureFlag 설정 ---
+        // TextureFlag 설정
         OutObjInfo.TextureFlag = 0;
         if (FbxInfo.bHasBaseColorTexture && !FbxInfo.BaseColorTexturePath.empty()) OutObjInfo.TextureFlag |= (1 << static_cast<uint32>(EMaterialTextureSlots::MTS_Diffuse));
         if (FbxInfo.bHasNormalTexture && !FbxInfo.NormalTexturePath.empty())    OutObjInfo.TextureFlag |= (1 << static_cast<uint32>(EMaterialTextureSlots::MTS_Normal));
@@ -986,20 +975,17 @@ namespace  FBX {
         {
             const uint32 SlotIdx = static_cast<uint32>(EMaterialTextureSlots::MTS_Diffuse);
             OutObjInfo.TextureInfos[SlotIdx].TexturePath = OutObjInfo.DiffuseTexturePath;
-            //OutObjInfo.TextureInfos[SlotIdx].TextureName = ;
+            OutObjInfo.TextureInfos[SlotIdx].bIsSRGB = true;
+        }
+        {
+            const uint32 SlotIdx = static_cast<uint32>(EMaterialTextureSlots::MTS_Specular);
+            OutObjInfo.TextureInfos[SlotIdx].TexturePath = OutObjInfo.SpecularTexturePath;
             OutObjInfo.TextureInfos[SlotIdx].bIsSRGB = true;
         }
         {
             const uint32 SlotIdx = static_cast<uint32>(EMaterialTextureSlots::MTS_Normal);
             OutObjInfo.TextureInfos[SlotIdx].TexturePath = OutObjInfo.BumpTexturePath;
-            //OutObjInfo.TextureInfos[SlotIdx].TextureName = ;
             OutObjInfo.TextureInfos[SlotIdx].bIsSRGB = false;
-        }
-        {
-            const uint32 SlotIdx = static_cast<uint32>(EMaterialTextureSlots::MTS_Specular);
-            OutObjInfo.TextureInfos[SlotIdx].TexturePath = OutObjInfo.SpecularTexturePath;
-            //OutObjInfo.TextureInfos[SlotIdx].TextureName = ;
-            OutObjInfo.TextureInfos[SlotIdx].bIsSRGB = true;
         }
     }
 }
@@ -1249,12 +1235,11 @@ bool FFBXLoader::ConvertToSkeletalMesh(const TArray<FBX::MeshRawData>& AllRawMes
 
     if (!OutSkeleton) return false;
 
-
     OutSkeletalMeshRenderData.MeshName = AllRawMeshData[0].NodeName.ToString();
     OutSkeletalMeshRenderData.FilePath = FullFBXInfo.FilePath;
     OutSkeleton->Clear();
 
-    // 1. 스키닝에 관련된 모든 본 및 그 부모 본들 수집 (BonesToInclude)
+    // 스키닝에 관련된 모든 본 및 그 부모 본들 수집 (BonesToInclude)
     TArray<FName> RelevantBoneNames;
     for (const auto& RawMeshDataInstance : AllRawMeshData)
     {
@@ -1281,7 +1266,6 @@ bool FFBXLoader::ConvertToSkeletalMesh(const TArray<FBX::MeshRawData>& AllRawMes
         }
     }
 
-
     // 2. 루트 본 식별 및 자식 관계 맵핑 (USkeleton에 아직 추가 안 함)
     TMap<FName, TArray<FName>> BoneChildrenMap;
     TArray<FName> RootBoneNamesForSorting;
@@ -1301,7 +1285,7 @@ bool FFBXLoader::ConvertToSkeletalMesh(const TArray<FBX::MeshRawData>& AllRawMes
         }
     }
 
-    // 3. 본들을 위상 정렬 (부모가 항상 자식보다 먼저 오도록)
+    // 본들을 위상 정렬 (부모가 항상 자식보다 먼저 오도록)
     TArray<FName> SortedBoneNames; SortedBoneNames.Reserve(BonesToInclude.Num());
     TArray<FName> ProcessingQueue = RootBoneNamesForSorting;
     TMap<FName, bool> ProcessedBones;
@@ -1337,7 +1321,7 @@ bool FFBXLoader::ConvertToSkeletalMesh(const TArray<FBX::MeshRawData>& AllRawMes
         }
     }
 
-    // 4. 정렬된 순서대로 USkeleton에 본 추가 (단일 호출 지점)
+    // 정렬된 순서대로 USkeleton에 본 추가 (단일 호출 지점)
     for (const FName& BoneName : SortedBoneNames)
     {
         const FBoneHierarchyNode* HNode = FullFBXInfo.SkeletonHierarchy.Find(BoneName);
@@ -1353,8 +1337,8 @@ bool FFBXLoader::ConvertToSkeletalMesh(const TArray<FBX::MeshRawData>& AllRawMes
         }
     }
 
-    // 2. Prepare Skinning Data
-    // --- 2. 메시 데이터 통합 ---
+    // Prepare Skinning Data
+    // 메시 데이터 통합
     TArray<FVector> CombinedControlPoints_MeshNodeLocal; // 각 메시 노드 로컬 공간 기준 컨트롤 포인트
     TArray<int32> CombinedPolygonVertexIndices;
     TArray<FControlPointSkinningData> CombinedCpSkinData; // 컨트롤 포인트 기준 스키닝 데이터
@@ -1366,13 +1350,12 @@ bool FFBXLoader::ConvertToSkeletalMesh(const TArray<FBX::MeshRawData>& AllRawMes
     uint32 GlobalVertexOffset = 0; // 전체 컨트롤 포인트에 대한 오프셋
     uint32 GlobalPolyVertOffset = 0; // 전체 폴리곤 정점에 대한 오프셋 (PVNormals, PVUVs 인덱싱용)
 
-
     for (const FBX::MeshRawData& CurrentRawMeshData : AllRawMeshData)
     {
         // 2a. 메시 노드의 글로벌 변환 가져오기 (이 변환은 정점을 월드(또는 공통) 바인드 공간으로 옮김)
         // 중요: 이 변환은 FBX 파싱 시 각 MeshRawData에 저장되어 있어야 함.
         // 여기서는 임시로 단위 행렬로 가정. 실제로는 각 메시 노드의 글로벌 변환을 사용해야 함.
-        const FMatrix& MeshNodeWorldBindTransform = FMatrix::Identity;//CurrentRawMeshData.MeshNodeGlobalTransformAtBindTime; // 저장된 값 사용
+        const FMatrix& MeshNodeWorldBindTransform = FMatrix::Identity;// CurrentRawMeshData.MeshNodeGlobalTransformAtBindTime; // 저장된 값 사용
 
         // 컨트롤 포인트 추가 (메시 노드 변환 적용)
         for (const FVector& cp_local_to_mesh_node : CurrentRawMeshData.ControlPoints)
@@ -1423,8 +1406,6 @@ bool FFBXLoader::ConvertToSkeletalMesh(const TArray<FBX::MeshRawData>& AllRawMes
             CombinedPVUVs.Add(uv);
         }
 
-
-
         // 폴리곤 정점 인덱스 추가 (컨트롤 포인트 인덱스에 GlobalVertexOffset 적용)
         for (int32 local_cp_idx : CurrentRawMeshData.PolygonVertexIndices)
         {
@@ -1434,12 +1415,11 @@ bool FFBXLoader::ConvertToSkeletalMesh(const TArray<FBX::MeshRawData>& AllRawMes
         GlobalPolyVertOffset += CurrentRawMeshData.PolygonVertexIndices.Num(); // PV 속성 인덱싱을 위함
     }
 
-    // --- 3. 통합된 스키닝 가중치 정규화 ---
+    // 통합된 스키닝 가중치 정규화
     for (int32 cpIdx = 0; cpIdx < CombinedCpSkinData.Num(); ++cpIdx)
     {
         CombinedCpSkinData[cpIdx].NormalizeWeights(MAX_BONE_INFLUENCES);
     }
-
 
     OutSkeletalMeshRenderData.BindPoseVertices.Empty();
     OutSkeletalMeshRenderData.Indices.Empty();
@@ -1517,7 +1497,7 @@ bool FFBXLoader::ConvertToSkeletalMesh(const TArray<FBX::MeshRawData>& AllRawMes
         }
     }
 
-    // 5. Populate Materials
+    // Populate Materials
     OutSkeletalMeshRenderData.Materials.Empty();
     TMap<FName, int32> MatNameToIndexMap;
     for (const FBX::MeshRawData& CurrentRawMeshData : AllRawMeshData)
@@ -1577,13 +1557,12 @@ bool FFBXLoader::ConvertToSkeletalMesh(const TArray<FBX::MeshRawData>& AllRawMes
     if (TotalSubIdx != OutSkeletalMeshRenderData.Indices.Num())
         return false;
 
-    // 7. Calculate Initial Local Transforms
+    // Calculate Initial Local Transforms
     CalculateInitialLocalTransformsInternal(OutSkeleton);
 
-    // 8. TODO: Calculate Tangents (Requires Tangent member in FSkeletalMeshVertex and averaging logic)
+    // TODO: Calculate Tangents (Requires Tangent member in FSkeletalMeshVertex and averaging logic)
 
-
-    // 9. Calculate Bounding Box
+    // Calculate Bounding Box
     TArray<FVector> PositionsForBoundsCalculation;
     PositionsForBoundsCalculation.Reserve(OutSkeletalMeshRenderData.BindPoseVertices.Num());
 
@@ -1670,15 +1649,13 @@ void FFBXLoader::ComputeBoundingBox(const TArray<FSkeletalMeshVertex>& InVertice
 
 void FFBXLoader::CalculateTangent(FSkeletalMeshVertex& PivotVertex, const FSkeletalMeshVertex& Vertex1, const FSkeletalMeshVertex& Vertex2) { /* TODO: Implement if needed */ }
 
-
 // --- FManagerFBX Static Method Implementations ---
-
 FSkeletalMeshRenderData* FManagerFBX::LoadFBXSkeletalMeshAsset(const FString& PathFileName, USkeleton* OutSkeleton)
 {
     using namespace FBX;
     if (!OutSkeleton) return nullptr; // USkeleton 객체 필요
 
-    FSkeletalMeshRenderData** FoundDataPtr = FBXSkeletalMeshMap.Find(PathFileName);
+    FSkeletalMeshRenderData** FoundDataPtr = SkeletalMeshRenderDataMap.Find(PathFileName);
 
     if (FoundDataPtr)
     {
@@ -1699,7 +1676,7 @@ FSkeletalMeshRenderData* FManagerFBX::LoadFBXSkeletalMeshAsset(const FString& Pa
         delete NewRenderData;
         return nullptr;
     }
-    FBXSkeletalMeshMap.Add(PathFileName, NewRenderData);
+    SkeletalMeshRenderDataMap.Add(PathFileName, NewRenderData);
     return NewRenderData;
 }
 
@@ -1708,39 +1685,42 @@ bool FManagerFBX::SaveSkeletalMeshToBinary(const FWString& FilePath, const FSkel
 bool FManagerFBX::LoadSkeletalMeshFromBinary(const FWString& FilePath, FSkeletalMeshRenderData& OutSkeletalMesh) { return false; /* TODO */ }
 
 // Parameter type corrected
-UMaterial* FManagerFBX::CreateMaterial(const FFbxMaterialInfo& materialInfo)
+UMaterial* FManagerFBX::CreateMaterial(const FFbxMaterialInfo& MaterialInfo)
 {
-    FString MatKey = materialInfo.MaterialName.ToString();
-    UMaterial** FoundMatPtr = materialMap.Find(MatKey); if (FoundMatPtr) return *FoundMatPtr;
+    FString MatKey = MaterialInfo.MaterialName.ToString();
+    UMaterial** FoundMatPtr = MaterialMap.Find(MatKey); if (FoundMatPtr) return *FoundMatPtr;
     UMaterial* NewMat = FObjectFactory::ConstructObject<UMaterial>(nullptr); // Use your factory
     if (NewMat)
     {
         FObjMaterialInfo objInfo;
 
-        FBX::ConvertFbxMaterialToObjMaterial(materialInfo, objInfo);
+        FBX::ConvertFbxMaterialToObjMaterial(MaterialInfo, objInfo);
 
         NewMat->SetMaterialInfo(objInfo);
 
-        if (materialInfo.bHasBaseColorTexture && !materialInfo.BaseColorTexturePath.empty())
+        if (MaterialInfo.bHasBaseColorTexture && !MaterialInfo.BaseColorTexturePath.empty())
         {
-            FFBXLoader::CreateTextureFromFile(materialInfo.BaseColorTexturePath);
+            FFBXLoader::CreateTextureFromFile(MaterialInfo.BaseColorTexturePath);
         }
-        if (materialInfo.bHasNormalTexture && !materialInfo.NormalTexturePath.empty())
+        if (MaterialInfo.bHasNormalTexture && !MaterialInfo.SpecularTexturePath.empty())
         {
-            FFBXLoader::CreateTextureFromFile(materialInfo.NormalTexturePath);
+            FFBXLoader::CreateTextureFromFile(MaterialInfo.SpecularTexturePath);
+        }
+        if (MaterialInfo.bHasNormalTexture && !MaterialInfo.NormalTexturePath.empty())
+        {
+            FFBXLoader::CreateTextureFromFile(MaterialInfo.NormalTexturePath);
         }
 
-        materialMap.Add(MatKey, NewMat);
+        MaterialMap.Add(MatKey, NewMat);
     }
     return NewMat;
 }
 
-UMaterial* FManagerFBX::GetMaterial(const FString& name) { UMaterial** Ptr = materialMap.Find(name); return Ptr ? *Ptr : nullptr; }
+UMaterial* FManagerFBX::GetMaterial(const FString& InName) { UMaterial** Ptr = MaterialMap.Find(InName); return Ptr ? *Ptr : nullptr; }
 
-USkeletalMesh* FManagerFBX::CreateSkeletalMesh(const FString& filePath)
+USkeletalMesh* FManagerFBX::CreateSkeletalMesh(const FString& InFilePath)
 {
-    FWString MeshKey = filePath.ToWideString();
-
+    FWString MeshKey = InFilePath.ToWideString();
 
     if (SkeletalMeshMap.Contains(MeshKey))
         return SkeletalMeshMap[MeshKey];
@@ -1752,7 +1732,7 @@ USkeletalMesh* FManagerFBX::CreateSkeletalMesh(const FString& filePath)
         return nullptr;
     }
 
-    FSkeletalMeshRenderData* RenderData = LoadFBXSkeletalMeshAsset(filePath, NewMesh->Skeleton);
+    FSkeletalMeshRenderData* RenderData = LoadFBXSkeletalMeshAsset(InFilePath, NewMesh->Skeleton);
     if (!RenderData)
     {
         return nullptr;
@@ -1765,10 +1745,10 @@ USkeletalMesh* FManagerFBX::CreateSkeletalMesh(const FString& filePath)
 }
 
 const TMap<FWString, USkeletalMesh*>& FManagerFBX::GetSkeletalMeshes() { return SkeletalMeshMap; }
-USkeletalMesh* FManagerFBX::GetSkeletalMesh(const FWString& name)
+USkeletalMesh* FManagerFBX::GetSkeletalMesh(const FWString& InName)
 {
-    if (SkeletalMeshMap.Contains(name))
-        return SkeletalMeshMap[name];
+    if (SkeletalMeshMap.Contains(InName))
+        return SkeletalMeshMap[InName];
 
-    return CreateSkeletalMesh(FString(name.c_str()));
+    return CreateSkeletalMesh(FString(InName.c_str()));
 }

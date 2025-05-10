@@ -1,7 +1,11 @@
 #pragma once
-#include "Define.h"
+
+#include <fbxsdk.h>
+#include <functional>
+#include <unordered_map> 
 
 // --- 기본 타입 및 컨테이너 ---
+#include "Define.h"
 #include "Math/Vector.h"      // FVector, FVector2D 포함 가정
 #include "Math/Vector4.h"     // FVector4 포함 가정
 #include "Math/Matrix.h"      // FMatrix 포함 가정
@@ -10,25 +14,17 @@
 #include "UObject/NameTypes.h" // FName 포함 가정
 #include "Components/Mesh/SkeletalMesh.h"
 #include "Asset/SkeletalMeshAsset.h"
-#include <fbxsdk.h>
 
-#include <functional>
-#include <unordered_map> 
-#include "SkeletalMeshDebugger.h" // FSkeletalMeshDebugger 클래스 선언을 사용하기 위해 포함
+#include "SkeletalMeshDebugger.h"
 
 class USkeletalMeshComponent;
 
-// --- FBX 로딩 관련 네임스페이스 ---
 namespace FBX
 {
     struct FBoneHierarchyNode;
-    // --- 데이터 구조체 정의 ---
-    // 재질 정보 구조체
-
     struct FBXInfo;
     struct MeshRawData;
-} // namespace FBX
-
+}
 
 namespace std
 {
@@ -44,10 +40,8 @@ namespace std
     template <>
     struct hash<FSkeletalMeshVertex>
     {
-        // 함수 선언만 남기고 세미콜론으로 끝냅니다.
         size_t operator()(const FSkeletalMeshVertex& Key) const noexcept;
     };
-
 }
 
 struct FFBXLoader
@@ -76,24 +70,18 @@ public:
 
     static bool LoadSkeletalMeshFromBinary(const FWString& FilePath, FSkeletalMeshRenderData& OutSkeletalMesh);
 
-    static UMaterial* CreateMaterial(const FFbxMaterialInfo& materialInfo);
+    static UMaterial* CreateMaterial(const FFbxMaterialInfo& MaterialInfo);
 
-    static TMap<FString, UMaterial*>& GetMaterials() { return materialMap; }
+    static UMaterial* GetMaterial(const FString& InName);
 
-    static UMaterial* GetMaterial(const FString& name);
-
-    static int GetMaterialNum() { return materialMap.Num(); }
-
-    static USkeletalMesh* CreateSkeletalMesh(const FString& filePath);
+    static USkeletalMesh* CreateSkeletalMesh(const FString& InFilePath);
 
     static const TMap<FWString, USkeletalMesh*>& GetSkeletalMeshes();
 
-    static USkeletalMesh* GetSkeletalMesh(const FWString& name);
-
-    static int GetSkeletalMeshNum() { return SkeletalMeshMap.Num(); }
+    static USkeletalMesh* GetSkeletalMesh(const FWString& InName);
 
 private:
-    inline static TMap<FString, FSkeletalMeshRenderData*> FBXSkeletalMeshMap;
+    inline static TMap<FString, FSkeletalMeshRenderData*> SkeletalMeshRenderDataMap;
     inline static TMap<FWString, USkeletalMesh*> SkeletalMeshMap;
-    inline static TMap<FString, UMaterial*> materialMap;
+    inline static TMap<FString, UMaterial*> MaterialMap;
 };

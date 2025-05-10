@@ -7,7 +7,7 @@
 struct FSkeletalMeshVertex
 {
     FVector Position;
-    float R, G, B, A; // Color
+    float R, G, B, A;
     FVector Normal;
     float TangentX, TangentY, TangentZ, TangentW;
     FVector2D TexCoord;
@@ -44,14 +44,8 @@ struct FSkeletalMeshVertex
 
 struct FSkeletalMeshBoneWeight
 {
-    uint8  BoneIndices[4];  // 이 정점에 영향을 주는 본의 인덱스(최대 4개)
-    float  Weights[4];      // 각 본에 대한 가중치 (합이 1.0이 되도록)
-};
-
-struct FSkeletalHierarchyData
-{
-    FString NodeName;
-    TArray<FSkeletalHierarchyData> Children;
+    uint8  BoneIndices[4];
+    float  Weights[4];
 };
 
 struct FFbxMaterialInfo
