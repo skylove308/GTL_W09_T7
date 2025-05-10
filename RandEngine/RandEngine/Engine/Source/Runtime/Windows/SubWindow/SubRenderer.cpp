@@ -3,7 +3,6 @@
 #include "RendererHelpers.h"
 #include "StaticMeshRenderPass.h"
 #include "Components/Mesh/SkeletalMesh.h"
-#include "Windows/SubWindow/SubCamera.h"
 #include "D3D11RHI/DXDShaderManager.h"
 #include "D3D11RHI/GraphicDevice.h"
 #include "Engine/Asset/SkeletalMeshAsset.h"
@@ -125,7 +124,7 @@ void FSubRenderer::Render()
 void FSubRenderer::RenderMesh()
 {
     FSkeletalMeshRenderData* RenderData = PreviewSkeletalMesh->GetRenderData();
-    
+
     TArray<FStaticMaterial*> RenderMaterial = PreviewSkeletalMesh->GetMaterials();
     
     UINT Stride = sizeof(FSkeletalMeshVertex);

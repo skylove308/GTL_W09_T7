@@ -42,18 +42,18 @@ void USkeletalMeshComponent::SetProperties(const TMap<FString, FString>& InPrope
         {
             if (USkeletalMesh* LoadedMesh = FManagerFBX::CreateSkeletalMesh(*MeshPath))
             {
-                SetSkeletalMesh(LoadedMesh, AABB);
+                SetSkeletalMesh(LoadedMesh);
                 UE_LOG(ELogLevel::Display, TEXT("Set SkeletalMesh '%s' for %s"), **MeshPath, *GetName());
             }
             else
             {
                 UE_LOG(ELogLevel::Warning, TEXT("Could not load SkeletalMesh '%s' for %s"), **MeshPath, *GetName());
-                SetSkeletalMesh(nullptr, FBoundingBox());
+                SetSkeletalMesh(nullptr);
             }
         }
         else
         {
-            SetSkeletalMesh(nullptr, FBoundingBox());
+            SetSkeletalMesh(nullptr);
         }
     }
 }
