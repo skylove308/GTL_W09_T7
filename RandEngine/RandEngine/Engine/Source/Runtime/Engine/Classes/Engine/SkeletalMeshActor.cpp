@@ -7,7 +7,7 @@ ASkeletalMeshActor::ASkeletalMeshActor()
 {
     SkeletalMeshComponent = AddComponent<USkeletalMeshComponent>();
     RootComponent = SkeletalMeshComponent;
-    SkeletalMeshComponent->SetSkeletalMesh(FManagerFBX::GetSkeletalMesh(L"Contents/Mutant.fbx"));
+    SkeletalMeshComponent->SetSkeletalMesh(FManagerFBX::GetSkeletalMesh(L"Contents/Sharkry_NoTwist.fbx"));
     //SkeletalMeshComponent->SetSkeletalMesh(FManagerFBX::GetSkeletalMesh(L"Contents/Sharkry_NoTwist.fbx"));
     
     {
@@ -36,6 +36,13 @@ ASkeletalMeshActor::ASkeletalMeshActor()
             }
         }
     }
+}
+
+void ASkeletalMeshActor::Tick(float DeltaTime)
+{
+    AActor::Tick(DeltaTime);
+
+    SetActorRotation(GetActorRotation()+FRotator(0, 0.05, 0));
 }
 
 UObject* ASkeletalMeshActor::Duplicate(UObject* InOuter)

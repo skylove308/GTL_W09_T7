@@ -606,12 +606,6 @@ LRESULT CALLBACK FEngineLoop::AppWndProc(HWND hWnd, uint32 Msg, WPARAM wParam, L
             }
             GEngineLoop.UpdateUI();
             break;
-        
-        case WM_ACTIVATE:
-            if (ImGui::GetCurrentContext() == nullptr) break;
-            ImGui::SetCurrentContext(GEngineLoop.FUIManager->GetContext());
-            GEngineLoop.CurrentImGuiContext = ImGui::GetCurrentContext();
-            break;
         default:
             if (hWnd == GEngineLoop.AppWnd && GEngineLoop.AppMessageHandler != nullptr)
             {
