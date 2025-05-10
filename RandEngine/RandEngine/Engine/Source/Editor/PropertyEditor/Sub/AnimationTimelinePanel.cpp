@@ -214,7 +214,7 @@ void SAnimationTimelinePanel::OnResize(HWND hWnd)
 
 
 void SAnimationTimelinePanel::RenderNotifyTrackItems(const TArray<FMockAnimNotifyEvent>& notifies, ImDrawList* drawList,
-    const ImRect& rc, const ImRect& clippingRect, bool isCompact)
+                                                     const ImRect& rc, const ImRect& clippingRect, bool isCompact)
 {
     if (!TargetSequence)
     {
