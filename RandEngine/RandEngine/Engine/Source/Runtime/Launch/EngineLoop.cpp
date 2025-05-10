@@ -105,12 +105,6 @@ int32 FEngineLoop::Init(HINSTANCE hInstance)
     FUIManager->Initialize(AppWnd, GraphicDevice.Device, GraphicDevice.DeviceContext);
     ResourceManager.Initialize(&Renderer, &GraphicDevice);
     
-    SkeletalViewerSubEngine = FObjectFactory::ConstructObject<USkeletalSubEngine>(nullptr);
-    SkeletalViewerSubEngine->Initialize(SkeletalViewerWnd, &SkeletalViewerGD, BufferManager,FUIManager,UnrealEditor);
-    AnimationViewerSubEngine =  FObjectFactory::ConstructObject<UAnimationSubEngine>(nullptr);
-    AnimationViewerSubEngine->Initialize(AnimationViewerWnd, &AnimationViewerGD, BufferManager,FUIManager,UnrealEditor);
-
-    
     uint32 ClientWidth = 0;
     uint32 ClientHeight = 0;
     GetClientSize(ClientWidth, ClientHeight);
@@ -119,7 +113,11 @@ int32 FEngineLoop::Init(HINSTANCE hInstance)
     GEngine = FObjectFactory::ConstructObject<UEditorEngine>(nullptr);
     GEngine->Init();
 
-
+    SkeletalViewerSubEngine = FObjectFactory::ConstructObject<USkeletalSubEngine>(nullptr);
+    SkeletalViewerSubEngine->Initialize(SkeletalViewerWnd, &SkeletalViewerGD, BufferManager,FUIManager,UnrealEditor);
+    AnimationViewerSubEngine =  FObjectFactory::ConstructObject<UAnimationSubEngine>(nullptr);
+    AnimationViewerSubEngine->Initialize(AnimationViewerWnd, &AnimationViewerGD, BufferManager,FUIManager,UnrealEditor);
+    
     FSoundManager::GetInstance().Initialize();
     FSoundManager::GetInstance().LoadSound("fishdream", "Contents/Sounds/fishdream.mp3");
     FSoundManager::GetInstance().LoadSound("sizzle", "Contents/Sounds/sizzle.mp3");

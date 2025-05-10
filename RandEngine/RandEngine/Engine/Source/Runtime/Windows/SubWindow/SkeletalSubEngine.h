@@ -1,6 +1,10 @@
 ﻿#pragma once
 #include "SubEngine.h"
 
+
+class ACube;
+class ASkeletalMeshActor;
+
 class USkeletalSubEngine : public USubEngine
 {
     DECLARE_CLASS(USkeletalSubEngine, USubEngine)
@@ -16,6 +20,6 @@ public:
 
     void SetSkeletalMesh(USkeletalMesh* InSkeletalMesh);    
     USkeletalMesh* SelectedSkeletalMesh;
-
-
+    ASkeletalMeshActor* SkeletalMeshActor;
+    ACube* BasePlane = nullptr;
 };

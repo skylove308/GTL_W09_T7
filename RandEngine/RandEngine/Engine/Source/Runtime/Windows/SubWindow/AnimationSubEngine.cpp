@@ -3,7 +3,7 @@
 #include "ImGuiSubWindow.h"
 #include "SubRenderer.h"
 #include "UnrealClient.h"
-
+#include "Actors/Cube.h"
 UAnimationSubEngine::UAnimationSubEngine()
 {
 }
@@ -22,19 +22,23 @@ void UAnimationSubEngine::Initialize(HWND& hWnd, FGraphicsDevice* InGraphics, FD
     UnrealEditor = InUnrealEd;
     SubUI = new FImGuiSubWindow(hWnd, InGraphics->Device, InGraphics->DeviceContext);
     UImGuiManager::ApplySharedStyle(InSubWindow->GetContext(), SubUI->Context);
-    SubRenderer->Initialize(InGraphics, InBufferManager);
+    SubRenderer->Initialize(InGraphics, InBufferManager,this);
 
     ViewportClient = new FEditorViewportClient();
     ViewportClient->Initialize(EViewScreenLocation::EVL_MAX, FRect(0,0,800,600));
     ViewportClient->CameraReset();
-    // EditorPlayer = FObjectFactory::ConstructObject<AEditorPlayer>(this);
+    EditorPlayer = FObjectFactory::ConstructObject<AEditorPlayer>(this);
+
+    BasePlane = FObjectFactory::ConstructObject<ACube>(this);
+    BasePlane->SetActorScale(FVector(10,10,1));
+    BasePlane->SetActorLocation(FVector(0,0,-1));
 }
 
 void UAnimationSubEngine::Tick(float DeltaTime)
 {
     Input(DeltaTime);
     ViewportClient->Tick(DeltaTime);
-    // EditorPlayer->Tick(DeltaTime);
+    EditorPlayer->Tick(DeltaTime);
     Render();    
 }
 
