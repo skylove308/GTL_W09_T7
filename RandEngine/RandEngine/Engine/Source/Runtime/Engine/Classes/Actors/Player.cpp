@@ -24,7 +24,7 @@ void AEditorPlayer::Tick(float DeltaTime)
     else
     {
         UObject* Outer = GetOuter();
-        ActiveViewport = static_cast<USubEngine*>(Outer)->ViewportClient;
+        ActiveViewport = Cast<USubEngine>(Outer)->ViewportClient;
     }
     Input();
 }
@@ -47,7 +47,7 @@ void AEditorPlayer::Input()
             if (GetOuter() == GEngine)
                 ScreenToClient(GEngineLoop.AppWnd, &mousePos);
             else
-                ScreenToClient(*static_cast<USubEngine*>(GetOuter())->Wnd, &mousePos);
+                ScreenToClient(*Cast<USubEngine>(GetOuter())->Wnd, &mousePos);
             /*
             uint32 UUID = FEngineLoop::GraphicDevice.GetPixelUUID(mousePos);
             // TArray<UObject*> objectArr = GetWorld()->GetObjectArr();
@@ -188,8 +188,8 @@ void AEditorPlayer::PickActor(const FVector& pickPosition)
         }
         else
         {
-            static_cast<USubEngine*>(GetOuter())->SelectedActor=Possible->GetOwner();
-            static_cast<USubEngine*>(GetOuter())->SelectedComponent=Possible;
+            Cast<USubEngine>(GetOuter())->SelectedActor=Possible->GetOwner();
+            Cast<USubEngine>(GetOuter())->SelectedComponent=Possible;
         }
     }
     else
@@ -201,8 +201,8 @@ void AEditorPlayer::PickActor(const FVector& pickPosition)
         }
         else
         {
-            static_cast<USubEngine*>(GetOuter())->SelectedActor=nullptr;
-            static_cast<USubEngine*>(GetOuter())->SelectedComponent= nullptr;
+            Cast<USubEngine>(GetOuter())->SelectedActor=nullptr;
+            Cast<USubEngine>(GetOuter())->SelectedComponent= nullptr;
         }
     }
 }
@@ -302,7 +302,7 @@ void AEditorPlayer::PickedObjControl()
     if (GetOuter() == GEngine)
         SelectedActor = Engine->GetSelectedActor();
     else
-        SelectedActor = static_cast<USubEngine*>(GetOuter())->SelectedActor;
+        SelectedActor =Cast<USubEngine>(GetOuter())->SelectedActor;
     
     // FEditorViewportClient* ActiveViewport = GEngineLoop.GetLevelEditor()->GetActiveViewportClient().get();
     if (SelectedActor && ActiveViewport->GetPickedGizmoComponent())
@@ -317,7 +317,7 @@ void AEditorPlayer::PickedObjControl()
         if (GEngine == GetOuter())
             TargetComponent = Engine->GetSelectedComponent();
         else
-            TargetComponent =  static_cast<USubEngine*>(GetOuter())->SelectedComponent;
+            TargetComponent =  Cast<USubEngine>(GetOuter())->SelectedComponent;
         if (!TargetComponent)
         {
             if (AActor* SelectedActor = Engine->GetSelectedActor())

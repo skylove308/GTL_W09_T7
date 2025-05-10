@@ -105,9 +105,9 @@ int32 FEngineLoop::Init(HINSTANCE hInstance)
     FUIManager->Initialize(AppWnd, GraphicDevice.Device, GraphicDevice.DeviceContext);
     ResourceManager.Initialize(&Renderer, &GraphicDevice);
     
-    SkeletalViewerSubEngine = new USkeletalSubEngine();
+    SkeletalViewerSubEngine = FObjectFactory::ConstructObject<USkeletalSubEngine>(nullptr);
     SkeletalViewerSubEngine->Initialize(SkeletalViewerWnd, &SkeletalViewerGD, BufferManager,FUIManager,UnrealEditor);
-    AnimationViewerSubEngine = new UAnimationSubEngine();
+    AnimationViewerSubEngine =  FObjectFactory::ConstructObject<UAnimationSubEngine>(nullptr);
     AnimationViewerSubEngine->Initialize(AnimationViewerWnd, &AnimationViewerGD, BufferManager,FUIManager,UnrealEditor);
 
     
