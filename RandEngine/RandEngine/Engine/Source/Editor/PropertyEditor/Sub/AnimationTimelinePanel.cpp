@@ -1,82 +1,106 @@
 #include "AnimationTimelinePanel.h"
 #include "Imgui/imgui.h"
-#include "Imgui/imgui_neo_internal.h"
-#include "Container/Map.h"
+#include "Imgui/imgui_neo_sequencer.h" // im-neo-sequencer 헤더 포함
+#include "Imgui/imgui_neo_internal.h" // 필요한 경우
 
-// ... (Static Member Initializations) ...
-#if !defined(FNAME_DEFINED) || !defined(MOCK_GLOBALS_DEFINED)
+// 정적 멤버 변수 초기화
+#if !defined(FNAME_DEFINED) || !defined(MOCK_GLOBALS_DEFINED) // 이 매크로는 프로젝트 전체에서 한 번만 정의되도록 관리
 #define MOCK_GLOBALS_DEFINED
 int FMockAnimNotifyEvent::NextEventId = 0;
-int FEditorTimelineTrack::NextTrackIdCounter = 0;
+int FEditorTimelineTrack::NextTrackIdCounter = 1; // ID는 1부터 시작하도록 변경 (0 또는 -1은 특별한 의미로 사용 가능)
 #endif
 
 SAnimationTimelinePanel::SAnimationTimelinePanel()
-    : TargetSequence(nullptr)
-    , IsSequencerExpanded(true)
-    , IsPlaying(false)
-    , IsLooping(false)
+    : MockAnimSequenceInstance(nullptr)
+    , TargetSequence(nullptr)
+    , bIsPlaying(false)
+    , bIsLooping(false)
     , PlaybackSpeed(1.0f)
     , CurrentTimeSeconds(0.0f)
-    , SequencerSelectedEntry(-1)
-    , SequencerFirstVisibleFrame(0)
     , SelectedNotifyEventId(-1)
-    , bIsDraggingSelectedNotify(false)
-    , DraggingNotifyOriginalTime(0.0f)
-    , FramePixelWidth(6.0f) // 적절한 초기값 설정
-    , FramePixelWidth_BeforeChange(6.0f) // FramePixelWidth와 동일하게 초기
+    , bIsDraggingNotify(false)
+    , PanelWidth(800.f)  // 기본값
+    , PanelHeight(600.f) // 기본값
 {
-
-    MocdkAnimSequence = new MockAnimSequence();
-
-  
-    MocdkAnimSequence->FrameRate = 30.0f;
-    MocdkAnimSequence->SequenceLength = 2.0f;
-    MocdkAnimSequence->AddNotify(1.0f, FName("Footstep_L"));
-    MocdkAnimSequence->AddNotify(1.6f, FName("Footstep_R"));
-    SetTargetSequence(MocdkAnimSequence);
+    MockAnimSequenceInstance = new MockAnimSequence();
+    MockAnimSequenceInstance->FrameRate = 30.0f;
+    MockAnimSequenceInstance->SequenceLength = 5.0f; // 길이 약간 늘림
+    MockAnimSequenceInstance->AddNotify(1.0f, FName("Footstep_L"));
+    MockAnimSequenceInstance->AddNotify(1.6f, FName("Footstep_R"));
+    MockAnimSequenceInstance->AddNotify(2.5f, FName("Jump"));
+    SetTargetSequence(MockAnimSequenceInstance);
 }
-void SAnimationTimelinePanel::SetTargetSequence(MockAnimSequence* sequence)
+
+SAnimationTimelinePanel::~SAnimationTimelinePanel()
 {
-    TargetSequence = sequence;
+    if (MockAnimSequenceInstance != nullptr)
+    {
+        delete MockAnimSequenceInstance;
+        MockAnimSequenceInstance = nullptr;
+    }
+    // TargetSequence는 MockAnimSequenceInstance를 가리키므로 별도 delete 필요 없음
+}
+
+void SAnimationTimelinePanel::SetTargetSequence(MockAnimSequence* Sequence)
+{
+    TargetSequence = Sequence;
     DisplayableTracks.Empty();
     CurrentTimeSeconds = 0.0f;
-    IsPlaying = false;
-    // ... (기존 초기화) ...
-    SelectedNotifyEventId = -1; // SequencerSelectedEntry는 im-neo-sequencer 방식으로 대체되거나 다른 의미로 사용될 수 있음
+    bIsPlaying = false;
+    bIsLooping = false;
+    PlaybackSpeed = 1.0f;
+    SelectedNotifyEventId = -1;
 
-    if (TargetSequence)
+    if (TargetSequence != nullptr)
     {
-        // "Notifies" 루트 트랙 추가
         int rootTrackId = FEditorTimelineTrack::NextTrackIdCounter++;
-        DisplayableTracks.Add(FEditorTimelineTrack(EEditorTimelineTrackType::AnimNotify_Root, "Notifies", rootTrackId, rootTrackId)); 
-        // ParentId를 자기 자신으로 (또는 -1)
+        // ParentTrackId를 -1로 하여 최상위 루트임을 표시
+        DisplayableTracks.Add(FEditorTimelineTrack(EEditorTimelineTrackType::AnimNotify_Root, "Notifies", rootTrackId, -1));
 
-        // TODO: 여기서 TargetSequence에 저장된 사용자 트랙 정보를 읽어와 DisplayableTracks에 추가하는 로직 필요
-        // 예:
-        // for (const auto& savedTrackData : TargetSequence->GetSavedUserTracks())
-        // {
-        //     AddUserNotifyTrackFromData(rootTrackId, savedTrackData);
-        // }
-
-        // 임시로 하위 트랙 추가 예시 (테스트용)
-        // AddUserNotifyTrack(rootTrackId, "Footstep Sounds");
-        // AddUserNotifyTrack(rootTrackId, "Particle Effects");
+        // 예시: "Footsteps" 사용자 트랙 자동 추가 및 기존 노티파이 할당
+        int footstepTrackId = FEditorTimelineTrack::NextTrackIdCounter++;
+        DisplayableTracks.Add(FEditorTimelineTrack(EEditorTimelineTrackType::AnimNotify_UserTrack, "Footsteps", footstepTrackId, rootTrackId));
+        for (FMockAnimNotifyEvent& notify : TargetSequence->Notifies)
+        {
+            if (notify.NotifyName == FName("Footstep_L") || notify.NotifyName == FName("Footstep_R"))
+            {
+                notify.UserInterfaceTrackId = footstepTrackId;
+            }
+        }
+        // 예시: "Actions" 사용자 트랙 자동 추가 및 기존 노티파이 할당
+        int actionTrackId = FEditorTimelineTrack::NextTrackIdCounter++;
+        DisplayableTracks.Add(FEditorTimelineTrack(EEditorTimelineTrackType::AnimNotify_UserTrack, "Actions", actionTrackId, rootTrackId));
+        for (FMockAnimNotifyEvent& notify : TargetSequence->Notifies)
+        {
+            if (notify.NotifyName == FName("Jump"))
+            {
+                notify.UserInterfaceTrackId = actionTrackId;
+            }
+        }
     }
 }
 
 float SAnimationTimelinePanel::GetSequenceDurationSeconds() const
 {
-    return TargetSequence ? TargetSequence->SequenceLength : 0.0f;
+    if (TargetSequence != nullptr)
+    {
+        return TargetSequence->SequenceLength;
+    }
+    return 0.0f;
 }
 
 float SAnimationTimelinePanel::GetSequenceFrameRate() const
 {
-    return TargetSequence ? TargetSequence->FrameRate : 30.0f;
+    if (TargetSequence != nullptr)
+    {
+        return TargetSequence->FrameRate;
+    }
+    return 30.0f; // 기본값
 }
 
 int SAnimationTimelinePanel::GetSequenceTotalFrames() const
 {
-    if (!TargetSequence || GetSequenceDurationSeconds() <= 0.0f || GetSequenceFrameRate() <= 0.0f)
+    if (TargetSequence == nullptr || GetSequenceDurationSeconds() <= 0.0f || GetSequenceFrameRate() <= 0.0f)
     {
         return 0;
     }
@@ -92,666 +116,253 @@ int SAnimationTimelinePanel::ConvertTimeToFrame() const
     return static_cast<int>(CurrentTimeSeconds * GetSequenceFrameRate());
 }
 
-void SAnimationTimelinePanel::ConvertFrameToTimeAndSet(int frame)
+void SAnimationTimelinePanel::ConvertFrameToTimeAndSet(int Frame)
 {
     if (GetSequenceFrameRate() <= 0.0f)
     {
         CurrentTimeSeconds = 0.0f;
         return;
     }
-    CurrentTimeSeconds = static_cast<float>(frame) / GetSequenceFrameRate();
+    CurrentTimeSeconds = static_cast<float>(Frame) / GetSequenceFrameRate();
     CurrentTimeSeconds = std::max(0.0f, std::min(CurrentTimeSeconds, GetSequenceDurationSeconds()));
 }
 
-
-void SAnimationTimelinePanel::Render()
+void SAnimationTimelinePanel::UpdatePlayback(float DeltaSeconds)
 {
-    
-    UpdatePlayback(0.01666);
-    RenderTimelineEditor();
-
-}
-
-void SAnimationTimelinePanel::OnResize(HWND hWnd)
-{
-    RECT ClientRect;
-    GetClientRect(hWnd, &ClientRect);
-    Width = ClientRect.right - ClientRect.left;
-    Height = ClientRect.bottom - ClientRect.top;
-}
-
-
-void SAnimationTimelinePanel::RenderNotifyTrackItems(const TArray<FMockAnimNotifyEvent>& notifies, ImDrawList* drawList,
-                                                     const ImRect& rc, const ImRect& clippingRect, bool isCompact)
-{
-    if (!TargetSequence)
+    if (!bIsPlaying || TargetSequence == nullptr || GetSequenceDurationSeconds() <= 0.0f)
     {
         return;
     }
 
-    drawList->PushClipRect(clippingRect.Min, clippingRect.Max, true);
-
-    const float trackHeight = rc.Max.y - rc.Min.y;
-    const ImGuiStyle& style = ImGui::GetStyle();
-    const float textPadding = style.FramePadding.x;
-
-    bool mouseButtonJustReleased = ImGui::IsMouseReleased(ImGuiMouseButton_Left);
-
-    if (bIsDraggingSelectedNotify && mouseButtonJustReleased)
-    {
-        bIsDraggingSelectedNotify = false;
-        if (TargetSequence && SelectedNotifyEventId != -1)
-        {
-            TargetSequence->Notifies.Sort([](const FMockAnimNotifyEvent& A, const FMockAnimNotifyEvent& B)
-                {
-                    return A.TriggerTime < B.TriggerTime;
-                });
-        }
-        // SelectedNotifyEventId = -1; // 선택 해제 필요시 주석 해제
-    }
-
-    for (const auto& notifyEvent : notifies)
-    {
-        if (notifyEvent.TriggerTime < 0 || notifyEvent.TriggerTime > GetSequenceDurationSeconds())
-        {
-            continue;
-        }
-        float normalizedPos = (GetSequenceDurationSeconds() > 0.0f) ? (notifyEvent.TriggerTime / GetSequenceDurationSeconds()) : 0.0f;
-        float xPos = ImLerp(rc.Min.x, rc.Max.x, normalizedPos);
-
-        std::string nameStrStd = notifyEvent.NotifyName.ToString().ToAnsiString();
-        const char* nameCStr = nameStrStd.c_str();
-        ImVec2 textSize = ImGui::CalcTextSize(nameCStr);
-
-        float tagWidth = textSize.x + textPadding * 2;
-        float tagHeight = isCompact ? std::min(textSize.y + style.FramePadding.y, trackHeight - 2.f) : std::min(textSize.y + style.FramePadding.y * 2, trackHeight - 4.f);
-        tagHeight = std::max(tagHeight, 10.f);
-
-        float tagStartX = xPos;
-        float tagStartY = rc.Min.y + (trackHeight - tagHeight) * 0.5f;
-        ImRect tagRect(ImVec2(tagStartX, tagStartY), ImVec2(tagStartX + tagWidth, tagStartY + tagHeight));
-
-        if (tagRect.Max.x < rc.Min.x || tagRect.Min.x > rc.Max.x)
-        {
-            continue;
-        }
-
-        ImU32 bgColor = ImGui::GetColorU32(ImGuiCol_Button);
-        if (SelectedNotifyEventId == notifyEvent.EventId)
-        {
-            bgColor = bIsDraggingSelectedNotify ? ImGui::GetColorU32(ImGuiCol_ButtonHovered) : ImGui::GetColorU32(ImGuiCol_ButtonActive);
-        }
-        ImU32 textColor = ImGui::GetColorU32(ImGuiCol_Text);
-
-        drawList->AddRectFilled(tagRect.Min, tagRect.Max, bgColor, 3.0f);
-        drawList->PushClipRect(tagRect.Min, tagRect.Max, true);
-        drawList->AddText(ImVec2(tagRect.Min.x + textPadding, tagRect.Min.y + (tagHeight - textSize.y) * 0.5f), textColor, nameCStr);
-        drawList->PopClipRect();
-
-        bool mouseOverThisTag = ImGui::IsMouseHoveringRect(tagRect.Min, tagRect.Max);
-
-        if (mouseOverThisTag && ImGui::IsMouseClicked(ImGuiMouseButton_Left))
-        {
-            SelectedNotifyEventId = notifyEvent.EventId;
-            bIsDraggingSelectedNotify = true;
-            DraggingNotifyOriginalTime = notifyEvent.TriggerTime;
-            DraggingStartMousePosInTrack = ImVec2(ImGui::GetMousePos().x - rc.Min.x, ImGui::GetMousePos().y - rc.Min.y);
-        }
-
-        if (bIsDraggingSelectedNotify && SelectedNotifyEventId == notifyEvent.EventId && ImGui::GetIO().MouseDown[ImGuiMouseButton_Left])
-        {
-            ImVec2 currentMousePosInTrack = ImVec2(ImGui::GetMousePos().x - rc.Min.x, ImGui::GetMousePos().y - rc.Min.y);
-            float mouseDeltaXInTrack = currentMousePosInTrack.x - DraggingStartMousePosInTrack.x;
-
-            float trackPixelWidth = rc.Max.x - rc.Min.x;
-            if (fabs(trackPixelWidth) >= FLT_EPSILON)
-            {
-                float timePerPixel = GetSequenceDurationSeconds() / trackPixelWidth;
-                float timeDelta = mouseDeltaXInTrack * timePerPixel;
-                float newTime = DraggingNotifyOriginalTime + timeDelta;
-                newTime = std::max(0.0f, std::min(newTime, GetSequenceDurationSeconds()));
-
-                for (int i = 0; i < TargetSequence->Notifies.Num(); ++i)
-                {
-                    if (TargetSequence->Notifies[i].EventId == SelectedNotifyEventId)
-                    {
-                        TargetSequence->Notifies[i].TriggerTime = newTime;
-                        break;
-                    }
-                }
-            }
-        }
-
-        if (mouseOverThisTag)
-        {
-            ImGui::SetTooltip("Notify: %s\nTime: %.2fs (Frame: %d)", nameCStr, notifyEvent.TriggerTime,
-                static_cast<int>(notifyEvent.TriggerTime * GetSequenceFrameRate()));
-        }
-
-    }
-    if (ImGui::IsMouseClicked(0) && ImGui::IsWindowHovered(ImGuiHoveredFlags_ChildWindows) && !ImGui::IsAnyItemHovered() && !bIsDraggingSelectedNotify || ImGui::IsMouseReleased(0))
-    {
-        SelectedNotifyEventId = -1;
-    }
-    drawList->PopClipRect();
-}
-void SAnimationTimelinePanel::UpdatePlayback(float DeltaSeconds)
-{
-    if (!IsPlaying || !TargetSequence || GetSequenceDurationSeconds() <= 0.0f) return;
-
-    float previousTimeSeconds = CurrentTimeSeconds;
     CurrentTimeSeconds += DeltaSeconds * PlaybackSpeed;
 
     if (CurrentTimeSeconds >= GetSequenceDurationSeconds())
     {
-        if (IsLooping)
+        if (bIsLooping)
         {
             CurrentTimeSeconds = fmodf(CurrentTimeSeconds, GetSequenceDurationSeconds());
-            TriggeredNotifyEventIdsThisPlayback.Empty();
+            // TriggeredNotifyEventIdsThisPlayback.Empty(); // 루핑 시 트리거된 이벤트 초기화 (필요시)
         }
         else
         {
             CurrentTimeSeconds = GetSequenceDurationSeconds();
-            IsPlaying = false;
+            bIsPlaying = false;
         }
     }
     else if (CurrentTimeSeconds < 0.0f)
     {
-        if (IsLooping)
+        if (bIsLooping)
         {
             CurrentTimeSeconds = GetSequenceDurationSeconds() - fmodf(-CurrentTimeSeconds, GetSequenceDurationSeconds());
-            TriggeredNotifyEventIdsThisPlayback.Empty();
+            // TriggeredNotifyEventIdsThisPlayback.Empty(); // 루핑 시 트리거된 이벤트 초기화 (필요시)
         }
         else
         {
             CurrentTimeSeconds = 0.0f;
-            IsPlaying = false;
+            bIsPlaying = false;
         }
     }
 }
 
-// 줌 레벨 변경 시 현재 보이는 중앙 프레임을 유지하도록 FirstVisibleFrame 조정
-void SAnimationTimelinePanel::AdjustFirstFrameToKeepCenter()
+void SAnimationTimelinePanel::Render() // UEditorPanel 오버라이드
 {
-    if (!TargetSequence || FramePixelWidth <= 0.0f) return;
-
-    // 현재 보이는 화면의 중앙에 어떤 프레임이 있는지 계산
-    // (RenderTimelineEditor에서 계산된 timelineWidgetRect.GetWidth() 사용 필요)
-    float viewWidth = ImGui::GetContentRegionAvail().x; // 또는 마지막으로 그린 시퀀서 폭
-    if (viewWidth < 100) viewWidth = 800; // 임시
-
-    float viewCenterX = viewWidth * 0.5f;
-    float centerFrameCurrentlyVisible = (float)SequencerFirstVisibleFrame + (viewCenterX / FramePixelWidth_BeforeChange);
-
-    // 새로운 FramePixelWidth로 새로운 FirstVisibleFrame 계산
-    SequencerFirstVisibleFrame = static_cast<int>(roundf(centerFrameCurrentlyVisible - (viewCenterX / FramePixelWidth)));
-
-    ConvertFrameToTimeAndSet(ConvertTimeToFrame());
-    // FitTimelineToView 호출 후에는 FramePixelWidth_BeforeChange도 현재 값으로 동기화하는 것이 좋을 수 있습니다.
-    FramePixelWidth_BeforeChange = FramePixelWidth;
-    ClampFirstVisibleFrame(); // SequencerFirstVisibleFrame이 0으로 설정되었으므로 호출
-}
-void SAnimationTimelinePanel::ClampFirstVisibleFrame()
-{
-    if (!TargetSequence) return;
-    int totalFrames = GetSequenceTotalFrames();
-    if (totalFrames <= 0)
-    {
-        SequencerFirstVisibleFrame = 0;
-        return;
-    }
-
-    float viewWidth = ImGui::GetContentRegionAvail().x; // 또는 마지막으로 그린 시퀀서 폭
-    if (viewWidth < 100) viewWidth = 800; // 임시
-
-    int visibleFramesOnScreen = static_cast<int>(floorf(viewWidth / FramePixelWidth));
-    if (visibleFramesOnScreen < 1) visibleFramesOnScreen = 1;
-
-    if (SequencerFirstVisibleFrame + visibleFramesOnScreen > totalFrames)
-    {
-        SequencerFirstVisibleFrame = totalFrames - visibleFramesOnScreen;
-    }
-    if (SequencerFirstVisibleFrame < 0)
-    {
-        SequencerFirstVisibleFrame = 0;
-    }
-    if (totalFrames <= visibleFramesOnScreen) // 전체가 다 보이면 항상 0부터 시작
-    {
-        SequencerFirstVisibleFrame = 0;
-    }
+    UpdatePlayback(ImGui::GetIO().DeltaTime); // ImGui 델타 타임 사용
+    RenderTimelineEditor();
 }
 
-// (선택 사항) 특정 프레임이 뷰의 중앙에 오도록 SequencerFirstVisibleFrame 조정
-void SAnimationTimelinePanel::CenterViewOnFrame(int targetFrame)
+void SAnimationTimelinePanel::OnResize(HWND hWnd) // HWND 의존성은 실제 환경에 맞게 수정
 {
-    if (!TargetSequence || FramePixelWidth <= 0.0f) return;
-
-    float viewWidth = ImGui::GetContentRegionAvail().x; // 또는 마지막으로 그린 시퀀서 폭
-    if (viewWidth < 100) viewWidth = 800; // 임시
-
-    float viewCenterX = viewWidth * 0.5f;
-    SequencerFirstVisibleFrame = static_cast<int>(roundf((float)targetFrame - (viewCenterX / FramePixelWidth)));
-    ClampFirstVisibleFrame();
-}
-
-
-void SAnimationTimelinePanel::RenderPlaybackControls()
-{
-    if (!TargetSequence) return;
-
-    // BeginChild의 높이를 충분히 확보하거나, 요소들이 넘치지 않도록 크기 조절
-    // 예: ImGui::GetFrameHeightWithSpacing() * 2.0f (한 줄 기준) 또는 * 3.0f (두 줄 기준)
-    ImGui::BeginChild("TimelineTopControlsArea", ImVec2(0, ImGui::GetFrameHeightWithSpacing() * 3.0f), false, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
-
-    // --- 첫 번째 줄: 재생 컨트롤 ---
-    // 각 버튼에 고유 ID를 명시적으로 부여 (##ID 사용)
-    if (IsPlaying)
-    {
-        if (ImGui::Button("Pause##PlaybackBtn")) { IsPlaying = false; }
-    }
-    else
-    {
-        if (ImGui::Button("Play##PlaybackBtn")) // 버튼 ID 확인
-        {
-            IsPlaying = true;
-            if (CurrentTimeSeconds >= GetSequenceDurationSeconds() - FLT_EPSILON && GetSequenceDurationSeconds() > 0.f)
-            {
-                CurrentTimeSeconds = 0.0f;
-                TriggeredNotifyEventIdsThisPlayback.Empty();
-            }
-            else if (CurrentTimeSeconds < FLT_EPSILON)
-            {
-                TriggeredNotifyEventIdsThisPlayback.Empty();
-            }
-        }
-    }
-    ImGui::SameLine(); // 같은 줄에 다음 요소 배치
-    if (ImGui::Button("Stop##PlaybackBtn"))
-    {
-        IsPlaying = false;
-        CurrentTimeSeconds = 0.0f;
-        TriggeredNotifyEventIdsThisPlayback.Empty();
-    }
-    ImGui::SameLine();
-    ImGui::Checkbox("Loop##Playback", &IsLooping);
-    ImGui::SameLine();
-
-    ImGui::PushItemWidth(80); // 고정 너비
-    ImGui::DragFloat("Speed##Playback", &PlaybackSpeed, 0.01f, 0.01f, 10.0f, "%.2fx");
-    ImGui::PopItemWidth();
-    ImGui::SameLine();
-
-    // Time 텍스트가 다른 요소에 밀리지 않도록 충분한 공간 확보
-    // 또는 ImGui::SetNextItemWidth(-100) 등으로 남은 공간의 일부를 사용하게 할 수도 있음
-    ImGui::Text("Time: %.2f / %.2f s", CurrentTimeSeconds, GetSequenceDurationSeconds());
-
-    // --- 두 번째 줄: 뷰 컨트롤 및 프레임 슬라이더 ---
-    // 명시적으로 줄바꿈을 원하면 ImGui::NewLine() 또는 ImGui::Separator() 사용
-    // 여기서는 요소들이 자동으로 다음 줄로 넘어가도록 배치
-    // ImGui::Separator(); // 구분선 추가
-
-  
-    ImGui::SameLine();
-
-    ImGui::PushItemWidth(150); // 줌 슬라이더 너비
-    float oldFramePixelWidth = FramePixelWidth;
-    if (ImGui::SliderFloat("Zoom##ViewCtrl", &FramePixelWidth, 0.1f, 200.0f, "%.1f px/fr", ImGuiSliderFlags_Logarithmic))
-    {
-        if (fabs(FramePixelWidth - oldFramePixelWidth) > FLT_EPSILON)
-        {
-            FramePixelWidth_BeforeChange = oldFramePixelWidth;
-            AdjustFirstFrameToKeepCenter();
-        }
-    }
-    ImGui::PopItemWidth();
-    ImGui::SameLine();
-
-    int currentFrameDisplay = ConvertTimeToFrame();
-    int totalFramesDisplay = GetSequenceTotalFrames();
-    // 프레임 슬라이더 너비 조절
-    // float frameSliderWidth = ImGui::GetContentRegionAvail().x; // 남은 공간 모두 사용
-    // if (frameSliderWidth < 50.0f) frameSliderWidth = 50.0f; // 최소 너비 보장
-    ImGui::PushItemWidth(150); // 또는 고정 너비
-    if (totalFramesDisplay > 0)
-    {
-        if (ImGui::SliderInt("Frame##Scroll", &currentFrameDisplay, 0, totalFramesDisplay - 1 < 0 ? 0 : totalFramesDisplay - 1))
-        {
-            ConvertFrameToTimeAndSet(currentFrameDisplay);
-            if (IsPlaying) IsPlaying = false;
-            TriggeredNotifyEventIdsThisPlayback.Empty();
-        }
-    }
-    else
-    {
-        ImGui::TextUnformatted("(No frames)");
-    }
-    ImGui::PopItemWidth();
-
-    ImGui::EndChild(); // TimelineTopControlsArea
+    // 이 부분은 실제 윈도우 시스템과 통합 방식에 따라 달라집니다.
+    // ImGui 자체는 창 크기를 내부적으로 관리하므로,
+    // 패널 크기를 ImGui 레이아웃 시스템에 맡기는 것이 일반적입니다.
+    // RECT ClientRect;
+    // if (GetClientRect(hWnd, &ClientRect))
+    // {
+    //     PanelWidth = static_cast<float>(ClientRect.right - ClientRect.left);
+    //     PanelHeight = static_cast<float>(ClientRect.bottom - ClientRect.top);
+    // }
 }
 
 void SAnimationTimelinePanel::RenderTimelineEditor()
 {
-    if (!TargetSequence)
+    if (TargetSequence == nullptr)
     {
-        ImGui::Text("No MockAnimSequence set. Please call SetTargetSequence().");
+        ImGui::Text("No TargetSequence set.");
         return;
     }
 
+    // 전체 패널을 위한 ImGui 창 (필요에 따라 크기 및 플래그 조절)
+    // 이 예제에서는 Render() 함수가 이미 ImGui::Begin/End를 호출한다고 가정하지 않음.
+    // 만약 UEditorPanel::Render() 내에서 이미 Begin/End를 하고 있다면,
+    // 이 Begin/End는 중첩되거나 필요 없을 수 있습니다.
 
+    // 여기서는 데모를 위해 간단히 현재 창에 그린다고 가정.
+    // 실제로는 ImGui::Begin("Animation Timeline", nullptr, ImGuiWindowFlags_...); 등으로 감싸야 함.
 
-
-    const ImGuiViewport* mainViewport = ImGui::GetMainViewport();
-    if (!mainViewport) // 뷰포트 정보가 없으면 (매우 예외적인 상황) 아무것도 하지 않음
-    {
-        return;
-    }
-
-    const float timelinePanelHeight = 300.0f;
-
-    ImVec2 windowPos = ImVec2(mainViewport->WorkPos.x, mainViewport->WorkPos.y + mainViewport->WorkSize.y - timelinePanelHeight);
-    ImVec2 windowSize = ImVec2(mainViewport->WorkSize.x, timelinePanelHeight);
-    ImGui::SetNextWindowPos(windowPos);
-    ImGui::SetNextWindowSize(windowSize);
-
-    ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoTitleBar |
-        ImGuiWindowFlags_NoResize |
-        ImGuiWindowFlags_NoMove |
-        ImGuiWindowFlags_NoScrollbar |
-        ImGuiWindowFlags_NoCollapse |
-        ImGuiWindowFlags_NoSavedSettings;
-
-    if (mainViewport->WorkSize.y <= timelinePanelHeight)
-    {
-        // 뷰포트 세로 크기가 타임라인 패널 높이보다 작거나 같으면,
-        // 타임라인 패널을 그리지 않거나 매우 작게 그리는 등의 예외 처리 가능
-        // 여기서는 그냥 진행하지만, 실제로는 UI가 이상하게 보일 수 있음
-    }
-
-    if (ImGui::Begin("AnimationTimelineHost", nullptr, windowFlags))
-    {
-
-        // 상단 컨트롤들을 그리기 위한 자식 창
-        ImGui::BeginChild("TimelineTopControlsArea", ImVec2(0, ImGui::GetFrameHeightWithSpacing() * 2.5f),
-            false,
-            ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
-
-
-        float currentMainAreaWidth = ImGui::GetContentRegionAvail().x;
-        if (currentMainAreaWidth >= 50.0f) // 매우 작은 값 방지 (최소 50px 이라고 가정)
-        {
-            LastSequencerAreaWidth = currentMainAreaWidth;
-        }
-
-
-        RenderPlaybackControls(); // 재생 컨트롤 그리기
-
-        ImGui::EndChild();        // TimelineTopControlsArea
-
-        ImGui::BeginChild("TimelineMainArea");
-        RenderSequencerWidget();
-        RenderNotifyEditor();
-        ImGui::EndChild();
-        ImGui::End();
-    }
-}
-void SAnimationTimelinePanel::RenderSequencerWidget()
-{
-    if (!TargetSequence) return;
-
-    // im-neo-sequencer 프레임 타입은 uint32_t (FrameIndexType)
-    ImGui::FrameIndexType currentFrame = static_cast<ImGui::FrameIndexType>(ConvertTimeToFrame());
-    ImGui::FrameIndexType startFrame = 0; // GetFrameMin() 대신
-    ImGui::FrameIndexType endFrame = static_cast<ImGui::FrameIndexType>(GetSequenceTotalFrames()); // GetFrameMax() 대신 (총 프레임 수)
-
-    // endFrame이 0이면 시퀀서가 제대로 동작하지 않을 수 있으므로 최소 길이 보장
-    if (endFrame <= startFrame) {
-        endFrame = startFrame + 1; // 또는 적절한 최소 길이
-    }
-
-    // 시퀀서 플래그 설정
-    ImGuiNeoSequencerFlags sequencerFlags = ImGuiNeoSequencerFlags_EnableSelection |
-        ImGuiNeoSequencerFlags_Selection_EnableDragging |
-        ImGuiNeoSequencerFlags_Selection_EnableDeletion;
-    if (/* 길이 변경 허용 조건 */ true) { // 필요에 따라 조건 추가
-        sequencerFlags |= ImGuiNeoSequencerFlags_AllowLengthChanging;
-    }
-    // if (/* 줌 숨기기 조건 */ false) {
-    //     sequencerFlags |= ImGuiNeoSequencerFlags_HideZoom;
-    // }
-
-
-    // BeginNeoSequencer 호출
-    // 세 번째 파라미터 startFrame, 네 번째 파라미터 endFrame은 포인터로 전달되어 내부에서 변경될 수 있음 (AllowLengthChanging 플래그 시)
-    if (ImGui::BeginNeoSequencer("AnimationNotifySequencer", &currentFrame, &startFrame, &endFrame, ImVec2(0, 0) /* 자동 크기 */, sequencerFlags))
-    {
-        // 현재 프레임이 UI를 통해 변경되었다면 게임/애니메이션 상태에 반영
-        if (currentFrame != static_cast<ImGui::FrameIndexType>(ConvertTimeToFrame()))
-        {
-            ConvertFrameToTimeAndSet(static_cast<int>(currentFrame));
-            if (IsPlaying) IsPlaying = false;
-            TriggeredNotifyEventIdsThisPlayback.Empty();
-        }
-
-        // (선택적) 시퀀스 길이 변경 시 처리
-        if (sequencerFlags & ImGuiNeoSequencerFlags_AllowLengthChanging)
-        {
-            if (startFrame != 0 || endFrame != static_cast<ImGui::FrameIndexType>(GetSequenceTotalFrames()))
-            {
-                // TODO: TargetSequence의 전체 길이를 startFrame, endFrame에 맞게 업데이트하는 로직
-                // 예: TargetSequence->SequenceLength = static_cast<float>(endFrame) / GetSequenceFrameRate();
-                // GetFrameMin()이 항상 0이 아니라면 startFrame도 고려해야 함.
-            }
-        }
-
-        // DisplayableTracks를 순회하며 타임라인 그리기
-        for (int i = 0; i < DisplayableTracks.Num(); ++i)
-        {
-            FEditorTimelineTrack& uiTrack = DisplayableTracks[i]; // bIsExpanded 상태 변경을 위해 non-const 참조
-
-            if (uiTrack.TrackType == EEditorTimelineTrackType::AnimNotify_Root)
-            {
-                // 루트 트랙 (그룹으로 표시)
-                // BeginNeoTimelineEx의 두 번째 파라미터는 bool* open 상태입니다.
-                if (ImGui::BeginNeoTimelineEx(uiTrack.DisplayName.c_str(), &uiTrack.bIsExpanded, ImGuiNeoTimelineFlags_Group))
-                {
-                    // 그룹이 열렸을 때만 내부(하위) 타임라인들을 그립니다.
-                    // DisplayableTracks는 이미 순서대로 정렬되어 있다고 가정 (루트 다음 자식들)
-                    // 또는 여기서 ParentTrackId를 확인하여 해당 루트의 자식만 그리는 로직 추가
-                    ImGui::EndNeoTimeLine(); // 그룹 타임라인 닫기
-                }
-            }
-            else if (uiTrack.TrackType == EEditorTimelineTrackType::AnimNotify_UserTrack)
-            {
-                // 이 사용자 트랙이 표시되어야 하는지 확인 (부모 루트가 열려있는지)
-                bool bShouldDisplay = false;
-                for (const auto& parentTrack : DisplayableTracks) {
-                    if (parentTrack.TrackId == uiTrack.ParentTrackId && parentTrack.bIsExpanded) {
-                        bShouldDisplay = true;
-                        break;
-                    }
-                }
-
-                if (bShouldDisplay)
-                {
-                    // 사용자 하위 트랙
-                    // BeginNeoTimelineEx의 두 번째 파라미터는 일반 타임라인이므로 nullptr (또는 확장 기능이 없다면)
-                    if (ImGui::BeginNeoTimelineEx(uiTrack.DisplayName.c_str(), nullptr, ImGuiNeoTimelineFlags_None))
-                    {
-                        // 이 트랙에 속한 노티파이들을 키프레임으로 그립니다.
-                        for (int notifyIdx = 0; notifyIdx < TargetSequence->Notifies.Num(); ++notifyIdx)
-                        {
-                            FMockAnimNotifyEvent& notifyEvent = TargetSequence->Notifies[notifyIdx]; // 값 변경 위해 non-const
-                            if (notifyEvent.UserInterfaceTrackId == uiTrack.TrackId)
-                            {
-                                // FMockAnimNotifyEvent의 TriggerTime을 프레임으로 변환
-                                int32_t keyframeTime = static_cast<int32_t>(notifyEvent.TriggerTime * GetSequenceFrameRate());
-
-                                // NeoKeyframe은 int32_t*를 받으므로, 임시 변수 또는 직접 수정 가능한 포인터 필요
-                                // 중요: 만약 notifyEvent.TriggerTime (또는 keyframeTime)이 NeoKeyframe 내부에서
-                                // 드래그 등으로 변경될 수 있다면, 그 변경 사항을 다시 원래 데이터에 반영해야 합니다.
-                                // NeoKeyframe이 값 자체를 변경하는지, 아니면 콜백을 제공하는지 API 확인 필요.
-                                // 현재 im-neo-sequencer API를 보면 NeoKeyframe(int32_t* value)는 포인터를 받으므로,
-                                // value가 가리키는 메모리의 값이 직접 변경될 수 있습니다.
-
-                                ImGui::PushID(notifyEvent.EventId); // 각 키프레임에 고유 ID 부여
-                                ImGui::NeoKeyframe(&keyframeTime); // 주소 전달
-
-                                // 키프레임 값 변경 감지 및 원래 데이터 업데이트
-                                float newTimeBasedOnFrame = static_cast<float>(keyframeTime) / GetSequenceFrameRate();
-                                if (fabs(newTimeBasedOnFrame - notifyEvent.TriggerTime) > FLT_EPSILON) {
-                                    notifyEvent.TriggerTime = std::max(0.0f, std::min(newTimeBasedOnFrame, GetSequenceDurationSeconds()));
-                                    // TODO: 변경 사항에 대한 추가 처리 (예: 정렬, Undo/Redo)
-                                    bIsDraggingSelectedNotify = true; // 드래그 중임을 표시 (정렬 등에 사용)
-                                }
-
-
-                                // 키프레임 선택 및 우클릭 등 상호작용 처리
-                                if (ImGui::IsNeoKeyframeSelected()) {
-                                    SelectedNotifyEventId = notifyEvent.EventId;
-                                    // 선택 시 추가 작업
-                                }
-                                if (ImGui::IsNeoKeyframeHovered()) {
-                                    // 호버 시 툴팁 등 표시
-                                    ImGui::SetTooltip("Notify: %s\nTime: %.2fs (Frame: %d)",
-                                        notifyEvent.NotifyName.ToString().ToAnsiString().c_str(),
-                                        notifyEvent.TriggerTime,
-                                        static_cast<int>(notifyEvent.TriggerTime * GetSequenceFrameRate()));
-                                }
-                                if (ImGui::IsNeoKeyframeRightClicked()) {
-                                    // 우클릭 메뉴 띄우기 등
-                                    SelectedNotifyEventId = notifyEvent.EventId; // 컨텍스트 메뉴를 위해 선택
-                                    // ImGui::OpenPopup(...)
-                                }
-                                ImGui::PopID();
-                            }
-                        }
-
-                        // 선택된 타임라인에 대한 처리 (예: 컨텍스트 메뉴 - 트랙 삭제 등)
-                        if (ImGui::IsNeoTimelineSelected()) {
-                            // 이 트랙이 선택됨
-                            SequencerSelectedEntry = uiTrack.TrackId; // 예시: 선택된 트랙 ID 저장
-                            if (ImGui::IsMouseReleased(ImGuiMouseButton_Right) && ImGui::IsWindowHovered(ImGuiHoveredFlags_RectOnly)) {
-                                // ImGui::OpenPopupOnItemClick("TrackContextPopup", ImGuiPopupFlags_MouseButtonRight);
-                            }
-                        }
-
-
-                        ImGui::EndNeoTimeLine(); // 하위 타임라인 닫기
-                    }
-                }
-            }
-        }
-
-        // 시퀀서 전체 영역에서의 상호작용 처리 (예: 빈 공간 클릭 시 선택 해제)
-        if (ImGui::IsWindowHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left) && !ImGui::IsAnyItemActive() && !ImGui::IsAnyItemHovered()) {
-            ImGui::NeoClearSelection(); // im-neo-sequencer의 선택 해제 API
-            SelectedNotifyEventId = -1;
-            SequencerSelectedEntry = -1;
-        }
-
-        // 드래그 완료 후 정렬
-        if (bIsDraggingSelectedNotify && ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
-            TargetSequence->Notifies.Sort([](const FMockAnimNotifyEvent& A, const FMockAnimNotifyEvent& B) {
-                return A.TriggerTime < B.TriggerTime;
-                });
-            bIsDraggingSelectedNotify = false;
-        }
-
-
-        ImGui::EndNeoSequencer();
-    }
-}
-void SAnimationTimelinePanel::RenderNotifyEditor()
-{
-    if (!TargetSequence)
-    {
-        return;
-    }
-
+    RenderPlaybackControls();
     ImGui::Separator();
-    int rootTrackId = -1;
-    for (const auto& track : DisplayableTracks) 
+    RenderTrackManagementUI(); // 트랙 관리 UI 추가
+    ImGui::Separator();
+    RenderSequencerWidget();   // 시퀀서 위젯
+}
+
+void SAnimationTimelinePanel::RenderPlaybackControls()
+{
+    if (TargetSequence == nullptr)
     {
-        if (track.TrackType == EEditorTimelineTrackType::AnimNotify_Root) 
+        return;
+    }
+
+    if (ImGui::Button(bIsPlaying ? "Pause" : "Play"))
+    {
+        bIsPlaying = !bIsPlaying;
+        if (bIsPlaying && CurrentTimeSeconds >= GetSequenceDurationSeconds() - FLT_EPSILON && GetSequenceDurationSeconds() > 0.f)
+        {
+            CurrentTimeSeconds = 0.0f;
+        }
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Stop"))
+    {
+        bIsPlaying = false;
+        CurrentTimeSeconds = 0.0f;
+    }
+    ImGui::SameLine();
+    ImGui::Checkbox("Loop", &bIsLooping);
+    ImGui::SameLine();
+    ImGui::PushItemWidth(80);
+    ImGui::DragFloat("Speed", &PlaybackSpeed, 0.01f, 0.01f, 10.0f, "%.2fx");
+    ImGui::PopItemWidth();
+    ImGui::SameLine();
+    ImGui::Text("Time: %.2f / %.2f s (Frame: %d)", CurrentTimeSeconds, GetSequenceDurationSeconds(), ConvertTimeToFrame());
+
+    // im-neo-sequencer는 자체 줌/패닝 기능이 있으므로, 이전 줌/프레임 슬라이더는 제거하거나
+    // im-neo-sequencer의 내부 상태를 제어하는 방식으로 변경해야 합니다.
+    // 여기서는 일단 제거하고, im-neo-sequencer의 기본 컨트롤에 의존합니다.
+}
+
+
+void SAnimationTimelinePanel::RenderTrackManagementUI()
+{
+    if (TargetSequence == nullptr)
+    {
+        return;
+    }
+
+    int rootTrackId = -1;
+    for (const auto& track : DisplayableTracks)
+    {
+        if (track.TrackType == EEditorTimelineTrackType::AnimNotify_Root)
         {
             rootTrackId = track.TrackId;
             break;
         }
     }
 
-    if (rootTrackId != -1) {
-        if (ImGui::Button("Add Notify Track")) 
+    if (rootTrackId != -1)
+    {
+        static char newTrackNameInput[128] = "New User Track";
+        ImGui::InputText("New Track Name", newTrackNameInput, IM_ARRAYSIZE(newTrackNameInput));
+        ImGui::SameLine();
+        if (ImGui::Button("Add User Track"))
         {
-            // 이름 입력 UI (예: 팝업)
-            static char newTrackNameInput[128] = "New User Track";
-            ImGui::InputText("Track Name", newTrackNameInput, IM_ARRAYSIZE(newTrackNameInput));
-            if (ImGui::Button("Create")) 
+            if (strlen(newTrackNameInput) > 0)
             {
-                // 실제로는 모달 팝업 등을 사용하는 것이 좋음
                 AddUserNotifyTrack(rootTrackId, newTrackNameInput);
+                newTrackNameInput[0] = '\0'; // 입력 필드 초기화
             }
         }
     }
 
+    ImGui::SameLine();
+    if (ImGui::Button("Add Notify At Current Time"))
+    {
+        int targetTrackIdForNewNotify = -1; // 기본값: 특정 트랙에 할당 안 함 (또는 기본 트랙)
 
-    // 선택된 노티파이 편집 (이전과 유사하게 유지)
+        // TODO: 현재 선택된 사용자 트랙이 있다면 그 ID를 사용하도록 로직 추가
+        
+        // 예: 
+        if (LastSelectedUserTrackId != -1)
+        {
+            targetTrackIdForNewNotify = LastSelectedUserTrackId;
+        }
+
+        TargetSequence->AddNotify(CurrentTimeSeconds, FName("NewMockEvent"), targetTrackIdForNewNotify);
+        TargetSequence->SortNotifies(); // 추가 후 정렬
+    }
+
+
     if (SelectedNotifyEventId != -1)
     {
         FMockAnimNotifyEvent* currentSelectedEvent = nullptr;
-        for (auto& notify : TargetSequence->Notifies) {
-            if (notify.EventId == SelectedNotifyEventId) {
+        for (auto& notify : TargetSequence->Notifies)
+        {
+            if (notify.EventId == SelectedNotifyEventId)
+            {
                 currentSelectedEvent = &notify;
                 break;
             }
         }
 
-        if (currentSelectedEvent) {
-            ImGui::Text("Editing Notify: %s (ID: %d)", currentSelectedEvent->NotifyName.ToString().ToAnsiString().c_str(), currentSelectedEvent->EventId);
-            // 여기에 트랙 할당 UI 추가
+        if (currentSelectedEvent != nullptr)
+        {
+            ImGui::Separator();
+            ImGui::Text("Editing Notify: %s (ID: %d, Time: %.2f)",
+                currentSelectedEvent->NotifyName.ToString().ToAnsiString().c_str(),
+                currentSelectedEvent->EventId,
+                currentSelectedEvent->TriggerTime);
+
+            // 트랙 할당 UI
             ImGui::Text("Assign to Track:");
             std::string currentAssignedTrackName = "None (Default)";
             int currentAssignedUiTrackId = currentSelectedEvent->UserInterfaceTrackId;
 
-            for (const auto& track : DisplayableTracks) 
+            for (const auto& track : DisplayableTracks)
             {
-                if (track.TrackType == EEditorTimelineTrackType::AnimNotify_UserTrack && track.TrackId == currentAssignedUiTrackId) 
+                if (track.TrackType == EEditorTimelineTrackType::AnimNotify_UserTrack && track.TrackId == currentAssignedUiTrackId)
                 {
                     currentAssignedTrackName = track.DisplayName;
                     break;
                 }
             }
 
-            if (ImGui::BeginCombo("##TrackAssignCombo", currentAssignedTrackName.c_str())) 
+            ImGui::PushItemWidth(200);
+            if (ImGui::BeginCombo("##TrackAssignCombo", currentAssignedTrackName.c_str()))
             {
-                // 기본 할당 (특정 트랙에 속하지 않음)
-                if (ImGui::Selectable("None (Default)", currentAssignedUiTrackId <= 0)) 
-                { // ID가 0 또는 음수면 특정 트랙 아님
-                    currentSelectedEvent->UserInterfaceTrackId = 0; // 또는 -1
+                if (ImGui::Selectable("None (Default)", currentAssignedUiTrackId <= 0))
+                {
+                    currentSelectedEvent->UserInterfaceTrackId = -1; // -1로 변경
                 }
-                for (const auto& track : DisplayableTracks) {
-                    if (track.TrackType == EEditorTimelineTrackType::AnimNotify_UserTrack) {
-                        if (ImGui::Selectable(track.DisplayName.c_str(), currentAssignedUiTrackId == track.TrackId)) {
+                for (const auto& track : DisplayableTracks)
+                {
+                    if (track.TrackType == EEditorTimelineTrackType::AnimNotify_UserTrack)
+                    {
+                        if (ImGui::Selectable(track.DisplayName.c_str(), currentAssignedUiTrackId == track.TrackId))
+                        {
                             currentSelectedEvent->UserInterfaceTrackId = track.TrackId;
                         }
                     }
                 }
                 ImGui::EndCombo();
             }
+            ImGui::PopItemWidth();
         }
     }
 }
 
-void SAnimationTimelinePanel::AddUserNotifyTrack(int InParentRootTrackId, const std::string& NewTrackName)
-{
-    if (!TargetSequence) return;
 
-    // 부모 루트 트랙 찾기 및 인덱스 확인
+void SAnimationTimelinePanel::AddUserNotifyTrack(int ParentRootTrackId, const std::string& NewTrackName)
+{
+    if (TargetSequence == nullptr)
+    {
+        return;
+    }
+
     FEditorTimelineTrack* parentRootTrack = nullptr;
     int parentRootTrackIndex = -1;
     for (int i = 0; i < DisplayableTracks.Num(); ++i)
     {
-        if (DisplayableTracks[i].TrackId == InParentRootTrackId &&
+        if (DisplayableTracks[i].TrackId == ParentRootTrackId &&
             DisplayableTracks[i].TrackType == EEditorTimelineTrackType::AnimNotify_Root)
         {
             parentRootTrack = &DisplayableTracks[i];
@@ -760,29 +371,23 @@ void SAnimationTimelinePanel::AddUserNotifyTrack(int InParentRootTrackId, const 
         }
     }
 
-    if (parentRootTrack)
+    if (parentRootTrack != nullptr)
     {
         int newTrackId = FEditorTimelineTrack::NextTrackIdCounter++;
-
-        // 새 트랙을 부모 루트 트랙의 자식들 중 가장 마지막에 삽입
-        // 또는 특정 정렬 기준이 있다면 그에 맞게 삽입 위치를 찾습니다.
-        int insertAtIndex = parentRootTrackIndex + 1; // 기본적으로 부모 바로 다음
+        int insertAtIndex = parentRootTrackIndex + 1;
         for (int i = parentRootTrackIndex + 1; i < DisplayableTracks.Num(); ++i)
         {
-            // 부모가 같은 다른 자식 트랙들을 지나, 다른 부모의 트랙이 시작되거나 배열 끝에 도달하면 그 위치
-            if (DisplayableTracks[i].ParentTrackId == InParentRootTrackId)
+            if (DisplayableTracks[i].ParentTrackId == ParentRootTrackId)
             {
                 insertAtIndex = i + 1;
             }
-            else // 다른 부모를 만나거나, 루트가 아닌 다른 타입의 트랙을 만나면 그 앞에 삽입
+            else
             {
                 break;
             }
         }
 
-        // IndentLevel은 부모보다 하나 더 깊게
-        int indentLevel = parentRootTrack->IndentLevel + 1;
-        FEditorTimelineTrack newUserTrack(EEditorTimelineTrackType::AnimNotify_UserTrack, NewTrackName, newTrackId, InParentRootTrackId, indentLevel);
+        FEditorTimelineTrack newUserTrack(EEditorTimelineTrackType::AnimNotify_UserTrack, NewTrackName, newTrackId, ParentRootTrackId);
 
         if (insertAtIndex >= DisplayableTracks.Num())
         {
@@ -790,69 +395,185 @@ void SAnimationTimelinePanel::AddUserNotifyTrack(int InParentRootTrackId, const 
         }
         else
         {
-            DisplayableTracks[insertAtIndex] = newUserTrack;
+            DisplayableTracks.Insert(newUserTrack, insertAtIndex);
         }
 
-         parentRootTrack->bIsExpanded = true;
-
-        // (선택사항) 새로 추가된 트랙을 선택 상태로 만들 수 있습니다.
-        // SetSelectedTimeline(NewTrackName.c_str()); // im-neo-sequencer API가 있다면
-        // 또는 SequencerSelectedEntry = newTrackId; (자체 관리 방식)
-    }
-    else
-    {
-        // 부모 루트 트랙을 찾지 못한 경우에 대한 처리 (예: 로그 출력)
-        // UE_LOG(LogTemp, Warning, TEXT("AddUserNotifyTrack: Parent root track with ID %d not found."), InParentRootTrackId);
+        parentRootTrack->bIsExpanded = true;
     }
 }
 
-// (선택적) 트랙 제거 함수 구현 예시
-void SAnimationTimelinePanel::RemoveUserNotifyTrack(int TrackIdToRemove)
-{
-    if (!TargetSequence) return;
 
-    int trackIndexToRemove = -1;
+void SAnimationTimelinePanel::RenderTracksRecursive(int ParentId)
+{
     for (int i = 0; i < DisplayableTracks.Num(); ++i)
     {
-        if (DisplayableTracks[i].TrackId == TrackIdToRemove &&
-            DisplayableTracks[i].TrackType == EEditorTimelineTrackType::AnimNotify_UserTrack)
-        {
-            trackIndexToRemove = i;
-            break;
-        }
-    }
+        FEditorTimelineTrack& uiTrack = DisplayableTracks[i]; // bIsExpanded 수정을 위해 non-const
 
-    if (trackIndexToRemove != -1)
-    {
-        DisplayableTracks.RemoveAt(trackIndexToRemove);
-
-        // 이 트랙에 할당되었던 노티파이들의 UserInterfaceTrackId를 기본값(예: 0 또는 -1)으로 변경
-        for (auto& notifyEvent : TargetSequence->Notifies)
+        if (uiTrack.ParentTrackId == ParentId)
         {
-            if (notifyEvent.UserInterfaceTrackId == TrackIdToRemove)
+            bool isGroup = (uiTrack.TrackType == EEditorTimelineTrackType::AnimNotify_Root);
+            ImGuiNeoTimelineFlags flags = isGroup ? ImGuiNeoTimelineFlags_Group : ImGuiNeoTimelineFlags_None;
+            bool* openStatePtr = isGroup ? &uiTrack.bIsExpanded : nullptr;
+
+            if (ImGui::BeginNeoTimelineEx(uiTrack.DisplayName.c_str(), openStatePtr, flags))
             {
-                notifyEvent.UserInterfaceTrackId = 0; // 또는 다른 기본 트랙 ID
+                if (isGroup) // 그룹이면 (그리고 열려있다면 BeginNeoTimelineEx가 true 반환)
+                {
+                    // 현재 uiTrack.bIsExpanded는 BeginNeoTimelineEx에 의해 UI 상태가 반영됨
+                    if (uiTrack.bIsExpanded)
+                    {
+                        RenderTracksRecursive(uiTrack.TrackId); // 자식들 렌더링
+                    }
+                }
+                else // 일반 사용자 트랙이면 키프레임 렌더링
+                {
+                    for (int notifyIdx = 0; notifyIdx < TargetSequence->Notifies.Num(); ++notifyIdx)
+                    {
+                        FMockAnimNotifyEvent& notifyEvent = TargetSequence->Notifies[notifyIdx];
+                        if (notifyEvent.UserInterfaceTrackId == uiTrack.TrackId)
+                        {
+                            // int32_t는 FrameIndexType의 기본 타입일 가능성이 높음
+                            int32_t keyframeTime = static_cast<int32_t>(notifyEvent.TriggerTime * GetSequenceFrameRate());
+
+                            ImGui::PushID(notifyEvent.EventId);
+                            ImGui::NeoKeyframe(&keyframeTime);
+
+                            float newTimeBasedOnFrame = static_cast<float>(keyframeTime) / GetSequenceFrameRate();
+                            if (fabs(newTimeBasedOnFrame - notifyEvent.TriggerTime) > 1e-5f) // 부동소수점 비교 수정
+                            {
+                                notifyEvent.TriggerTime = std::max(0.0f, std::min(newTimeBasedOnFrame, GetSequenceDurationSeconds()));
+                                bIsDraggingNotify = true; // 드래그 완료 후 정렬을 위해 플래그 설정
+                            }
+
+                            if (ImGui::IsNeoKeyframeSelected())
+                            {
+                                SelectedNotifyEventId = notifyEvent.EventId;
+                            }
+                            if (ImGui::IsNeoKeyframeHovered())
+                            {
+                                ImGui::SetTooltip("Notify: %s\nTime: %.2fs (Frame: %d)",
+                                    notifyEvent.NotifyName.ToString().ToAnsiString().c_str(),
+                                    notifyEvent.TriggerTime,
+                                    static_cast<int>(notifyEvent.TriggerTime * GetSequenceFrameRate()));
+                            }
+                            if (ImGui::IsNeoKeyframeRightClicked())
+                            {
+                                SelectedNotifyEventId = notifyEvent.EventId;
+                                // TODO: ImGui::OpenPopup("NotifyContextMenu");
+                            }
+                            ImGui::PopID();
+                        }
+                    }
+                    // 현재 타임라인(사용자 트랙)이 선택되었는지 확인
+                    if (ImGui::IsNeoTimelineSelected()) {
+                        // TODO: 선택된 트랙에 대한 처리 (예: 컨텍스트 메뉴)
+                        // SequencerSelectedEntry = uiTrack.TrackId; // 예시
+                    }
+                }
+                ImGui::EndNeoTimeLine(); // BeginNeoTimelineEx가 true를 반환했으므로 호출
             }
         }
-        // 선택 상태 등 관련 데이터 초기화
-        // if (SequencerSelectedEntry == TrackIdToRemove) SequencerSelectedEntry = -1;
     }
 }
 
-// (선택적) 노티파이 할당 함수 구현 예시
-void SAnimationTimelinePanel::AssignNotifyToTrack(int NotifyEventId, int TargetTrackId)
+
+void SAnimationTimelinePanel::RenderSequencerWidget()
 {
-    if (!TargetSequence)
+    if (TargetSequence == nullptr)
     {
         return;
     }
 
-    for (auto& notifyEvent : TargetSequence->Notifies)
+    ImGui::FrameIndexType currentFrame = static_cast<ImGui::FrameIndexType>(ConvertTimeToFrame());
+    ImGui::FrameIndexType startFrame = 0;
+    ImGui::FrameIndexType endFrame = static_cast<ImGui::FrameIndexType>(GetSequenceTotalFrames());
+
+    if (endFrame <= startFrame)
     {
-        if (notifyEvent.EventId == NotifyEventId)
+        endFrame = startFrame + 100; // 시퀀스가 비었을 때 기본 길이 (예: 100 프레임)
+        if (TargetSequence != nullptr && TargetSequence->FrameRate > 0)
         {
-            notifyEvent.UserInterfaceTrackId = TargetTrackId; // TargetTrackId가 0이면 특정 트랙 아님
-            break;
+            // TargetSequence->SequenceLength = static_cast<float>(endFrame) / TargetSequence->FrameRate; // 길이도 업데이트
         }
     }
+
+
+    ImGuiNeoSequencerFlags sequencerFlags = ImGuiNeoSequencerFlags_EnableSelection |
+        ImGuiNeoSequencerFlags_Selection_EnableDragging |
+        ImGuiNeoSequencerFlags_Selection_EnableDeletion |
+        ImGuiNeoSequencerFlags_AllowLengthChanging; // 길이 변경 허용
+
+    // ImVec2(0,0)은 사용 가능한 전체 공간을 사용하려고 시도합니다.
+    // 높이를 명시적으로 지정하려면 ImVec2(0, 원하는_높이)
+    if (ImGui::BeginNeoSequencer("MainSequencer", &currentFrame, &startFrame, &endFrame, ImVec2(0, 200.f), sequencerFlags))
+    {
+        if (currentFrame != static_cast<ImGui::FrameIndexType>(ConvertTimeToFrame()))
+        {
+            ConvertFrameToTimeAndSet(static_cast<int>(currentFrame));
+            if (bIsPlaying)
+            {
+                bIsPlaying = false;
+            }
+            // TriggeredNotifyEventIdsThisPlayback.Empty(); // 필요시
+        }
+
+        // 시퀀스 길이 변경 처리 (AllowLengthChanging 플래그 사용 시)
+        // uint32_t currentTotalFrames = static_cast<uint32_t>(GetSequenceTotalFrames());
+        // if (startFrame != 0 || endFrame != currentTotalFrames) // 시작 프레임은 0으로 고정 가정
+        if (endFrame != static_cast<ImGui::FrameIndexType>(GetSequenceTotalFrames()) && TargetSequence->FrameRate > 0.0f)
+        {
+            TargetSequence->SequenceLength = static_cast<float>(endFrame) / TargetSequence->FrameRate;
+        }
+
+
+        // 최상위 루트 트랙들 (ParentTrackId가 -1인 트랙들)부터 재귀적으로 렌더링
+        RenderTracksRecursive(-1);
+
+
+        // 삭제 로직 (Begin/End NeoSequencer 내부)
+        // Delete 키는 ImGui::IsKeyPressed를 사용 (포커스된 창에서만 감지)
+        // 또는 GetIO().KeysDown[]을 직접 확인 (전역적이지만, 다른 입력과 충돌 가능성)
+        if (ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows) && ImGui::IsKeyPressed(ImGuiKey_Delete, false))
+        {
+            if (ImGui::NeoCanDeleteSelection()) // 선택된 "키프레임"이 있는지 확인
+            {
+                if (SelectedNotifyEventId != -1) // 우리가 관리하는 선택된 "노티파이" ID
+                {
+                    TargetSequence->RemoveNotifyByEventId(SelectedNotifyEventId);
+                    SelectedNotifyEventId = -1;
+                    ImGui::NeoClearSelection(); // 시퀀서 라이브러리의 선택 상태도 클리어
+                }
+            }
+        }
+
+        // 빈 공간 클릭 시 선택 해제
+        if (ImGui::IsMouseClicked(ImGuiMouseButton_Left) && ImGui::IsWindowHovered(ImGuiHoveredFlags_ChildWindows) && !ImGui::IsAnyItemHovered() && !ImGui::IsItemActive())
+        {
+            if (ImGui::NeoHasSelection()) // 라이브러리에 선택된게 있을때만
+            {
+                ImGui::NeoClearSelection();
+            }
+            SelectedNotifyEventId = -1;
+        }
+
+        // 드래그 완료 후 노티파이 정렬
+        if (bIsDraggingNotify && ImGui::IsMouseReleased(ImGuiMouseButton_Left))
+        {
+            TargetSequence->SortNotifies();
+            bIsDraggingNotify = false;
+        }
+
+        ImGui::EndNeoSequencer();
+    }
 }
+
+// --- SAnimationTimelinePanel의 나머지 함수들 (AdjustFirstFrameToKeepCenter, ClampFirstVisibleFrame, CenterViewOnFrame 등) ---
+// --- 이 함수들은 im-neo-sequencer가 자체 줌/패닝을 처리하므로 필요 없거나, ---
+// --- im-neo-sequencer의 API를 통해 줌/오프셋을 제어하는 방식으로 변경되어야 합니다. ---
+// --- 지금은 일단 주석 처리하거나 삭제합니다. ---
+/*
+void SAnimationTimelinePanel::FitTimelineToView() { ... }
+void SAnimationTimelinePanel::AdjustFirstFrameToKeepCenter() { ... }
+void SAnimationTimelinePanel::ClampFirstVisibleFrame() { ... }
+void SAnimationTimelinePanel::CenterViewOnFrame(int targetFrame) { ... }
+*/

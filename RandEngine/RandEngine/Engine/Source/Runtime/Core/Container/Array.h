@@ -63,6 +63,9 @@ public:
     SizeType Add(T&& Item);
     SizeType AddUnique(const T& Item);
 
+    void Insert(const ElementType& Item, SizeType Index);
+    void Insert(ElementType&& Item, SizeType Index);
+
     template <typename... Args>
     SizeType Emplace(Args&&... Item);
 
@@ -248,6 +251,34 @@ typename TArray<T, Allocator>::SizeType TArray<T, Allocator>::AddUnique(const T&
         return Index;
     }
     return Add(Item);
+}
+
+template<typename T, typename Allocator>
+inline void TArray<T, Allocator>::Insert(const ElementType& Item, SizeType Index)
+{
+    if (Index >= 0 && Index <= ContainerPrivate.size())
+    {
+        ContainerPrivate.insert(ContainerPrivate.begin() + Index, Item);
+    }
+    else
+    {
+        // 유효하지 않은 인덱스에 대한 처리 (예: 어서트 또는 예외)
+        // 여기서는 일단 아무것도 하지 않음 (프로젝트 정책에 따라 결정)
+        assert(Index >= 0 && Index <= ContainerPrivate.size() && "TArray::Insert - Index out of bounds");
+    }
+}
+
+template<typename T, typename Allocator>
+inline void TArray<T, Allocator>::Insert(ElementType&& Item, SizeType Index)
+{
+    if (Index >= 0 && Index <= ContainerPrivate.size())
+    {
+        ContainerPrivate.insert(ContainerPrivate.begin() + Index, std::move(Item));
+    }
+    else
+    {
+        assert(Index >= 0 && Index <= ContainerPrivate.size() && "TArray::Insert - Index out of bounds");
+    }
 }
 
 template <typename T, typename Allocator>

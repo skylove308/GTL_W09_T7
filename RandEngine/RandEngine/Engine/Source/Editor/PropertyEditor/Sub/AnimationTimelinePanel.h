@@ -1,68 +1,63 @@
 #pragma once
 
-#include "ImGui/imgui_neo_sequencer.h"
+#include "ImGui/imgui_neo_sequencer.h" // im-neo-sequencer 헤더
 #include "Container/Array.h"
 #include "Container/Set.h"
 #include "UObject/NameTypes.h"
-#include "UnrealEd/EditorPanel.h"
+#include "UnrealEd/EditorPanel.h" // UEditorPanel 상속 가정
 
 #include "Imgui/imgui.h"
-#include "Imgui/imgui_internal.h"
+#include "Imgui/imgui_internal.h" // 필요한 경우 (하지만 직접 사용은 최소화)
 
-class FEditorTimelineTrack;
-class FAnimNotifyEvent;
-class UAnimSequence;
+// 전방 선언
+class UAnimSequence; // 실제 UAnimSequence를 사용한다면
 
-
-
-// --- 모의(Mock) 애니메이션 데이터 구조체 --- ----------------
-// 
-// ToDo: 실제 애니메이션 애니메이션 구조체로 변경해야함
-//
-// ---------------------------------------------------------
+// --- 모의(Mock) 애니메이션 데이터 구조체 ---
 struct FMockAnimNotifyEvent
 {
     int EventId;
     float TriggerTime = 0.0f;
     FName NotifyName;
-    FString NotifyDisplayName;
-    int UserInterfaceTrackId;
+    // FString NotifyDisplayName; // NotifyName.ToString()으로 동적 생성 가능
+    int UserInterfaceTrackId; // 이 노티파이가 속한 FEditorTimelineTrack의 TrackId
 
-    FMockAnimNotifyEvent(float InTime, FName InName, int InUITrackId)
+    FMockAnimNotifyEvent(float InTime, FName InName, int InUITrackId = -1) // 기본값 -1 (할당 안됨)
         : TriggerTime(InTime), NotifyName(InName), UserInterfaceTrackId(InUITrackId)
     {
         EventId = NextEventId++;
-        NotifyDisplayName = NotifyName.ToString().ToAnsiString(); // 기본 표시 이름
     }
- 
-    FMockAnimNotifyEvent(float InTime, FName InName) // 이 생성자는 특정 UI 트랙 ID가 없을 경우 사용
-        : TriggerTime(InTime), NotifyName(InName), UserInterfaceTrackId(-1) // -1은 특정 UI 트랙에 할당되지 않음을 의미 (예: 기본 Notifies 트랙)
-    {
-        EventId = NextEventId++;
-        NotifyDisplayName = NotifyName.ToString().ToAnsiString();
-    }
+
     static int NextEventId;
 };
-
 
 class MockAnimSequence
 {
 public:
     TArray<FMockAnimNotifyEvent> Notifies;
-    float SequenceLength = 10.0f; // 기본 길이 10초
-    float FrameRate = 30.0f;      // 기본 프레임률 30 FPS
+    float SequenceLength = 10.0f;
+    float FrameRate = 30.0f;
 
     MockAnimSequence() {}
 
-    void AddNotify(float triggerTime, const FName& name) {
-        Notifies.Add(FMockAnimNotifyEvent(triggerTime, name));
-        Notifies.Sort([](const FMockAnimNotifyEvent& A, const FMockAnimNotifyEvent& B) {
-            return A.TriggerTime < B.TriggerTime;
+    void AddNotify(float TriggerTime, const FName& Name, int AssignedTrackId = -1) // 트랙 ID 인자 추가
+    {
+        Notifies.Add(FMockAnimNotifyEvent(TriggerTime, Name, AssignedTrackId));
+        // 정렬은 필요시 외부에서 수행하거나, 추가 직후가 아닌 다른 시점에 수행
+    }
+
+    void RemoveNotifyByEventId(int EventId)
+    {
+        Notifies.RemoveAll([EventId](const FMockAnimNotifyEvent& Event)
+            {
+                return Event.EventId == EventId;
             });
     }
-    void RemoveNotifyByEventId(int eventId) {
-        Notifies.RemoveAll([eventId](const FMockAnimNotifyEvent& Event) {
-            return Event.EventId == eventId;
+
+    void SortNotifies()
+    {
+        Notifies.Sort([](const FMockAnimNotifyEvent& A, const FMockAnimNotifyEvent& B)
+            {
+                return A.TriggerTime < B.TriggerTime;
             });
     }
 };
@@ -70,103 +65,90 @@ public:
 // --- Editor Specific Data Structures (ImGui 연동용) ---
 enum class EEditorTimelineTrackType
 {
-    AnimNotify_Root,
-    AnimNotify_UserTrack
+    AnimNotify_Root,     // "Notifies" 같은 최상위 그룹
+    AnimNotify_UserTrack // 사용자가 추가한 하위 트랙
 };
 
 struct FEditorTimelineTrack
 {
     EEditorTimelineTrackType TrackType;
-    std::string DisplayName;
-    int TrackId;
-    int ParentTrackId;
-    bool bIsExpanded; // 그룹 트랙의 확장/축소 상태
-    int IndentLevel;
+    std::string DisplayName; // UTF-8 문자열 사용 권장 (ImGui는 UTF-8 기본)
+    int TrackId;             // 이 트랙의 고유 ID
+    int ParentTrackId;       // 부모 트랙의 ID (루트면 -1 또는 자기 자신 ID)
+    bool bIsExpanded;        // 자신이 그룹일 경우 확장 상태
+    // int IndentLevel;      // im-neo-sequencer가 Begin/EndTimelineEx 중첩으로 자동 처리
 
-    FEditorTimelineTrack(EEditorTimelineTrackType InTrackType, const std::string& InDisplayName, int InTrackId, int InParentTrackId = -1, int InIndentLevel = 0)
+    FEditorTimelineTrack(EEditorTimelineTrackType InTrackType, const std::string& InDisplayName, int InTrackId, int InParentTrackId = -1)
         : TrackType(InTrackType), DisplayName(InDisplayName), TrackId(InTrackId),
-        ParentTrackId(InParentTrackId), bIsExpanded(true), IndentLevel(InIndentLevel)
+        ParentTrackId(InParentTrackId), bIsExpanded(true) // 기본적으로 확장
     {
-        if (NextTrackIdCounter <= InTrackId) NextTrackIdCounter = InTrackId + 1;
+        if (NextTrackIdCounter <= InTrackId)
+        {
+            NextTrackIdCounter = InTrackId + 1;
+        }
     }
-    
+
     static int NextTrackIdCounter;
 };
 
 
 class SAnimationTimelinePanel : public UEditorPanel
 {
-    MockAnimSequence* MocdkAnimSequence; //for Text
 public:
     SAnimationTimelinePanel();
-    ~SAnimationTimelinePanel()
-    {
-        if (MocdkAnimSequence)
-        {
-            delete MocdkAnimSequence;
-            MocdkAnimSequence = nullptr;
-        }
-    }
+    virtual ~SAnimationTimelinePanel(); // 가상 소멸자 권장
+
     // --- Public Interface Methods ---
-    void SetTargetSequence(MockAnimSequence* sequence); 
+    void SetTargetSequence(MockAnimSequence* Sequence);
 
     // 데이터 접근 및 변환 함수
     float GetSequenceDurationSeconds() const;
     float GetSequenceFrameRate() const;
     int GetSequenceTotalFrames() const;
     int ConvertTimeToFrame() const;
-    void ConvertFrameToTimeAndSet(int frame);
+    void ConvertFrameToTimeAndSet(int Frame);
 
-    // 재생 로직 업데이트
-    void UpdatePlayback(float DeltaSeconds);
-
-    // 메인 UI 렌더링 함수
-    void RenderTimelineEditor();
-
-
-    
+    // 메인 UI 렌더링 함수 (UEditorPanel 오버라이드)
     virtual void Render() override;
-    virtual void OnResize(HWND hWnd) override;
+    virtual void OnResize(HWND hWnd) override; // Windows 핸들 의존성 제거 고려
+
 private:
     // --- Private Helper Methods for UI Rendering ---
-    void RenderPlaybackControls();
-    void CenterViewOnFrame(int targetFrame);
-    void AdjustFirstFrameToKeepCenter();
-    void ClampFirstVisibleFrame();
-    void RenderSequencerWidget();
-    void RenderNotifyEditor();
+    void RenderTimelineEditor();      // 전체 타임라인 UI를 그리는 메인 함수
+    void RenderPlaybackControls();    // 재생 관련 컨트롤 UI
+    void RenderSequencerWidget();     // im-neo-sequencer를 사용하여 실제 시퀀서 부분을 그리는 함수
+    void RenderTrackManagementUI();   // 트랙 추가/삭제, 노티파이 할당 등의 UI
 
-    // 노티파이 그리기 헬퍼 함수
-    void RenderNotifyTrackItems(const TArray<FMockAnimNotifyEvent>& notifies, ImDrawList* drawList, const ImRect& rc, const ImRect& clippingRect, bool isCompact); 
-    void AddUserNotifyTrack(int InParentRootTrackId, const std::string& NewTrackName);
-    void RemoveUserNotifyTrack(int InTrackId);
-    void AssignNotifyToTrack(int NotifyEventId, int TargetTrackId);
-public:
-    MockAnimSequence* TargetSequence; // 편집 대상이 되는 모의 시퀀스 객체
+    // 트랙 및 노티파이 관리 함수
+    void UpdatePlayback(float DeltaSeconds);
+    void AddUserNotifyTrack(int ParentRootTrackId, const std::string& NewTrackName);
+    void RemoveUserNotifyTrack(int TrackIdToRemove); // TODO: 구현 필요
+    void AssignNotifyToTrack(int NotifyEventId, int TargetTrackId); // TODO: 구현 필요
 
-    TArray<FEditorTimelineTrack> DisplayableTracks;
-    float FramePixelWidth = 10.0f;
-    float FramePixelWidth_BeforeChange;
+    // 계층적 트랙 렌더링 헬퍼
+    void RenderTracksRecursive(int ParentId);
+
+
+    // --- Member Variables ---
+    MockAnimSequence* MockAnimSequenceInstance; // 생성자에서 할당, 소멸자에서 해제
+    MockAnimSequence* TargetSequence;           // 현재 편집 대상 시퀀스
+
+    TArray<FEditorTimelineTrack> DisplayableTracks; // UI에 표시될 트랙 정보
+
     // Playback state
-    bool IsPlaying = false;
-    bool IsLooping = false;
-    float PlaybackSpeed = 1.0f;
-    float CurrentTimeSeconds = 0.0f;
+    bool bIsPlaying;
+    bool bIsLooping;
+    float PlaybackSpeed;
+    float CurrentTimeSeconds;
 
-    TSet<int> TriggeredNotifyEventIdsThisPlayback;
+    // UI Interaction State
+    int SelectedNotifyEventId; // 현재 선택된 노티파이의 EventId
+    // int SequencerSelectedTimelineId; // im-neo-sequencer의 선택된 타임라인 ID (필요시)
+    bool bIsDraggingNotify; // im-neo-sequencer의 드래그 기능을 사용하므로, 별도 플래그 필요성 재검토
 
-    // ImSequencer state
-    int SequencerSelectedEntry = -1; // 현재는 항상 0 (Notify 트랙만 있음)
-    int SequencerFirstVisibleFrame = 0;
-    int SelectedNotifyEventId = -1; // UI에서 선택된 노티파이의 EventId
-    bool IsSequencerExpanded = false;
 
-    // 드래그 상태
-    bool bIsDraggingSelectedNotify = false;
-    float DraggingNotifyOriginalTime = 0.0f;
-    ImVec2 DraggingStartMousePosInTrack;
-
-    float LastSequencerAreaWidth = 400.f;
-
-    float Width = 800, Height = 600;
+    // Windows 핸들 의존성 제거를 위해 Width, Height는 다른 방식으로 관리 고려
+    // (예: ImGui::GetContentRegionAvail())
+    float PanelWidth;
+    float PanelHeight;
 };
