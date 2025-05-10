@@ -29,9 +29,9 @@ void UnrealEd::Render() const
     }
 }
 
-void UnrealEd::RenderSubWindowPanel() const
+void UnrealEd::RenderSkeletalSubWindowPanel() const
 {
-    for (const auto& Panel : SubPanels)
+    for (const auto& Panel : SkeletalSubPanels)
     {
         Panel.Value->Render();
     }
@@ -39,12 +39,12 @@ void UnrealEd::RenderSubWindowPanel() const
 
 void UnrealEd::AddEditorPanel(const FString& PanelId, const std::shared_ptr<UEditorPanel>& EditorPanel, bool bSubWindow)
 {
-    (bSubWindow ? SubPanels : Panels)[PanelId] = EditorPanel;
+    (bSubWindow ? SkeletalSubPanels : Panels)[PanelId] = EditorPanel;
 }
 
 void UnrealEd::OnResize(HWND hWnd, bool bSubWindow) const
 {
-    auto& targetPanels = bSubWindow ? SubPanels : Panels;
+    auto& targetPanels = bSubWindow ? SkeletalSubPanels : Panels;
 
     for (auto& PanelPair : targetPanels)
     {
@@ -62,5 +62,5 @@ std::shared_ptr<UEditorPanel> UnrealEd::GetEditorPanel(const FString& PanelId)
 
 std::shared_ptr<UEditorPanel> UnrealEd::GetSubEditorPanel(const FString& PanelId)
 {
-    return SubPanels[PanelId];
+    return SkeletalSubPanels[PanelId];
 }

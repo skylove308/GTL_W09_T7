@@ -33,6 +33,8 @@ public:
     const T& operator[](SizeType Index) const;
     void operator+(const TArray& OtherArray);
 
+    T& Last() { return ContainerPrivate.back(); }
+    const T& Last() const { return ContainerPrivate.back(); }
 public:
     ArrayType& GetContainerPrivate() { return ContainerPrivate; }
     const ArrayType& GetContainerPrivate() const { return ContainerPrivate; }

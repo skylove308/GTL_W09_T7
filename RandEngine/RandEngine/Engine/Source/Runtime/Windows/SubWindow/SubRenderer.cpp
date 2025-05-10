@@ -7,7 +7,8 @@
 #include "D3D11RHI/DXDShaderManager.h"
 #include "D3D11RHI/GraphicDevice.h"
 #include "Engine/Asset/SkeletalMeshAsset.h"
-
+#include "UnrealEd/EditorViewportClient.h"
+#include "Editor/PropertyEditor/Animation/AnimationTimelinePanel.h"
 FSubRenderer::~FSubRenderer()
 {
     Release();
@@ -63,6 +64,7 @@ void FSubRenderer::Initialize(FGraphicsDevice* InGraphics, FDXDBufferManager* In
         // TODO: 적절한 오류 처리
         return;
     }
+
 }
 
 void FSubRenderer::Release()
@@ -74,9 +76,9 @@ void FSubRenderer::Release()
     }
 }
 
-void FSubRenderer::PrepareRender(const FSubCamera& Camera) const
+void FSubRenderer::PrepareRender(FEditorViewportClient* Viewport) const
 {
-    UpdateViewCamera(Camera);
+    UpdateViewCamera(Viewport);
 
     // Set RTV + DSV
     Graphics->DeviceContext->OMSetRenderTargets(1, &Graphics->BackBufferRTV, Graphics->DeviceDSV);
@@ -91,14 +93,12 @@ void FSubRenderer::PrepareRender(const FSubCamera& Camera) const
     // Clear RenderTarget
     Graphics->DeviceContext->ClearRenderTargetView(Graphics->BackBufferRTV, Graphics->ClearColor);
 }
-
-void FSubRenderer::Render(FSubCamera& Camera)
+void FSubRenderer::Render()
 {
     if (PreviewSkeletalMesh == nullptr)
     {
         return;
     }
-
     // 셰이더 설정
     ID3D11VertexShader* vertexShader = ShaderManager->GetVertexShaderByKey(L"StaticMeshVertexShader");
     ID3D11InputLayout* inputLayout = ShaderManager->GetInputLayoutByKey(L"StaticMeshVertexShader"); // VS와 함께 생성했으므로 같은 키 사용
@@ -118,26 +118,13 @@ void FSubRenderer::Render(FSubCamera& Camera)
 
     UpdateConstants();
 
-    RenderMesh(Camera);
+    RenderMesh();
+
 }
 
-void FSubRenderer::RenderMesh(FSubCamera& Camera)
+void FSubRenderer::RenderMesh()
 {
     FSkeletalMeshRenderData* RenderData = PreviewSkeletalMesh->GetRenderData();
-
-    if (!bOnlyOnce)
-    {
-        FVector Target = (RenderData->Bounds.MaxLocation+ RenderData->Bounds.MinLocation) * 0.5f;
-        FVector Extent = RenderData->Bounds.MaxLocation - RenderData->Bounds.MinLocation;
-        Camera.SetTargetPosition(Target.X, Target.Y, Target.Z);
-        
-        float MaxOff = std::max(std::max(Extent.X, Extent.Y), Extent.Z);
-        Camera.SetTargetZOffset(MaxOff);
-
-        Camera.UpdateViewMatrix();
-        Camera.UpdateCamera();
-        bOnlyOnce = true;
-    }
     
     TArray<FStaticMaterial*> RenderMaterial = PreviewSkeletalMesh->GetMaterials();
     
@@ -226,19 +213,18 @@ void FSubRenderer::UpdateConstants() const
 
     /** Light */
     UpdateLightConstant();
-    
 }
 
-void FSubRenderer::UpdateViewCamera(const FSubCamera& Camera) const
+void FSubRenderer::UpdateViewCamera(FEditorViewportClient* Viewport) const
 {
     FCameraConstantBuffer CameraConstantBuffer;
-    CameraConstantBuffer.ViewMatrix = Camera.GetViewMatrix();
+    CameraConstantBuffer.ViewMatrix = Viewport->GetViewMatrix();
     CameraConstantBuffer.InvViewMatrix = FMatrix::Inverse(CameraConstantBuffer.ViewMatrix);
-    CameraConstantBuffer.ProjectionMatrix = Camera.GetProjectionMatrix();
+    CameraConstantBuffer.ProjectionMatrix = Viewport->GetProjectionMatrix();
     CameraConstantBuffer.InvProjectionMatrix = FMatrix::Inverse(CameraConstantBuffer.ProjectionMatrix);
-    CameraConstantBuffer.ViewLocation = Camera.GetCameraLocation();
-    CameraConstantBuffer.NearClip = Camera.GetCameraNearClip();
-    CameraConstantBuffer.FarClip = Camera.GetCameraFarClip();
+    CameraConstantBuffer.ViewLocation = Viewport->GetCameraLocation();
+    CameraConstantBuffer.NearClip = Viewport->GetCameraNearClip();
+    CameraConstantBuffer.FarClip = Viewport->GetCameraFarClip();
     BufferManager->UpdateConstantBuffer("FCameraConstantBuffer", CameraConstantBuffer);
 }
 

@@ -1,5 +1,7 @@
 #include "SkeletalViewerPanel.h"
 #include "Engine/Asset/SkeletalMeshAsset.h"
+#include "SubWindow/SkeletalSubEngine.h"
+#include "SubWindow/SubEngine.h"
 #include "Components/Mesh/SkeletalMesh.h"
 
 void SkeletalViewerPanel::Render()
@@ -28,8 +30,7 @@ void SkeletalViewerPanel::OnResize(HWND hWnd)
 
 void SkeletalViewerPanel::CreateSkeletalTreeNode()
 {
-    USkeletalMesh* Selected = GEngineLoop.GetSelectedSkeletalMesh();
-    if (!Selected || !Selected->Skeleton) return;
+    USkeletalMesh* Selected = static_cast<FSkeletalSubEngine*>(GEngineLoop.SkeletalViewerSubEngine)->SelectedSkeletalMesh;
 
     const FReferenceSkeleton& RefSkeleton = Selected->Skeleton->ReferenceSkeleton;
     const TArray<FBoneNode>& BoneNodes = RefSkeleton.BoneInfo;
