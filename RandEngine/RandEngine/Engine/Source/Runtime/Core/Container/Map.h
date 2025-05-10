@@ -1,6 +1,6 @@
-﻿#pragma once
+#pragma once
 #include <unordered_map>
-
+#include "Container/Array.h"
 #include "ContainerAllocator.h"
 #include "Pair.h"
 #include "Serialization/Archive.h"
@@ -177,6 +177,16 @@ public:
     void Reserve(SizeType Number)
     {
         ContainerPrivate.reserve(Number);
+    }
+    void GetKeys(TArray<KeyType>& OutKeys) const
+    {
+        OutKeys.Empty();
+        //OutKeys.Reserve(ContainerPrivate.size()); // 배열을 비우고 필요한 만큼 예약
+        OutKeys.Reserve(ContainerPrivate.size()); // 용량 확보 (TArray 구현에 따라 필요 없을 수 있음)
+        for (const auto& Pair : ContainerPrivate) // 내부 std::unordered_map 순회
+        {
+            OutKeys.Add(Pair.first); // 각 요소의 키(first)를 TArray에 추가
+        }
     }
 };
 

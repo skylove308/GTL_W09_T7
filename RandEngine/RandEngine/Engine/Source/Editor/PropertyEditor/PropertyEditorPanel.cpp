@@ -937,13 +937,13 @@ void PropertyEditorPanel::RenderForSkeletalComponent(USkeletalMeshComponent* Ske
         ImGui::SameLine();
 
         FString PreviewName = FString("None");
-        if (USkeletalMesh* SkeletalMesh = SkeletalMeshComponent->GetSkeletalMesh())
+      /*  if (USkeletalMesh* SkeletalMesh = SkeletalMeshComponent->GetSkeletalMesh())
         {
             if (FSkeletalMeshRenderData* RenderData = SkeletalMesh->GetRenderData())
             {
                 PreviewName = RenderData->DisplayName;
             }
-        }
+        }*/
 
         static char BoneNameBuffer[64] = "mixamorig:Spine";
 

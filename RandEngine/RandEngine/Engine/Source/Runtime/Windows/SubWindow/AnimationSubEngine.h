@@ -1,5 +1,7 @@
-﻿#pragma once
+#pragma once
 #include "SubEngine.h"
+
+class SAnimationTimelinePanel;
 
 class UAnimationSubEngine : public USubEngine
 {

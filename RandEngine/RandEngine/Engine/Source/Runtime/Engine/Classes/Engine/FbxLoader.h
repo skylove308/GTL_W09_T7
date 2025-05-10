@@ -1,116 +1,87 @@
 #pragma once
-#include "HAL/PlatformType.h"
-#include "Container/String.h"
-#include "Container/Array.h"
-#include "Math/Matrix.h"
-#include "Math/Plane.h"
-#include "Container/Map.h"
-#include "fbxsdk.h"
-#include "Engine/Asset/SkeletalMeshAsset.h"
 
-struct FSkeletalHierarchyData;
-// Explicitly qualify FbxAxisSystem to resolve ambiguity
-inline fbxsdk::FbxAxisSystem unrealAxis(
-    fbxsdk::FbxAxisSystem::eZAxis,      // UpVector = Z axis
-    fbxsdk::FbxAxisSystem::eParityOdd,  // FrontVector = +X axis
-    fbxsdk::FbxAxisSystem::eLeftHanded  // 좌표계 = Left-Handed
-);
+#include <fbxsdk.h>
+#include <functional>
+#include <unordered_map> 
 
-struct FBone;
-struct FSkeletalMeshVertex;
-struct FSkeletalMeshBoneWeight;
-struct FMaterialSubset;
-struct FStaticMeshVertex;
-struct FStaticMeshRenderData;
-struct FSkeletalMeshRenderData;
-class UStaticMesh;
-class USkeletalMesh;
-class UMaterial;
+// --- 기본 타입 및 컨테이너 ---
+#include "Define.h"
+#include "Math/Vector.h"      // FVector, FVector2D 포함 가정
+#include "Math/Vector4.h"     // FVector4 포함 가정
+#include "Math/Matrix.h"      // FMatrix 포함 가정
+#include "Container/Array.h" // TArray 포함 가정
+#include "Container/Map.h"    // TMap 포함 가정
+#include "UObject/NameTypes.h" // FName 포함 가정
+#include "Components/Mesh/SkeletalMesh.h"
+#include "Asset/SkeletalMeshAsset.h"
 
+#include "SkeletalMeshDebugger.h"
 
-static FMatrix FbxAMatrixToFMatrix(const FbxAMatrix& InM)
+class USkeletalMeshComponent;
+
+namespace FBX
 {
-    FMatrix Out;
-
-    for (int Row = 0; Row < 4; ++Row)
-    {
-        for (int Col = 0; Col < 4; ++Col)
-        {
-            Out.M[Row][Col] = static_cast<float>(InM.Get(Row, Col));
-        }
-    }
-
-    return Out;
+    struct FBoneHierarchyNode;
+    struct FBXInfo;
+    struct MeshRawData;
 }
 
-static FbxAMatrix FMatrixToFbxAMatrix(const FMatrix& InM)
+namespace std
 {
-    FbxAMatrix Out;
-
-    for (int Row = 0; Row < 4; ++Row)
+    // hash_combine 함수 템플릿 정의 (헤더에 위치)
+    template <class T>
+    inline void hash_combine(std::size_t& seed, const T& v)
     {
-        for (int Col = 0; Col < 4; ++Col)
-        {
-            Out.mData[Row][Col] = static_cast<double>(InM.M[Row][Col]); // transpose
-        }
+        std::hash<T> hasher;
+        seed ^= hasher(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
     }
 
-    return Out;
+    // std::hash<FSkeletalMeshVertex> 특수화 *선언* (구현은 cpp 파일에)
+    template <>
+    struct hash<FSkeletalMeshVertex>
+    {
+        size_t operator()(const FSkeletalMeshVertex& Key) const noexcept;
+    };
 }
 
 struct FFBXLoader
 {
-public:
-    FFBXLoader() = default;
-    ~FFBXLoader();
+    static bool ParseFBX(const FString& FBXFilePath, FBX::FBXInfo& OutFBXInfo);
 
-    static bool Initialize();
-    static bool LoadFBX(const FString& FilePath);
-    static void DumpAllMeshes(FbxNode* node);
-    static bool FindMesh(FbxNode* Node, const FString& FilePath);
+    // Convert the Raw data to Cooked data (FSkeletalMeshRenderData)
+    static bool ConvertToSkeletalMesh(const TArray<FBX::MeshRawData>& RawMeshData, const FBX::FBXInfo& FullFBXInfo, FSkeletalMeshRenderData& OutSkeletalMesh, USkeleton* OutSkeleton);
 
-    static bool IsStaticMesh(FbxMesh* Mesh);
-    static bool IsSkeletalMesh(FbxMesh* Mesh);
+    static bool CreateTextureFromFile(const FWString& Filename);
 
-    static void BuildSkeletalVertexBuffers(FbxMesh* Mesh, TArray<FSkeletalMeshVertex>& OutVerts, TArray<uint32>& OutIndices);
-    static void SetupMaterialSubsets(FbxMesh* Mesh, TArray<FMaterialSubset>& OutSubsets);
-    static void LoadMaterialInfo(FbxNode* Node);
-    static void ExtractSkeleton(FbxMesh* Mesh, TArray<FSkeletonBone>& OutBones);
-    static void RecalculateGlobalPoses(TArray<FSkeletonBone>& Bones);
-    static void RotateBones(TArray<FSkeletonBone>& Bones, int32 BoneIndex, const FbxVector4& EulerDegrees);
-    static void ReskinVerticesCPU(FbxMesh* Mesh, const TArray<FSkeletonBone>& Bones, TArray<FSkeletalMeshVertex>& Vertices);
-    static int32 FindBoneByName(const TArray<FSkeletonBone>& Bones, const FString& Name);
-    static void BuildNodeHierarchyRecursive(const FbxNode* Node, FSkeletalHierarchyData& OutHierarchyData);
-    
-public:
-    static void CopyControlPoints(FbxMesh* Mesh,TArray<FStaticMeshVertex>& OutVerts);
-    static void BuildStaticIndexBuffer(FbxMesh* Mesh, TArray<uint32>& OutIndices);
-    static void CopyNormals(FbxMesh* Mesh, TArray<FStaticMeshVertex>& OutVerts);
-    static void CopyUVs(FbxMesh* Mesh, TArray<FStaticMeshVertex>& OutVerts);
-    static void CopyTangents(FbxMesh* Mesh, TArray<FStaticMeshVertex>& OutVerts);
-    static void ComputeBoundingBox(const TArray<FStaticMeshVertex>& InVerts, FVector& OutMin, FVector& OutMax);
-    static void ComputeBoundingBox(const TArray<FSkeletalMeshVertex>& InVerts, FVector& OutMin, FVector& OutMax);
+    static void ComputeBoundingBox(const TArray<FSkeletalMeshVertex>& InVertices, FVector& OutMinVector, FVector& OutMaxVector);
 
-    
-    inline static FbxMesh* Mesh = nullptr;
 private:
-    inline static FbxManager* Manager = nullptr;
-    inline static FbxImporter* Importer = nullptr;
-    inline static FbxScene* Scene = nullptr;
-
+    static void CalculateTangent(FSkeletalMeshVertex& PivotVertex, const FSkeletalMeshVertex& Vertex1, const FSkeletalMeshVertex& Vertex2);
 };
 
-struct FFBXManager
+struct FManagerFBX
 {
 public:
-    static UStaticMesh* CreateStaticMesh(const FString& filePath);
-    static USkeletalMesh* CreateSkeletalMesh(const FString& filePath);
+    static FSkeletalMeshRenderData* LoadFBXSkeletalMeshAsset(const FString& PathFileName, USkeleton* OutSkeleton);
 
-    inline static FStaticMeshRenderData* StaticMeshRenderData = nullptr;
-    inline static FSkeletalMeshRenderData* SkeletalMeshRenderData = nullptr;
+    static void CombineMaterialIndex(FSkeletalMeshRenderData& OutFSkeletalMesh);
+
+    static bool SaveSkeletalMeshToBinary(const FWString& FilePath, const FSkeletalMeshRenderData& SkeletalMesh);
+
+    static bool LoadSkeletalMeshFromBinary(const FWString& FilePath, FSkeletalMeshRenderData& OutSkeletalMesh);
+
+    static UMaterial* CreateMaterial(const FFbxMaterialInfo& MaterialInfo);
+
+    static UMaterial* GetMaterial(const FString& InName);
+
+    static USkeletalMesh* CreateSkeletalMesh(const FString& InFilePath);
+
+    static const TMap<FWString, USkeletalMesh*>& GetSkeletalMeshes();
+
+    static USkeletalMesh* GetSkeletalMesh(const FWString& InName);
 
 private:
-    inline static TMap<FString, USkeletalMesh*> SkeletalMeshMap;
-    inline static TMap<FString, UStaticMesh*> StaticMeshMap;
+    inline static TMap<FString, FSkeletalMeshRenderData*> SkeletalMeshRenderDataMap;
+    inline static TMap<FWString, USkeletalMesh*> SkeletalMeshMap;
+    inline static TMap<FString, UMaterial*> MaterialMap;
 };
-

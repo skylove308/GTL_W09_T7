@@ -13,9 +13,8 @@
 ACube::ACube()
 {
     //StaticMeshComponent->SetStaticMesh(FObjManager::GetStaticMesh(L"Contents/Reference/Reference.obj"));
-    UStaticMesh* StaticMesh = FFBXManager::CreateStaticMesh("Contents/teamugfbx.fbx");
-    StaticMeshComponent->SetStaticMesh(StaticMesh);
-    
+    //UStaticMesh* StaticMesh = FFBXManager::CreateStaticMesh("Contents/teamugfbx.fbx");
+    //StaticMeshComponent->SetStaticMesh(StaticMesh);
 }
 
 void ACube::Tick(float DeltaTime)

@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <cmath>
 #include <concepts>
 #include <numbers>
@@ -137,6 +137,11 @@ struct FMath
     [[nodiscard]] static FORCEINLINE bool IsNearlyZero(float Value, float ErrorTolerance = SMALL_NUMBER)
     {
         return Abs<float>(Value) <= ErrorTolerance;
+    }
+
+    [[nodiscard]] static FORCEINLINE bool IsNearlyEqual(float A, float B, float ErrorTolerance = KINDA_SMALL_NUMBER)
+    {
+        return Abs<float>(A - B) <= ErrorTolerance;
     }
 
     // Begin Interpolations
@@ -542,6 +547,22 @@ struct FMath
             A += 360.0f;
         }
         return A;
+    }
+
+    // double 타입에 대한 IsNaN 구현
+    static inline bool IsNaN(double Value)
+    {
+        return Value != Value;
+    }
+    static inline bool IsFinite(float Value)
+    {
+        return !IsNaN(Value) && !std::isinf(Value);
+    }
+
+    // double 타입에 대한 IsFinite 구현
+    static inline bool IsFinite(double Value)
+    {
+        return !IsNaN(Value) && !std::isinf(Value);
     }
 
     [[nodiscard]] static float Fmod(float X, float Y)

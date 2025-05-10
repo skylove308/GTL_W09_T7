@@ -1,9 +1,7 @@
 #pragma once
-#include "MeshComponent.h"
-#include "SkeletalMeshRenderData.h"
-#include "UObject/Casts.h"
+#include "Components/Mesh/MeshComponent.h"
+#include "Components/Mesh/SkeletalMesh.h"
 
-class UMaterial;
 class USkinnedMeshComponent : public UMeshComponent
 {
     DECLARE_CLASS(USkinnedMeshComponent, UMeshComponent)
@@ -13,24 +11,23 @@ public:
 
     virtual UObject* Duplicate(UObject* InOuter) override;
 
-    virtual uint32 GetNumMaterials() const override
-    {
-        return SkeletalMesh ? SkeletalMesh->GetMaterials().Num() : 0;
-    }
+    virtual void TickComponent(float DeltaTime) override;
 
+    void SetselectedSubMeshIndex(const int& value) { selectedSubMeshIndex = value; }
+    int GetselectedSubMeshIndex() const { return selectedSubMeshIndex; };
+
+    virtual uint32 GetNumMaterials() const override;
     virtual UMaterial* GetMaterial(uint32 ElementIndex) const override;
     virtual uint32 GetMaterialIndex(FName MaterialSlotName) const override;
     virtual TArray<FName> GetMaterialSlotNames() const override;
     virtual void GetUsedMaterials(TArray<UMaterial*>& Out) const override;
 
+    virtual int CheckRayIntersection(const FVector& InRayOrigin, const FVector& InRayDirection, float& OutHitDistance) const override;
+
     USkeletalMesh* GetSkeletalMesh() const { return SkeletalMesh; }
-    void SetSkeletalMesh(USkeletalMesh* InMesh, FBoundingBox InAABB)
-    {
-        SkeletalMesh = InMesh;
-        AABB = InAABB;
-        OverrideMaterials.SetNum(SkeletalMesh ? SkeletalMesh->GetMaterials().Num() : 0);
-    }
+    void SetSkeletalMesh(USkeletalMesh* value);
 
 protected:
     USkeletalMesh* SkeletalMesh = nullptr;
+    int selectedSubMeshIndex = -1;
 };

@@ -2,12 +2,12 @@
 
 #include "RendererHelpers.h"
 #include "StaticMeshRenderPass.h"
-#include "Components/Mesh/SkeletalMeshRenderData.h"
+#include "Components/Mesh/SkeletalMesh.h"
 #include "D3D11RHI/DXDShaderManager.h"
 #include "D3D11RHI/GraphicDevice.h"
 #include "Engine/Asset/SkeletalMeshAsset.h"
 #include "UnrealEd/EditorViewportClient.h"
-#include "Editor/PropertyEditor/Animation/AnimationTimelinePanel.h"
+
 FSubRenderer::~FSubRenderer()
 {
     Release();
@@ -124,39 +124,39 @@ void FSubRenderer::Render()
 void FSubRenderer::RenderMesh()
 {
     FSkeletalMeshRenderData* RenderData = PreviewSkeletalMesh->GetRenderData();
-    
+
     TArray<FStaticMaterial*> RenderMaterial = PreviewSkeletalMesh->GetMaterials();
     
     UINT Stride = sizeof(FSkeletalMeshVertex);
     UINT Offset = 0;
 
     FVertexInfo VertexInfo;
-    BufferManager->CreateVertexBuffer(RenderData->ObjectName, RenderData->Vertices, VertexInfo);
+    BufferManager->CreateDynamicVertexBuffer(RenderData->MeshName, RenderData->BindPoseVertices, VertexInfo);
 
     Graphics->DeviceContext->IASetVertexBuffers(0, 1, &VertexInfo.VertexBuffer, &Stride, &Offset);
 
     FIndexInfo IndexInfo;
-    BufferManager->CreateIndexBuffer(RenderData->ObjectName, RenderData->Indices, IndexInfo);
+    BufferManager->CreateIndexBuffer(RenderData->MeshName, RenderData->Indices, IndexInfo);
 
     if (IndexInfo.IndexBuffer)
     {
         Graphics->DeviceContext->IASetIndexBuffer(IndexInfo.IndexBuffer, DXGI_FORMAT_R32_UINT, 0);
     }
 
-    if (RenderData->MaterialSubsets.Num() == 0)
+    if (RenderData->Subsets.Num() == 0)
     {
         Graphics->DeviceContext->DrawIndexed(RenderData->Indices.Num(), 0, 0);
         return;
     }
 
-    for (int SubMeshIndex = 0; SubMeshIndex < RenderData->MaterialSubsets.Num(); SubMeshIndex++)
+    for (int SubMeshIndex = 0; SubMeshIndex < RenderData->Subsets.Num(); SubMeshIndex++)
     {
-        uint32 MaterialIndex = RenderData->MaterialSubsets[SubMeshIndex].MaterialIndex;
+        uint32 MaterialIndex = RenderData->Subsets[SubMeshIndex].MaterialIndex;
         
         MaterialUtils::UpdateMaterial(BufferManager, Graphics, RenderMaterial[MaterialIndex]->Material->GetMaterialInfo());
         
-        uint32 StartIndex = RenderData->MaterialSubsets[SubMeshIndex].IndexStart;
-        uint32 IndexCount = RenderData->MaterialSubsets[SubMeshIndex].IndexCount;
+        uint32 StartIndex = RenderData->Subsets[SubMeshIndex].IndexStart;
+        uint32 IndexCount = RenderData->Subsets[SubMeshIndex].IndexCount;
         Graphics->DeviceContext->DrawIndexed(IndexCount, StartIndex, 0);
     }
 }

@@ -29,6 +29,7 @@ class FEditorViewportClient;
 class FViewportResource;
 
 class FStaticMeshRenderPass;
+class FSkeletalMeshRenderPass;
 class FWorldBillboardRenderPass;
 class FEditorBillboardRenderPass;
 class FGizmoRenderPass;
@@ -78,7 +79,8 @@ protected:
 public:
     template<typename T>
     ID3D11Buffer* CreateImmutableVertexBuffer(const FString& key, const TArray<T>& Vertices);
-
+    template<typename T>
+    ID3D11Buffer* CreateDynamicVertexBuffer(const FString& key, const TArray<T>& Vertices);
     ID3D11Buffer* CreateImmutableIndexBuffer(const FString& key, const TArray<uint32>& indices);
     
     // 상수 버퍼 생성/해제
@@ -97,6 +99,7 @@ public:
     class FShadowRenderPass* ShadowRenderPass;
 
     FStaticMeshRenderPass* StaticMeshRenderPass = nullptr;
+    FSkeletalMeshRenderPass* SkeletalMeshRenderPass = nullptr;
     FWorldBillboardRenderPass* WorldBillboardRenderPass = nullptr;
     FEditorBillboardRenderPass* EditorBillboardRenderPass = nullptr;
     FGizmoRenderPass* GizmoRenderPass = nullptr;
@@ -123,7 +126,13 @@ inline ID3D11Buffer* FRenderer::CreateImmutableVertexBuffer(const FString& key, 
     BufferManager->CreateVertexBuffer(key, Vertices, VertexBufferInfo);
     return VertexBufferInfo.VertexBuffer;
 }
-
+template<typename T>
+inline ID3D11Buffer* FRenderer::CreateDynamicVertexBuffer(const FString& key, const TArray<T>& Vertices)
+{
+    FVertexInfo VertexBufferInfo;
+    BufferManager->CreateDynamicVertexBuffer(key, Vertices, VertexBufferInfo);
+    return VertexBufferInfo.VertexBuffer;
+}
 inline ID3D11Buffer* FRenderer::CreateImmutableIndexBuffer(const FString& key, const TArray<uint32>& indices)
 {
     FIndexInfo IndexInfo;
