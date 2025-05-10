@@ -16,22 +16,6 @@
                         "ComponentOwner": "ADirectionalLight_132",
                         "ComponentOwnerClass": "ADirectionalLight",
                         "RelativeLocation": "X=0.000 Y=0.000 Z=0.000",
-                        "RelativeRotation": "Pitch=0.000 Yaw=0.000 Roll=0.000",
-                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
-                        "bAutoActive": "true",
-                        "bIsActive": "true"
-                    }
-                },
-                {
-                    "ComponentClass": "USceneComponent",
-                    "ComponentID": "USceneComponent_128",
-                    "Properties": {
-                        "AttachParentID": "nullptr",
-                        "ComponentClass": "USceneComponent",
-                        "ComponentName": "USceneComponent_128",
-                        "ComponentOwner": "ADirectionalLight_132",
-                        "ComponentOwnerClass": "ADirectionalLight",
-                        "RelativeLocation": "X=0.000 Y=0.000 Z=0.000",
                         "RelativeRotation": "Pitch=0.000 Yaw=0.000 Roll=-0.000",
                         "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
                         "bAutoActive": "true",
@@ -60,6 +44,22 @@
                     }
                 },
                 {
+                    "ComponentClass": "USceneComponent",
+                    "ComponentID": "USceneComponent_133",
+                    "Properties": {
+                        "AttachParentID": "nullptr",
+                        "ComponentClass": "USceneComponent",
+                        "ComponentName": "USceneComponent_133",
+                        "ComponentOwner": "ADirectionalLight_132",
+                        "ComponentOwnerClass": "ADirectionalLight",
+                        "RelativeLocation": "X=0.000 Y=0.000 Z=0.000",
+                        "RelativeRotation": "Pitch=0.000 Yaw=0.000 Roll=-0.000",
+                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
+                        "bAutoActive": "true",
+                        "bIsActive": "true"
+                    }
+                },
+                {
                     "ComponentClass": "UBillboardComponent",
                     "ComponentID": "UBillboardComponent_0",
                     "Properties": {
@@ -74,7 +74,7 @@
                         "FinalIndexU": "0.000000",
                         "FinalIndexV": "0.000000",
                         "RelativeLocation": "X=31.697 Y=0.000 Z=131.534",
-                        "RelativeRotation": "Pitch=65.900 Yaw=-180.000 Roll=-180.000",
+                        "RelativeRotation": "Pitch=65.900 Yaw=180.000 Roll=180.000",
                         "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
                         "bAutoActive": "true",
                         "bIsActive": "true",
@@ -83,11 +83,11 @@
                 },
                 {
                     "ComponentClass": "USceneComponent",
-                    "ComponentID": "USceneComponent_140",
+                    "ComponentID": "USceneComponent_128",
                     "Properties": {
                         "AttachParentID": "nullptr",
                         "ComponentClass": "USceneComponent",
-                        "ComponentName": "USceneComponent_140",
+                        "ComponentName": "USceneComponent_128",
                         "ComponentOwner": "ADirectionalLight_132",
                         "ComponentOwnerClass": "ADirectionalLight",
                         "RelativeLocation": "X=0.000 Y=0.000 Z=0.000",
@@ -99,11 +99,11 @@
                 },
                 {
                     "ComponentClass": "USceneComponent",
-                    "ComponentID": "USceneComponent_133",
+                    "ComponentID": "USceneComponent_140",
                     "Properties": {
                         "AttachParentID": "nullptr",
                         "ComponentClass": "USceneComponent",
-                        "ComponentName": "USceneComponent_133",
+                        "ComponentName": "USceneComponent_140",
                         "ComponentOwner": "ADirectionalLight_132",
                         "ComponentOwnerClass": "ADirectionalLight",
                         "RelativeLocation": "X=0.000 Y=0.000 Z=0.000",
@@ -124,15 +124,15 @@
             "Components": [
                 {
                     "ComponentClass": "USceneComponent",
-                    "ComponentID": "mixamorig:RightHandThumb2",
+                    "ComponentID": "mixamorig:LeftToeBase",
                     "Properties": {
-                        "AttachParentID": "mixamorig:RightHandThumb1",
+                        "AttachParentID": "mixamorig:LeftFoot",
                         "ComponentClass": "USceneComponent",
-                        "ComponentName": "mixamorig:RightHandThumb2",
+                        "ComponentName": "mixamorig:LeftToeBase",
                         "ComponentOwner": "ASkeletalMeshActor_132",
                         "ComponentOwnerClass": "ASkeletalMeshActor",
-                        "RelativeLocation": "X=0.000 Y=10.473 Z=0.000",
-                        "RelativeRotation": "Pitch=0.269 Yaw=13.354 Roll=4.568",
+                        "RelativeLocation": "X=0.000 Y=21.288 Z=-0.000",
+                        "RelativeRotation": "Pitch=0.000 Yaw=0.000 Roll=-45.535",
                         "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
                         "bAutoActive": "true",
                         "bIsActive": "true"
@@ -148,7 +148,7 @@
                         "ComponentOwner": "ASkeletalMeshActor_132",
                         "ComponentOwnerClass": "ASkeletalMeshActor",
                         "RelativeLocation": "X=0.000 Y=0.000 Z=0.000",
-                        "RelativeRotation": "Pitch=0.000 Yaw=0.000 Roll=0.000",
+                        "RelativeRotation": "Pitch=0.000 Yaw=0.000 Roll=-0.000",
                         "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
                         "bAutoActive": "true",
                         "bIsActive": "true"
@@ -156,15 +156,31 @@
                 },
                 {
                     "ComponentClass": "USceneComponent",
-                    "ComponentID": "mixamorig:LeftLeg",
+                    "ComponentID": "mixamorig:RightUpLeg",
                     "Properties": {
-                        "AttachParentID": "mixamorig:LeftUpLeg",
+                        "AttachParentID": "mixamorig:Hips",
                         "ComponentClass": "USceneComponent",
-                        "ComponentName": "mixamorig:LeftLeg",
+                        "ComponentName": "mixamorig:RightUpLeg",
                         "ComponentOwner": "ASkeletalMeshActor_132",
                         "ComponentOwnerClass": "ASkeletalMeshActor",
-                        "RelativeLocation": "X=0.000 Y=35.950 Z=-0.000",
-                        "RelativeRotation": "Pitch=0.000 Yaw=-0.000 Roll=6.773",
+                        "RelativeLocation": "X=-13.656 Y=-7.135 Z=0.130",
+                        "RelativeRotation": "Pitch=0.000 Yaw=-180.000 Roll=-2.362",
+                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
+                        "bAutoActive": "true",
+                        "bIsActive": "true"
+                    }
+                },
+                {
+                    "ComponentClass": "USceneComponent",
+                    "ComponentID": "mixamorig:RightHandIndex4",
+                    "Properties": {
+                        "AttachParentID": "mixamorig:RightHandIndex3",
+                        "ComponentClass": "USceneComponent",
+                        "ComponentName": "mixamorig:RightHandIndex4",
+                        "ComponentOwner": "ASkeletalMeshActor_132",
+                        "ComponentOwnerClass": "ASkeletalMeshActor",
+                        "RelativeLocation": "X=-0.000 Y=6.770 Z=0.000",
+                        "RelativeRotation": "Pitch=0.000 Yaw=-0.000 Roll=0.000",
                         "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
                         "bAutoActive": "true",
                         "bIsActive": "true"
@@ -182,12 +198,44 @@
                         "ComponentOwner": "ASkeletalMeshActor_132",
                         "ComponentOwnerClass": "ASkeletalMeshActor",
                         "RelativeLocation": "X=0.000 Y=0.000 Z=0.000",
-                        "RelativeRotation": "Pitch=0.000 Yaw=0.000 Roll=0.000",
+                        "RelativeRotation": "Pitch=0.000 Yaw=0.000 Roll=-0.000",
                         "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
                         "SkeletalMeshPath": "Contents/Mutant.fbx",
                         "bAutoActive": "true",
                         "bIsActive": "true",
                         "m_Type": ""
+                    }
+                },
+                {
+                    "ComponentClass": "USceneComponent",
+                    "ComponentID": "mixamorig:LeftHand",
+                    "Properties": {
+                        "AttachParentID": "mixamorig:LeftForeArm",
+                        "ComponentClass": "USceneComponent",
+                        "ComponentName": "mixamorig:LeftHand",
+                        "ComponentOwner": "ASkeletalMeshActor_132",
+                        "ComponentOwnerClass": "ASkeletalMeshActor",
+                        "RelativeLocation": "X=-0.000 Y=26.753 Z=-0.000",
+                        "RelativeRotation": "Pitch=0.000 Yaw=0.000 Roll=-0.000",
+                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
+                        "bAutoActive": "true",
+                        "bIsActive": "true"
+                    }
+                },
+                {
+                    "ComponentClass": "USceneComponent",
+                    "ComponentID": "mixamorig:Hips",
+                    "Properties": {
+                        "AttachParentID": "USkeletalMeshComponent_160",
+                        "ComponentClass": "USceneComponent",
+                        "ComponentName": "mixamorig:Hips",
+                        "ComponentOwner": "ASkeletalMeshActor_132",
+                        "ComponentOwnerClass": "ASkeletalMeshActor",
+                        "RelativeLocation": "X=0.000 Y=92.555 Z=4.552",
+                        "RelativeRotation": "Pitch=0.000 Yaw=0.000 Roll=-0.000",
+                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
+                        "bAutoActive": "true",
+                        "bIsActive": "true"
                     }
                 },
                 {
@@ -208,31 +256,15 @@
                 },
                 {
                     "ComponentClass": "USceneComponent",
-                    "ComponentID": "mixamorig:Spine2",
+                    "ComponentID": "mixamorig:RightHandPinky1",
                     "Properties": {
-                        "AttachParentID": "mixamorig:Spine1",
+                        "AttachParentID": "mixamorig:RightHand",
                         "ComponentClass": "USceneComponent",
-                        "ComponentName": "mixamorig:Spine2",
+                        "ComponentName": "mixamorig:RightHandPinky1",
                         "ComponentOwner": "ASkeletalMeshActor_132",
                         "ComponentOwnerClass": "ASkeletalMeshActor",
-                        "RelativeLocation": "X=-0.000 Y=13.021 Z=-0.000",
-                        "RelativeRotation": "Pitch=0.006 Yaw=-0.095 Roll=-4.037",
-                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
-                        "bAutoActive": "true",
-                        "bIsActive": "true"
-                    }
-                },
-                {
-                    "ComponentClass": "USceneComponent",
-                    "ComponentID": "mixamorig:Hips",
-                    "Properties": {
-                        "AttachParentID": "USkeletalMeshComponent_160",
-                        "ComponentClass": "USceneComponent",
-                        "ComponentName": "mixamorig:Hips",
-                        "ComponentOwner": "ASkeletalMeshActor_132",
-                        "ComponentOwnerClass": "ASkeletalMeshActor",
-                        "RelativeLocation": "X=0.000 Y=92.555 Z=4.552",
-                        "RelativeRotation": "Pitch=0.000 Yaw=0.000 Roll=-0.000",
+                        "RelativeLocation": "X=-10.003 Y=17.508 Z=0.478",
+                        "RelativeRotation": "Pitch=-90.000 Yaw=180.000 Roll=179.999",
                         "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
                         "bAutoActive": "true",
                         "bIsActive": "true"
@@ -265,6 +297,54 @@
                         "ComponentOwnerClass": "ASkeletalMeshActor",
                         "RelativeLocation": "X=1.052 Y=8.689 Z=6.401",
                         "RelativeRotation": "Pitch=0.000 Yaw=-0.000 Roll=0.000",
+                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
+                        "bAutoActive": "true",
+                        "bIsActive": "true"
+                    }
+                },
+                {
+                    "ComponentClass": "USceneComponent",
+                    "ComponentID": "mixamorig:RightHandThumb4",
+                    "Properties": {
+                        "AttachParentID": "mixamorig:RightHandThumb3",
+                        "ComponentClass": "USceneComponent",
+                        "ComponentName": "mixamorig:RightHandThumb4",
+                        "ComponentOwner": "ASkeletalMeshActor_132",
+                        "ComponentOwnerClass": "ASkeletalMeshActor",
+                        "RelativeLocation": "X=0.000 Y=8.025 Z=0.000",
+                        "RelativeRotation": "Pitch=0.000 Yaw=0.000 Roll=-0.000",
+                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
+                        "bAutoActive": "true",
+                        "bIsActive": "true"
+                    }
+                },
+                {
+                    "ComponentClass": "USceneComponent",
+                    "ComponentID": "mixamorig:Spine2",
+                    "Properties": {
+                        "AttachParentID": "mixamorig:Spine1",
+                        "ComponentClass": "USceneComponent",
+                        "ComponentName": "mixamorig:Spine2",
+                        "ComponentOwner": "ASkeletalMeshActor_132",
+                        "ComponentOwnerClass": "ASkeletalMeshActor",
+                        "RelativeLocation": "X=-0.000 Y=13.021 Z=-0.000",
+                        "RelativeRotation": "Pitch=0.006 Yaw=-0.095 Roll=-4.037",
+                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
+                        "bAutoActive": "true",
+                        "bIsActive": "true"
+                    }
+                },
+                {
+                    "ComponentClass": "USceneComponent",
+                    "ComponentID": "mixamorig:LeftFoot",
+                    "Properties": {
+                        "AttachParentID": "mixamorig:LeftLeg",
+                        "ComponentClass": "USceneComponent",
+                        "ComponentName": "mixamorig:LeftFoot",
+                        "ComponentOwner": "ASkeletalMeshActor_132",
+                        "ComponentOwnerClass": "ASkeletalMeshActor",
+                        "RelativeLocation": "X=-0.000 Y=34.409 Z=-0.000",
+                        "RelativeRotation": "Pitch=0.000 Yaw=0.000 Roll=-48.876",
                         "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
                         "bAutoActive": "true",
                         "bIsActive": "true"
@@ -320,6 +400,22 @@
                 },
                 {
                     "ComponentClass": "USceneComponent",
+                    "ComponentID": "mixamorig:RightHandThumb2",
+                    "Properties": {
+                        "AttachParentID": "mixamorig:RightHandThumb1",
+                        "ComponentClass": "USceneComponent",
+                        "ComponentName": "mixamorig:RightHandThumb2",
+                        "ComponentOwner": "ASkeletalMeshActor_132",
+                        "ComponentOwnerClass": "ASkeletalMeshActor",
+                        "RelativeLocation": "X=0.000 Y=10.473 Z=0.000",
+                        "RelativeRotation": "Pitch=0.269 Yaw=13.354 Roll=4.568",
+                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
+                        "bAutoActive": "true",
+                        "bIsActive": "true"
+                    }
+                },
+                {
+                    "ComponentClass": "USceneComponent",
                     "ComponentID": "mixamorig:LeftArm",
                     "Properties": {
                         "AttachParentID": "mixamorig:LeftShoulder",
@@ -335,19 +431,23 @@
                     }
                 },
                 {
-                    "ComponentClass": "USceneComponent",
-                    "ComponentID": "mixamorig:RightHandThumb1",
+                    "ComponentClass": "USkeletalMeshComponent",
+                    "ComponentID": "USkeletalMeshComponent_134",
                     "Properties": {
-                        "AttachParentID": "mixamorig:RightHand",
-                        "ComponentClass": "USceneComponent",
-                        "ComponentName": "mixamorig:RightHandThumb1",
+                        "AABB_max": "X=149.101 Y=185.540 Z=36.305",
+                        "AABB_min": "X=-125.152 Y=-0.594 Z=-34.203",
+                        "AttachParentID": "nullptr",
+                        "ComponentClass": "USkeletalMeshComponent",
+                        "ComponentName": "USkeletalMeshComponent_134",
                         "ComponentOwner": "ASkeletalMeshActor_132",
                         "ComponentOwnerClass": "ASkeletalMeshActor",
-                        "RelativeLocation": "X=6.163 Y=2.492 Z=4.446",
-                        "RelativeRotation": "Pitch=-5.426 Yaw=-43.761 Roll=-24.442",
+                        "RelativeLocation": "X=1.106 Y=51.750 Z=20.145",
+                        "RelativeRotation": "Pitch=0.000 Yaw=0.000 Roll=-0.000",
                         "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
+                        "SkeletalMeshPath": "Contents/Mutant.fbx",
                         "bAutoActive": "true",
-                        "bIsActive": "true"
+                        "bIsActive": "true",
+                        "m_Type": ""
                     }
                 },
                 {
@@ -361,22 +461,6 @@
                         "ComponentOwnerClass": "ASkeletalMeshActor",
                         "RelativeLocation": "X=0.000 Y=26.415 Z=-0.000",
                         "RelativeRotation": "Pitch=0.000 Yaw=3.166 Roll=0.001",
-                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
-                        "bAutoActive": "true",
-                        "bIsActive": "true"
-                    }
-                },
-                {
-                    "ComponentClass": "USceneComponent",
-                    "ComponentID": "mixamorig:LeftHand",
-                    "Properties": {
-                        "AttachParentID": "mixamorig:LeftForeArm",
-                        "ComponentClass": "USceneComponent",
-                        "ComponentName": "mixamorig:LeftHand",
-                        "ComponentOwner": "ASkeletalMeshActor_132",
-                        "ComponentOwnerClass": "ASkeletalMeshActor",
-                        "RelativeLocation": "X=-0.000 Y=26.753 Z=-0.000",
-                        "RelativeRotation": "Pitch=0.000 Yaw=0.000 Roll=-0.000",
                         "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
                         "bAutoActive": "true",
                         "bIsActive": "true"
@@ -464,22 +548,6 @@
                 },
                 {
                     "ComponentClass": "USceneComponent",
-                    "ComponentID": "mixamorig:RightFoot",
-                    "Properties": {
-                        "AttachParentID": "mixamorig:RightLeg",
-                        "ComponentClass": "USceneComponent",
-                        "ComponentName": "mixamorig:RightFoot",
-                        "ComponentOwner": "ASkeletalMeshActor_132",
-                        "ComponentOwnerClass": "ASkeletalMeshActor",
-                        "RelativeLocation": "X=-0.000 Y=34.409 Z=-0.000",
-                        "RelativeRotation": "Pitch=0.000 Yaw=0.000 Roll=-48.876",
-                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
-                        "bAutoActive": "true",
-                        "bIsActive": "true"
-                    }
-                },
-                {
-                    "ComponentClass": "USceneComponent",
                     "ComponentID": "mixamorig:RightHandIndex2",
                     "Properties": {
                         "AttachParentID": "mixamorig:RightHandIndex1",
@@ -488,22 +556,6 @@
                         "ComponentOwner": "ASkeletalMeshActor_132",
                         "ComponentOwnerClass": "ASkeletalMeshActor",
                         "RelativeLocation": "X=-0.000 Y=7.514 Z=0.000",
-                        "RelativeRotation": "Pitch=0.000 Yaw=0.000 Roll=-0.000",
-                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
-                        "bAutoActive": "true",
-                        "bIsActive": "true"
-                    }
-                },
-                {
-                    "ComponentClass": "USceneComponent",
-                    "ComponentID": "mixamorig:RightHandPinky2",
-                    "Properties": {
-                        "AttachParentID": "mixamorig:RightHandPinky1",
-                        "ComponentClass": "USceneComponent",
-                        "ComponentName": "mixamorig:RightHandPinky2",
-                        "ComponentOwner": "ASkeletalMeshActor_132",
-                        "ComponentOwnerClass": "ASkeletalMeshActor",
-                        "RelativeLocation": "X=-0.000 Y=7.044 Z=0.000",
                         "RelativeRotation": "Pitch=0.000 Yaw=0.000 Roll=-0.000",
                         "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
                         "bAutoActive": "true",
@@ -528,31 +580,15 @@
                 },
                 {
                     "ComponentClass": "USceneComponent",
-                    "ComponentID": "mixamorig:RightHandIndex4",
+                    "ComponentID": "mixamorig:RightHandPinky2",
                     "Properties": {
-                        "AttachParentID": "mixamorig:RightHandIndex3",
+                        "AttachParentID": "mixamorig:RightHandPinky1",
                         "ComponentClass": "USceneComponent",
-                        "ComponentName": "mixamorig:RightHandIndex4",
+                        "ComponentName": "mixamorig:RightHandPinky2",
                         "ComponentOwner": "ASkeletalMeshActor_132",
                         "ComponentOwnerClass": "ASkeletalMeshActor",
-                        "RelativeLocation": "X=-0.000 Y=6.770 Z=0.000",
-                        "RelativeRotation": "Pitch=0.000 Yaw=-0.000 Roll=0.000",
-                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
-                        "bAutoActive": "true",
-                        "bIsActive": "true"
-                    }
-                },
-                {
-                    "ComponentClass": "USceneComponent",
-                    "ComponentID": "mixamorig:RightHandPinky1",
-                    "Properties": {
-                        "AttachParentID": "mixamorig:RightHand",
-                        "ComponentClass": "USceneComponent",
-                        "ComponentName": "mixamorig:RightHandPinky1",
-                        "ComponentOwner": "ASkeletalMeshActor_132",
-                        "ComponentOwnerClass": "ASkeletalMeshActor",
-                        "RelativeLocation": "X=-10.003 Y=17.508 Z=0.478",
-                        "RelativeRotation": "Pitch=-90.000 Yaw=180.000 Roll=179.999",
+                        "RelativeLocation": "X=-0.000 Y=7.044 Z=0.000",
+                        "RelativeRotation": "Pitch=0.000 Yaw=0.000 Roll=-0.000",
                         "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
                         "bAutoActive": "true",
                         "bIsActive": "true"
@@ -592,6 +628,22 @@
                 },
                 {
                     "ComponentClass": "USceneComponent",
+                    "ComponentID": "mixamorig:RightHandThumb1",
+                    "Properties": {
+                        "AttachParentID": "mixamorig:RightHand",
+                        "ComponentClass": "USceneComponent",
+                        "ComponentName": "mixamorig:RightHandThumb1",
+                        "ComponentOwner": "ASkeletalMeshActor_132",
+                        "ComponentOwnerClass": "ASkeletalMeshActor",
+                        "RelativeLocation": "X=6.163 Y=2.492 Z=4.446",
+                        "RelativeRotation": "Pitch=-5.426 Yaw=-43.761 Roll=-24.442",
+                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
+                        "bAutoActive": "true",
+                        "bIsActive": "true"
+                    }
+                },
+                {
+                    "ComponentClass": "USceneComponent",
                     "ComponentID": "mixamorig:RightHandThumb3",
                     "Properties": {
                         "AttachParentID": "mixamorig:RightHandThumb2",
@@ -608,22 +660,6 @@
                 },
                 {
                     "ComponentClass": "USceneComponent",
-                    "ComponentID": "mixamorig:RightHandThumb4",
-                    "Properties": {
-                        "AttachParentID": "mixamorig:RightHandThumb3",
-                        "ComponentClass": "USceneComponent",
-                        "ComponentName": "mixamorig:RightHandThumb4",
-                        "ComponentOwner": "ASkeletalMeshActor_132",
-                        "ComponentOwnerClass": "ASkeletalMeshActor",
-                        "RelativeLocation": "X=0.000 Y=8.025 Z=0.000",
-                        "RelativeRotation": "Pitch=0.000 Yaw=0.000 Roll=-0.000",
-                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
-                        "bAutoActive": "true",
-                        "bIsActive": "true"
-                    }
-                },
-                {
-                    "ComponentClass": "USceneComponent",
                     "ComponentID": "mixamorig:LeftUpLeg",
                     "Properties": {
                         "AttachParentID": "mixamorig:Hips",
@@ -632,7 +668,7 @@
                         "ComponentOwner": "ASkeletalMeshActor_132",
                         "ComponentOwnerClass": "ASkeletalMeshActor",
                         "RelativeLocation": "X=13.656 Y=-7.135 Z=0.130",
-                        "RelativeRotation": "Pitch=0.000 Yaw=180.000 Roll=-2.362",
+                        "RelativeRotation": "Pitch=0.000 Yaw=-180.000 Roll=-2.362",
                         "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
                         "bAutoActive": "true",
                         "bIsActive": "true"
@@ -640,47 +676,15 @@
                 },
                 {
                     "ComponentClass": "USceneComponent",
-                    "ComponentID": "mixamorig:LeftFoot",
+                    "ComponentID": "mixamorig:LeftLeg",
                     "Properties": {
-                        "AttachParentID": "mixamorig:LeftLeg",
+                        "AttachParentID": "mixamorig:LeftUpLeg",
                         "ComponentClass": "USceneComponent",
-                        "ComponentName": "mixamorig:LeftFoot",
+                        "ComponentName": "mixamorig:LeftLeg",
                         "ComponentOwner": "ASkeletalMeshActor_132",
                         "ComponentOwnerClass": "ASkeletalMeshActor",
-                        "RelativeLocation": "X=-0.000 Y=34.409 Z=-0.000",
-                        "RelativeRotation": "Pitch=0.000 Yaw=0.000 Roll=-48.876",
-                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
-                        "bAutoActive": "true",
-                        "bIsActive": "true"
-                    }
-                },
-                {
-                    "ComponentClass": "USceneComponent",
-                    "ComponentID": "mixamorig:RightLeg",
-                    "Properties": {
-                        "AttachParentID": "mixamorig:RightUpLeg",
-                        "ComponentClass": "USceneComponent",
-                        "ComponentName": "mixamorig:RightLeg",
-                        "ComponentOwner": "ASkeletalMeshActor_132",
-                        "ComponentOwnerClass": "ASkeletalMeshActor",
-                        "RelativeLocation": "X=0.000 Y=35.950 Z=0.000",
-                        "RelativeRotation": "Pitch=-0.000 Yaw=0.000 Roll=6.773",
-                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
-                        "bAutoActive": "true",
-                        "bIsActive": "true"
-                    }
-                },
-                {
-                    "ComponentClass": "USceneComponent",
-                    "ComponentID": "mixamorig:LeftToeBase",
-                    "Properties": {
-                        "AttachParentID": "mixamorig:LeftFoot",
-                        "ComponentClass": "USceneComponent",
-                        "ComponentName": "mixamorig:LeftToeBase",
-                        "ComponentOwner": "ASkeletalMeshActor_132",
-                        "ComponentOwnerClass": "ASkeletalMeshActor",
-                        "RelativeLocation": "X=0.000 Y=21.288 Z=-0.000",
-                        "RelativeRotation": "Pitch=0.000 Yaw=0.000 Roll=-45.535",
+                        "RelativeLocation": "X=0.000 Y=35.950 Z=-0.000",
+                        "RelativeRotation": "Pitch=0.000 Yaw=-0.000 Roll=6.773",
                         "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
                         "bAutoActive": "true",
                         "bIsActive": "true"
@@ -704,15 +708,31 @@
                 },
                 {
                     "ComponentClass": "USceneComponent",
-                    "ComponentID": "mixamorig:RightUpLeg",
+                    "ComponentID": "mixamorig:RightLeg",
                     "Properties": {
-                        "AttachParentID": "mixamorig:Hips",
+                        "AttachParentID": "mixamorig:RightUpLeg",
                         "ComponentClass": "USceneComponent",
-                        "ComponentName": "mixamorig:RightUpLeg",
+                        "ComponentName": "mixamorig:RightLeg",
                         "ComponentOwner": "ASkeletalMeshActor_132",
                         "ComponentOwnerClass": "ASkeletalMeshActor",
-                        "RelativeLocation": "X=-13.656 Y=-7.135 Z=0.130",
-                        "RelativeRotation": "Pitch=0.000 Yaw=180.000 Roll=-2.362",
+                        "RelativeLocation": "X=0.000 Y=35.950 Z=0.000",
+                        "RelativeRotation": "Pitch=-0.000 Yaw=0.000 Roll=6.773",
+                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
+                        "bAutoActive": "true",
+                        "bIsActive": "true"
+                    }
+                },
+                {
+                    "ComponentClass": "USceneComponent",
+                    "ComponentID": "mixamorig:RightFoot",
+                    "Properties": {
+                        "AttachParentID": "mixamorig:RightLeg",
+                        "ComponentClass": "USceneComponent",
+                        "ComponentName": "mixamorig:RightFoot",
+                        "ComponentOwner": "ASkeletalMeshActor_132",
+                        "ComponentOwnerClass": "ASkeletalMeshActor",
+                        "RelativeLocation": "X=-0.000 Y=34.409 Z=-0.000",
+                        "RelativeRotation": "Pitch=0.000 Yaw=0.000 Roll=-48.876",
                         "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
                         "bAutoActive": "true",
                         "bIsActive": "true"
@@ -800,26 +820,6 @@
                         "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
                         "bAutoActive": "true",
                         "bIsActive": "true"
-                    }
-                },
-                {
-                    "ComponentClass": "USkeletalMeshComponent",
-                    "ComponentID": "USkeletalMeshComponent_134",
-                    "Properties": {
-                        "AABB_max": "X=149.101 Y=185.540 Z=36.305",
-                        "AABB_min": "X=-125.152 Y=-0.594 Z=-34.203",
-                        "AttachParentID": "nullptr",
-                        "ComponentClass": "USkeletalMeshComponent",
-                        "ComponentName": "USkeletalMeshComponent_134",
-                        "ComponentOwner": "ASkeletalMeshActor_132",
-                        "ComponentOwnerClass": "ASkeletalMeshActor",
-                        "RelativeLocation": "X=1.106 Y=51.750 Z=20.145",
-                        "RelativeRotation": "Pitch=0.000 Yaw=0.000 Roll=-0.000",
-                        "RelativeScale3D": "X=1.000 Y=1.000 Z=1.000",
-                        "SkeletalMeshPath": "Contents/Mutant.fbx",
-                        "bAutoActive": "true",
-                        "bIsActive": "true",
-                        "m_Type": ""
                     }
                 }
             ],

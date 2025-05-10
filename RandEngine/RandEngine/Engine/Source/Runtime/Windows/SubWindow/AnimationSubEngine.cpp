@@ -27,6 +27,7 @@ void FAnimationSubEngine::Initialize(HWND& hWnd, FGraphicsDevice* InGraphics, FD
 
     ViewportClient = new FEditorViewportClient();
     ViewportClient->Initialize(EViewScreenLocation::EVL_MAX, FRect(0,0,800,600));
+    ViewportClient->CameraReset();
 }
 
 void FAnimationSubEngine::Tick(float DeltaTime)
@@ -105,7 +106,7 @@ void FAnimationSubEngine::Render()
         // Sub window rendering
         SubUI->BeginFrame();
 
-        UnrealEditor->RenderSubWindowPanel();
+        UnrealEditor->RenderSkeletalSubWindowPanel();
         
         SubUI->EndFrame();
         
