@@ -118,6 +118,7 @@ private:
     void RenderPlaybackControls();    // 재생 관련 컨트롤 UI
     void RenderSequencerWidget();     // im-neo-sequencer를 사용하여 실제 시퀀서 부분을 그리는 함수
     void RenderTrackManagementUI();   // 트랙 추가/삭제, 노티파이 할당 등의 UI
+    void RenderNotifyPropertiesUI(); // 선택된 노티파이의 속성 UI
 
     // 트랙 및 노티파이 관리 함수
     void UpdatePlayback(float DeltaSeconds);
@@ -146,7 +147,7 @@ private:
     // int SequencerSelectedTimelineId; // im-neo-sequencer의 선택된 타임라인 ID (필요시)
     bool bIsDraggingNotify; // im-neo-sequencer의 드래그 기능을 사용하므로, 별도 플래그 필요성 재검토
 
-
+    int LastSelectedUserTrackId = -1;
     // Windows 핸들 의존성 제거를 위해 Width, Height는 다른 방식으로 관리 고려
     // (예: ImGui::GetContentRegionAvail())
     float PanelWidth;
