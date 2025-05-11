@@ -527,6 +527,7 @@ struct FMath
     [[nodiscard]] static FORCEINLINE float TruncToFloat(float F) { return SSE::TruncToFloat(F); }
     [[nodiscard]] static FORCEINLINE double TruncToDouble(double F) { return SSE::TruncToDouble(F); }
 
+    [[nodiscard]] static FORCEINLINE int FloorToInt(float F) { return SSE::FloorToInt(F); }
     [[nodiscard]] static FORCEINLINE float FloorToFloat(float F) { return SSE::FloorToFloat(F); }
     [[nodiscard]] static FORCEINLINE double FloorToDouble(double F) { return SSE::FloorToDouble(F); }
 

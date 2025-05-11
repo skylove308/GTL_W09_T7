@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "AnimSequenceBase.h"
 
 class UAnimSequence : public UAnimSequenceBase
@@ -7,5 +7,4 @@ class UAnimSequence : public UAnimSequenceBase
 public:
     UAnimSequence() = default;
     // ...
-    
 };

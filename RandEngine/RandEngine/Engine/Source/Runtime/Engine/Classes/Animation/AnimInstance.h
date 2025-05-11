@@ -5,6 +5,7 @@
 #include "UObject/ObjectMacros.h"
 #include "Animation/AnimTypes.h"
 
+class USkeleton;
 class USkeletalMeshComponent;
 //struct FAnimNotifyEvent;
 struct FAnimNotifyQueue
@@ -26,8 +27,6 @@ public:
     void Update(float DeltaTime);
     void PostEvaluate();
 
-    
-
     void TriggerAnimNotifies(float DeltaTime);
     //void HandleNotify(const FAnimNotifyEvent& NotifyEvent);
 
@@ -41,6 +40,15 @@ public:
     const FBoneContainer& GetRequiredBones() const { return RequiredBones; }
 
     USkeletalMeshComponent* GetSkelMeshComponent() const;
+    // [TEMP]
+    virtual void UpdateAnimation(float DeltaSeconds, bool bNeedsValidRootMotion);
+
+    void SetCurrentSkeleton(USkeleton* InSkeleton) { CurrentSkeleton = InSkeleton; }
+
+    void SetOwningComponent(USkeletalMeshComponent* InComponent) { OwningComponent = InComponent; }
+
+public:
+    USkeleton* CurrentSkeleton = nullptr;
 
 protected:
     // 필수 데이터

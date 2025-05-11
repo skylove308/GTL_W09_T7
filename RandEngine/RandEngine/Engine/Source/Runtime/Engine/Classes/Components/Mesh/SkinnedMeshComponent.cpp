@@ -147,6 +147,5 @@ void USkinnedMeshComponent::SetSkeletalMesh(USkeletalMesh* value)
         AABB = FBoundingBox(SkeletalMesh->GetRenderData()->Bounds.MinLocation, SkeletalMesh->GetRenderData()->Bounds.MaxLocation);
         SkeletalMesh->UpdateWorldTransforms();
         SkeletalMesh->UpdateAndApplySkinning();
-
     }
 }

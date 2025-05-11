@@ -11,7 +11,8 @@ ASkeletalMeshActor::ASkeletalMeshActor()
     RootComponent = SkeletalMeshComponent;
     //SkeletalMeshComponent->SetSkeletalMesh(UAssetManager::Get().GetSkeletalMesh(L"Contents/Sharkry_NoTwist.fbx"));
     SkeletalMeshComponent->SetSkeletalMesh(UAssetManager::Get().GetSkeletalMesh(L"Contents/Rumba Dancing.fbx"));
-    
+    // [TEMP] test for animation
+    SetActorTickInEditor(true);
     {
         FSkeletalMeshRenderData* RenderData = SkeletalMeshComponent->GetSkeletalMesh()->GetRenderData();
         if (!RenderData) return;

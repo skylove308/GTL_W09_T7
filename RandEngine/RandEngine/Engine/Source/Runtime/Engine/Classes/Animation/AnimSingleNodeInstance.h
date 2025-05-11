@@ -19,11 +19,13 @@ public:
 
     bool IsPlaying() const;
 
+    virtual void UpdateAnimation(float DeltaSeconds, bool bNeedsValidRootMotion) override;
 public:
-    UAnimationAsset* CurrentAsset;
+    UAnimationAsset* CurrentAsset = nullptr;
 
     bool bIsLooping;
     bool bIsPlaying;
+    float CurrentTime;
     float PlayRate;
 };
 

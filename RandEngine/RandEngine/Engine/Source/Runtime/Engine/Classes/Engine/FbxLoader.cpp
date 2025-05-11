@@ -1094,12 +1094,14 @@ bool FFBXLoader::ParseFBX(const FString& FBXFilePath, FBX::FBXInfo& OutFBXInfo, 
 
     OutFBXInfo.SkeletonHierarchy.Empty(); OutFBXInfo.SkeletonRootBoneNames.Empty();
 
+    CollectAllBones(RootNode, AllBoneNodesTemp);
+
     for (int meshIdx = 0; meshIdx < Scene->GetSrcObjectCount<FbxMesh>(); ++meshIdx)
     {
         FbxMesh* Mesh = Scene->GetSrcObject<FbxMesh>(meshIdx);
         if (!Mesh) continue;
 
-        int DeformerCount = Mesh->GetDeformerCount(FbxDeformer::eSkin);
+        /*int DeformerCount = Mesh->GetDeformerCount(FbxDeformer::eSkin);
 
         for (int deformerIdx = 0; deformerIdx < DeformerCount; ++deformerIdx)
         {
@@ -1120,7 +1122,7 @@ bool FFBXLoader::ParseFBX(const FString& FBXFilePath, FBX::FBXInfo& OutFBXInfo, 
                 if (BoneNode)
                     AllBoneNodesTemp.AddUnique(BoneNode);
             }
-        }
+        }*/
     }
 
     for (FbxNode* BoneNode : AllBoneNodesTemp)
@@ -1248,43 +1250,20 @@ bool FFBXLoader::ConvertToSkeletalMesh(const TArray<FBX::MeshRawData>& AllRawMes
     OutSkeleton->Clear();
 
     // 스키닝에 관련된 모든 본 및 그 부모 본들 수집 (BonesToInclude)
-    TArray<FName> RelevantBoneNames;
-    for (const auto& RawMeshDataInstance : AllRawMeshData)
-    {
-        // 모든 메시의 영향 본 수집
-        for (const auto& influence : RawMeshDataInstance.SkinningInfluences)
-        {
-            RelevantBoneNames.AddUnique(influence.BoneName);
-        }
-    }
-    if (RelevantBoneNames.IsEmpty() && !AllRawMeshData.IsEmpty() && !FullFBXInfo.SkeletonHierarchy.IsEmpty())
-    {
-        FullFBXInfo.SkeletonHierarchy.GetKeys(RelevantBoneNames);
-    }
+    TArray<FName> BonesToInclude;
+    FullFBXInfo.SkeletonHierarchy.GetKeys(BonesToInclude); // 전체 계층 구조에서 모든 본 추출
 
-    TArray<FName> BonesToInclude = RelevantBoneNames;
-    int32 CheckIndex = 0;
-    while (CheckIndex < BonesToInclude.Num())
-    {
-        FName CurrentBoneName = BonesToInclude[CheckIndex++];
-        const FBoneHierarchyNode* HNode = FullFBXInfo.SkeletonHierarchy.Find(CurrentBoneName);
-        if (HNode && !HNode->ParentName.IsNone() && FullFBXInfo.SkeletonHierarchy.Contains(HNode->ParentName))
-        {
-            BonesToInclude.AddUnique(HNode->ParentName);
-        }
-    }
-
-    // 2. 루트 본 식별 및 자식 관계 맵핑 (USkeleton에 아직 추가 안 함)
     TMap<FName, TArray<FName>> BoneChildrenMap;
     TArray<FName> RootBoneNamesForSorting;
-    for (const FName& BoneName : BonesToInclude)
+
+    for (const FName& BoneName : BonesToInclude) // 모든 본 처리
     {
         const FBoneHierarchyNode* HNode = FullFBXInfo.SkeletonHierarchy.Find(BoneName);
         if (HNode)
         {
             if (HNode->ParentName.IsNone() || !BonesToInclude.Contains(HNode->ParentName))
             {
-                RootBoneNamesForSorting.AddUnique(BoneName);
+                RootBoneNamesForSorting.Add(BoneName);
             }
             else
             {
@@ -1341,9 +1320,16 @@ bool FFBXLoader::ConvertToSkeletalMesh(const TArray<FBX::MeshRawData>& AllRawMes
                 const uint32* FoundParentIndexPtr = OutSkeleton->BoneNameToIndex.Find(HNode->ParentName);
                 if (FoundParentIndexPtr) ParentIndexInSkeleton = static_cast<int32>(*FoundParentIndexPtr);
             }
-            OutSkeleton->AddBone(BoneName, ParentIndexInSkeleton, HNode->GlobalBindPose, HNode->TransformMatrix);
+            
+            OutSkeleton->AddBone(
+                BoneName, 
+                ParentIndexInSkeleton, 
+                HNode->GlobalBindPose,
+                HNode->TransformMatrix
+            );
         }
     }
+
 
     // Prepare Skinning Data
     // 메시 데이터 통합
@@ -1838,7 +1824,7 @@ void FFBXLoader::TraverseNodeBoneTrack(FbxNode* Node, TArray<FBoneAnimationTrack
             // w, x, y, z임
             FbxQuaternion FbxQuat = LocalTransform.GetQ();
 
-            FQuat Rotation = FQuat(FbxQuat[0], FbxQuat[1], FbxQuat[2], FbxQuat[3]);
+            FQuat Rotation = FQuat(FbxQuat[3], FbxQuat[0], FbxQuat[1], FbxQuat[2]);
 
             FbxVector4 FbxScale = LocalTransform.GetS();
 
@@ -1904,3 +1890,14 @@ void FFBXLoader::TraverseNodeCurveData(FbxNode* Node, FbxAnimLayer* AnimLayer, F
     
     // TODO OutCurveData.TransformCurves.Add(New Curve)
 }
+
+void FFBXLoader::CollectAllBones(FbxNode* InNode, TArray<FbxNode*>& OutBones)
+{
+    if (InNode->GetNodeAttribute() &&
+        InNode->GetNodeAttribute()->GetAttributeType() == FbxNodeAttribute::eSkeleton) {
+        OutBones.AddUnique(InNode);
+    }
+    for (int i = 0; i < InNode->GetChildCount(); ++i) {
+        CollectAllBones(InNode->GetChild(i), OutBones);
+    }
+};
