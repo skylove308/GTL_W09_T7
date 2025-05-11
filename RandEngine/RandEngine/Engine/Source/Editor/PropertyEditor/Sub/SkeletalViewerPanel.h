@@ -1,4 +1,5 @@
 #pragma once
+#include "SkeletalDetailPanel.h"
 #include "Components/ActorComponent.h"
 #include "UnrealEd/EditorPanel.h"
 
@@ -13,11 +14,13 @@ public:
     virtual void OnResize(HWND hWnd) override;
 
 private:
-    USkeleton* Skeleton;
+    USkeletalMesh* SkeletalMesh =nullptr;
 
     void CreateSkeletalTreeNode();
     void RenderBoneHierarchy(int32 CurrentBoneIdx, const TArray<FBoneNode>& BoneNodes, const TMap<int32, TArray<int32>>& BoneHierarchy);
 
+    SkeletalDetailPanel DetailPanel;
+    int32 SelectedBoneIdx = 0;
 private:
     float Width = 800, Height = 600;
 };

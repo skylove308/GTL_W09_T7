@@ -11,6 +11,8 @@
 #include "Engine/Asset/SkeletalMeshAsset.h"
 #include "Engine/SkeletalMeshActor.h"
 #include "Engine/FbxLoader.h"
+#include "SubWindow/SkeletalSubEngine.h"
+#include "Actors/Cube.h"
 
 ATransformGizmo::ATransformGizmo()
 {
@@ -99,21 +101,37 @@ void ATransformGizmo::Tick(float DeltaTime)
     {
         return;
     }
-
+    
     UEditorEngine* Engine = Cast<UEditorEngine>(GEngine);
     if (!Engine)
     {
         return;
     }
-    AEditorPlayer* EditorPlayer = Engine->GetEditorPlayer();
+    AEditorPlayer* EditorPlayer = nullptr;
+    UEngine* testEngine = Cast<UEngine>(GetOuter());
+    if (GEngine == Cast<UEngine>(GetOuter()))
+        EditorPlayer = Engine->GetEditorPlayer();
+    else
+    {
+        EditorPlayer = Cast<USkeletalSubEngine>(GetOuter())->EditorPlayer;
+    }
     if (!EditorPlayer)
     {
         return;
     }
     
-    USceneComponent* SelectedComponent = Engine->GetSelectedComponent();
-    AActor* SelectedActor = Engine->GetSelectedActor();
-
+    USceneComponent* SelectedComponent = nullptr;
+    AActor* SelectedActor = nullptr;
+    if (GEngine == GetOuter())
+    {
+        SelectedComponent =  Engine->GetSelectedComponent();
+        SelectedActor = Engine->GetSelectedActor();
+    }
+    else
+    {
+        SelectedComponent = Cast<USkeletalSubEngine>(GetOuter())->SelectedComponent;
+        SelectedActor =  Cast<USkeletalSubEngine>(GetOuter())->SelectedActor;
+    }
     USceneComponent* TargetComponent = nullptr;
 
     if (SelectedComponent != nullptr)

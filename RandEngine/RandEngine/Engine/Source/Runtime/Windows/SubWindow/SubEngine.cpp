@@ -1,4 +1,4 @@
-﻿#include "SubEngine.h"
+#include "SubEngine.h"
 
 #include "ImGuiManager.h"
 #include "ImGuiSubWindow.h"
@@ -6,44 +6,48 @@
 #include "UnrealClient.h"
 #include "UnrealEd/EditorViewportClient.h"
 
-FSubEngine::FSubEngine() :
+USubEngine::USubEngine() :
                          Graphics(nullptr),
                          BufferManager(nullptr),
                          Wnd(nullptr),
                          SubRenderer(nullptr),
                          UnrealEditor(nullptr),
                          SubUI(nullptr),
-                         bIsShowSubWindow(false)
+                         bIsShowSubWindow(false),
+                         EditorPlayer(nullptr)
 {
 }
 
-FSubEngine::~FSubEngine()
+USubEngine::~USubEngine()
 {
 }
 
-void FSubEngine::Initialize(HWND& hWnd, FGraphicsDevice* InGraphics, FDXDBufferManager* InBufferManager, UImGuiManager* InSubWindow,UnrealEd* InUnrealEd)
-{
-}
-
-void FSubEngine::Input(float DeltaTime)
+void USubEngine::Initialize(HWND& hWnd, FGraphicsDevice* InGraphics, FDXDBufferManager* InBufferManager, UImGuiManager* InSubWindow,UnrealEd* InUnrealEd)
 {
 
+ 
 }
 
-void FSubEngine::Tick(float DeltaTime)
-{
-}
-
-void FSubEngine::Render()
+void USubEngine::Input(float DeltaTime)
 {
 
 }
 
-void FSubEngine::Release()
+void USubEngine::Tick(float DeltaTime)
 {
 }
 
-void FSubEngine::RequestShowWindow(bool bShow)
+void USubEngine::Render()
+{
+
+}
+
+void USubEngine::Release()
+{
+}
+
+void USubEngine::RequestShowWindow(bool bShow)
 {
     bIsShowSubWindow = bShow;
+    bIsShowing = bShow;
 }
