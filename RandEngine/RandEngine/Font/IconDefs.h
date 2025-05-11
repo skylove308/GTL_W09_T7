@@ -19,5 +19,6 @@
 #define ICON_PLAY        0xE9A8
 #define ICON_STOP        0xE9E6
 #define ICON_SQUARE     0xE9E4
+#define ICON_PAUSE      0xE99C 
 
 #endif // !__ICON_FONT__

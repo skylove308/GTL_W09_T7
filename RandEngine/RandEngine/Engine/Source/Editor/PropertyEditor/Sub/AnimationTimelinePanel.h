@@ -5,6 +5,9 @@
 #include "Container/Set.h"
 #include "UObject/NameTypes.h"
 #include "UnrealEd/EditorPanel.h" // UEditorPanel 상속 가정
+#include "Animation/AnimSequence.h"
+#include "Animation/AnimData/AnimDataModel.h" 
+
 
 #include "Imgui/imgui.h"
 #include "Imgui/imgui_internal.h" // 필요한 경우 (하지만 직접 사용은 최소화)

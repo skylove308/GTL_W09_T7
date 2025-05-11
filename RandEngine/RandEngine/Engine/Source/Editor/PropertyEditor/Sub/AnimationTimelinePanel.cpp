@@ -1,7 +1,11 @@
 #include "AnimationTimelinePanel.h"
+
+
 #include "Imgui/imgui.h"
 #include "Imgui/imgui_neo_sequencer.h" // im-neo-sequencer 헤더 포함
 #include "Imgui/imgui_neo_internal.h" // 필요한 경우
+#include "Font/RawFonts.h"
+#include "Font/IconDefs.h"
 
 // 정적 멤버 변수 초기화
 #if !defined(FNAME_DEFINED) || !defined(MOCK_GLOBALS_DEFINED) // 이 매크로는 프로젝트 전체에서 한 번만 정의되도록 관리
@@ -261,7 +265,7 @@ void SAnimationTimelinePanel::RenderPlaybackControls()
     const ImGuiIO& IO = ImGui::GetIO();
     ImFont* IconFont = IO.Fonts->Fonts.size() == 1 ? IO.FontDefault : IO.Fonts->Fonts[FEATHER_FONT];
     ImGui::PushFont(IconFont);
-    if (ImGui::Button("\ue9a8", ImVec2(32, 32))) // Play
+    if (ImGui::Button((bIsPlaying)? "\ue99c" : "\ue9a8", ImVec2(32, 32))) // Play
     {
         bIsPlaying = !bIsPlaying;
         if (bIsPlaying && CurrentTimeSeconds >= GetSequenceDurationSeconds() - FLT_EPSILON && GetSequenceDurationSeconds() > 0.f)
@@ -269,13 +273,14 @@ void SAnimationTimelinePanel::RenderPlaybackControls()
             CurrentTimeSeconds = 0.0f;
         }
     }
-    ImGui::PopFont();
     ImGui::SameLine();
-    if (ImGui::Button("Stop"))
+    if (ImGui::Button("\ue9e4", ImVec2(32, 32))) 
     {
         bIsPlaying = false;
         CurrentTimeSeconds = 0.0f;
     }
+    ImGui::PopFont();
+    
     ImGui::SameLine();
     ImGui::Checkbox("Loop", &bIsLooping);
     ImGui::SameLine();
@@ -313,7 +318,12 @@ void SAnimationTimelinePanel::RenderTrackManagementUI()
         static char newTrackNameInput[128] = "New User Track";
         ImGui::InputText("New Track Name", newTrackNameInput, IM_ARRAYSIZE(newTrackNameInput));
         ImGui::SameLine();
-        if (ImGui::Button("Add User Track"))
+
+        const ImGuiIO& IO = ImGui::GetIO();
+        ImFont* IconFont = IO.Fonts->Fonts.size() == 1 ? IO.FontDefault : IO.Fonts->Fonts[FEATHER_FONT];
+        ImGui::PushFont(IconFont);
+       
+        if (ImGui::Button("\ue9c8", ImVec2(32, 32)))
         {
             if (strlen(newTrackNameInput) > 0)
             {
@@ -321,6 +331,7 @@ void SAnimationTimelinePanel::RenderTrackManagementUI()
                 newTrackNameInput[0] = '\0'; // 입력 필드 초기화
             }
         }
+        ImGui::PopFont();
     }
 }
 void SAnimationTimelinePanel::RenderNotifyPropertiesUI()
