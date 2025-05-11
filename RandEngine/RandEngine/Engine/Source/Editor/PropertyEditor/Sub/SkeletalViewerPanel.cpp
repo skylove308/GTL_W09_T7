@@ -3,6 +3,7 @@
 #include "SubWindow/SkeletalSubEngine.h"
 #include "SubWindow/SubEngine.h"
 #include "Components/Mesh/SkeletalMesh.h"
+#include "Engine/SkeletalMeshActor.h"
 
 void SkeletalViewerPanel::Render()
 {
@@ -34,7 +35,9 @@ void SkeletalViewerPanel::OnResize(HWND hWnd)
 
 void SkeletalViewerPanel::CreateSkeletalTreeNode()
 {
-    SkeletalMesh = static_cast<USkeletalSubEngine*>(GEngineLoop.SkeletalViewerSubEngine)->SelectedSkeletalMesh;
+
+    USkeletalSubEngine* SubEngine = static_cast<USkeletalSubEngine*>(GEngineLoop.SkeletalViewerSubEngine);
+    SkeletalMesh = SubEngine->SelectedSkeletalMesh;
 
     // if (Skeleton == Selected->Skeleton)
     //     return;
@@ -91,6 +94,16 @@ void SkeletalViewerPanel::RenderBoneHierarchy(
     {
         SelectedBoneIdx = CurrentBoneIdx;
         // 필요하다면, 이름도 저장
+        if (WindowType == WT_SkeletalSubWindow)
+        {
+            USkeletalSubEngine* SubEngine = static_cast<USkeletalSubEngine*>(GEngineLoop.SkeletalViewerSubEngine);
+            SubEngine->SelectedComponent = SubEngine->SkeletalMeshActor->BoneGizmoSceneComponents[SelectedBoneIdx];
+        }
+        else if (WindowType == WT_AnimationSubWindow)
+        {
+            USkeletalSubEngine* SubEngine = static_cast<USkeletalSubEngine*>(GEngineLoop.AnimationViewerSubEngine);
+            SubEngine->SelectedComponent = SubEngine->SkeletalMeshActor->BoneGizmoSceneComponents[SelectedBoneIdx];
+        }
     }
 
     if (nodeOpen)

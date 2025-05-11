@@ -3,6 +3,7 @@
 #include "Animation/Skeleton.h"
 #include "Components/Mesh/SkeletalMesh.h"
 #include "Math/JungleMath.h"
+#include "SubWindow/SkeletalSubEngine.h"
 #include "UnrealEd/ImGuiWidget.h"
 
 void SkeletalDetailPanel::Render(USkeletalMesh* InSkeletalMesh, int32 SelectedBone)
@@ -37,7 +38,6 @@ void SkeletalDetailPanel::Render(USkeletalMesh* InSkeletalMesh, int32 SelectedBo
                 FVector Location = CurrentLocalMatrix.GetTranslationVector();
                 FRotator Rotation = CurrentLocalMatrix.GetRotationVector();;
                 FVector Scale = CurrentLocalMatrix.GetScaleVector();
-
                 if (ImGui::CollapsingHeader("Transforms", ImGuiTreeNodeFlags_DefaultOpen))
                 {
                     // optionally indent for nicer grouping
@@ -90,8 +90,11 @@ void SkeletalDetailPanel::Render(USkeletalMesh* InSkeletalMesh, int32 SelectedBo
                     return;
                 }
                 else
+                {
                     PrevLocation = Location; PrevRotation = Rotation; PrevScale = Scale;
+                    // Cast<USkeletalSubEngine>(GEngineLoop.SkeletalViewerSubEngine)->SelectedBoneComponent->SetRelativeLocation()
 
+                }
                 FMatrix NewLocalMatrix =
                     FMatrix::GetScaleMatrix(Scale) *
                     FMatrix::GetRotationMatrix(Rotation) *
