@@ -66,11 +66,19 @@ USkeletalMesh* UAssetManager::GetSkeletalMesh(const FName& Name)
     {
         return SkeletalMeshMap[NameWithoutExt];
     }
+    if (SkeletalMeshMap.Contains(path.c_str()))
+    {
+        return SkeletalMeshMap[path.c_str()];
+    }
     LoadFile(path, static_cast<uint8>(EExtensionType::Fbx));
 
     if (SkeletalMeshMap.Contains(NameWithoutExt))
     {
         return SkeletalMeshMap[NameWithoutExt];
+    }
+    if (SkeletalMeshMap.Contains(path.c_str()))
+    {
+        return SkeletalMeshMap[path.c_str()];
     }
     return nullptr;
 }
@@ -83,12 +91,20 @@ UAnimationAsset* UAssetManager::GetAnimationAsset(const FName& Name)
     {
         return AnimationMap[NameWithoutExt];
     }
+    if (AnimationMap.Contains(path.c_str()))
+    {
+        return AnimationMap[path.c_str()];
+    }
     
     LoadFile(path, static_cast<uint8>(EExtensionType::Fbx));
 
     if (AnimationMap.Contains(NameWithoutExt))
     {
         return AnimationMap[NameWithoutExt];
+    }
+    if (AnimationMap.Contains(path.c_str()))
+    {
+        return AnimationMap[path.c_str()];
     }
     return nullptr;
 }
@@ -168,7 +184,7 @@ void UAssetManager::LoadFile(std::filesystem::path Entry, uint8 ExtensionFlags)
         for (int32 i = 0; i < Result.Animations.Num(); ++i)
         {
             UAnimationAsset* AnimationAsset = Result.Animations[i];
-            FString BaseAssetName = FileNameWithoutExt + "_Skeleton";
+            FString BaseAssetName = FileNameWithoutExt + "_" + AnimationAsset->GetName();
                 
             FAssetInfo Info = AssetInfo;
             Info.AssetName = i > 0 ? FName(BaseAssetName + FString::FromInt(i)) : FName(BaseAssetName);
