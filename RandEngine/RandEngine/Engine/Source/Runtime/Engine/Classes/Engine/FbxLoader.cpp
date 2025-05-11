@@ -1766,8 +1766,8 @@ void FFBXLoader::LoadFbxAnimation(FbxScene* InScene, UAnimSequence*& OutAnimSequ
         
         if (bBoneTrackExist || bCurveDataExist)
         {
-            //UAssetManager::Get()
-            OutAnimSequence = FObjectFactory::ConstructObject<UAnimSequence>(nullptr);
+            FName AnimStackName = FName(AnimStack->GetName());
+            OutAnimSequence = FObjectFactory::ConstructObject<UAnimSequence>(nullptr, AnimStackName);
             UAnimDataModel* AnimDataModel = FObjectFactory::ConstructObject<UAnimDataModel>(nullptr);
             OutAnimSequence->SetAnimDataModel(AnimDataModel);
 

@@ -32,8 +32,8 @@ public:
 
     template<typename T>
         requires std::derived_from<T, UObject>
-    static T* ConstructObject(UObject* InOuter)
+    static T* ConstructObject(UObject* InOuter, FName InName = NAME_None)
     {
-        return static_cast<T*>(ConstructObject(T::StaticClass(), InOuter));
+        return static_cast<T*>(ConstructObject(T::StaticClass(), InOuter, InName));
     }
 };
