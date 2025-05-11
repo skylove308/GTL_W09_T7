@@ -31,6 +31,7 @@ FResourceMgr FEngineLoop::ResourceManager;
 FEngineLoop::FEngineLoop()
     : AppWnd(nullptr)
     , SkeletalViewerWnd(nullptr)
+    , AnimationViewerWnd(nullptr)
     , FUIManager(nullptr)
     , CurrentImGuiContext(nullptr)
     , LevelEditor(nullptr)
@@ -50,8 +51,7 @@ int32 FEngineLoop::Init(HINSTANCE hInstance)
 
     /* must be initialized before window. */
     WindowInit(hInstance);
-    SkeletalSubWindowInit(hInstance);
-    AnimationSubWindowInit(hInstance);
+
     
     UnrealEditor = new UnrealEd();
     BufferManager = new FDXDBufferManager();
@@ -62,20 +62,6 @@ int32 FEngineLoop::Init(HINSTANCE hInstance)
     UnrealEditor->Initialize();
     GraphicDevice.Initialize(AppWnd);
 
-    if (SkeletalViewerWnd)
-    {
-        SkeletalViewerGD.Initialize(SkeletalViewerWnd, GraphicDevice.Device);
-        SkeletalViewerGD.ClearColor[0] = 0.025f;
-        SkeletalViewerGD.ClearColor[1] = 0.025f;
-        SkeletalViewerGD.ClearColor[2] = 0.025f;
-    }
-    if (AnimationViewerWnd)
-    {
-        AnimationViewerGD.Initialize(AnimationViewerWnd, GraphicDevice.Device);
-        AnimationViewerGD.ClearColor[0] = 0.025f;
-        AnimationViewerGD.ClearColor[1] = 0.025f;
-        AnimationViewerGD.ClearColor[2] = 0.025f;
-    }
     if (!GPUTimingManager.Initialize(GraphicDevice.Device, GraphicDevice.DeviceContext))
     {
         UE_LOG(ELogLevel::Error, TEXT("Failed to initialize GPU Timing Manager!"));
@@ -113,7 +99,22 @@ int32 FEngineLoop::Init(HINSTANCE hInstance)
     GetClientSize(ClientWidth, ClientHeight);
     LevelEditor->Initialize(ClientWidth, ClientHeight);
 
-
+    SkeletalSubWindowInit(hInstance);
+    AnimationSubWindowInit(hInstance);
+    if (SkeletalViewerWnd)
+    {
+        SkeletalViewerGD.Initialize(SkeletalViewerWnd, GraphicDevice.Device);
+        SkeletalViewerGD.ClearColor[0] = 0.025f;
+        SkeletalViewerGD.ClearColor[1] = 0.025f;
+        SkeletalViewerGD.ClearColor[2] = 0.025f;
+    }
+    if (AnimationViewerWnd)
+    {
+        AnimationViewerGD.Initialize(AnimationViewerWnd, GraphicDevice.Device);
+        AnimationViewerGD.ClearColor[0] = 0.025f;
+        AnimationViewerGD.ClearColor[1] = 0.025f;
+        AnimationViewerGD.ClearColor[2] = 0.025f;
+    }
     SkeletalViewerSubEngine = FObjectFactory::ConstructObject<USkeletalSubEngine>(nullptr);
     SkeletalViewerSubEngine->Initialize(SkeletalViewerWnd, &SkeletalViewerGD, BufferManager,FUIManager,UnrealEditor);
     AnimationViewerSubEngine =  FObjectFactory::ConstructObject<UAnimationSubEngine>(nullptr);
@@ -452,14 +453,11 @@ void FEngineLoop::AnimationSubWindowInit(HINSTANCE hInstance)
 
     if (!AnimationViewerWnd)
     {
-        // 오류 처리
         UE_LOG(ELogLevel::Error, TEXT("Failed to create sub window!"));
     }
     else
     {
-        // 필요할 때
-        // ShowWindow(SubAppWnd, SW_SHOW);
-        // 호출하여 표시
+
     }
 }
 
