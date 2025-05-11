@@ -16,20 +16,20 @@ ASkeletalMeshActor::ASkeletalMeshActor()
     CreateBoneComponents();
 }
 
-// void ASkeletalMeshActor::SetSkeletalMesh(USkeletalMesh* InSkeletalMesh)
-// {
-//     // for (int i = 0; i < BoneGizmoSceneComponents.Num(); i++)
-//     // {
-//     //     if (BoneGizmoSceneComponents[i])
-//     //         BoneGizmoSceneComponent[i].DestroyComponent();
-//     // }
-//     // BoneGizmoSceneComponents.Empty();
-//     // BoneGizmoSceneComponent->DestroyComponent();
-//     // BoneGizmoSceneComponent = nullptr;
-//     SkeletalMeshComponent->SetSkeletalMesh(InSkeletalMesh);
+void ASkeletalMeshActor::SetSkeletalMesh(USkeletalMesh* InSkeletalMesh)
+{
+    // for (int i = 0; i < BoneGizmoSceneComponents.Num(); i++)
+    // {
+    //     if (BoneGizmoSceneComponents[i])
+    //         BoneGizmoSceneComponent[i].DestroyComponent();
+    // }
+    // BoneGizmoSceneComponents.Empty();
+    // BoneGizmoSceneComponent->DestroyComponent();
+    // BoneGizmoSceneComponent = nullptr;
+    // SkeletalMeshComponent->SetSkeletalMesh(InSkeletalMesh);
 
-//     // CreateBoneComponents();
-// }
+    // CreateBoneComponents();
+}
 
 void ASkeletalMeshActor::CreateBoneComponents()
 {

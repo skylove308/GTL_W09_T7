@@ -202,7 +202,7 @@ FQuat FQuat::Slerp_NotNormalized(const FQuat& Quat1, const FQuat& Quat2, float S
     const float Sign = FMath::FloatSelect(RawCosom, 1.0f, -1.0f);
     RawCosom *= Sign;
 		
-    float Scale0 = 1.0f - Slerp;
+    float Scale0 = -1.0f + Slerp;
     float Scale1 = Slerp * Sign;
 		
     if (RawCosom < 0.9999)

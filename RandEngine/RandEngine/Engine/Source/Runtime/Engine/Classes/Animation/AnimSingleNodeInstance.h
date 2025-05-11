@@ -22,7 +22,7 @@ public:
     virtual void UpdateAnimation(float DeltaSeconds, bool bNeedsValidRootMotion) override;
 public:
     UAnimationAsset* CurrentAsset = nullptr;
-
+    int32 frame = 0;
     bool bIsLooping;
     bool bIsPlaying;
     float CurrentTime;

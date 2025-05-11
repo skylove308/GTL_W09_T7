@@ -81,11 +81,14 @@ private:
     bool bKClicked = false;
     bool bIsExit = false;
 
+    
     int32 TargetFPS = 999;
 public:
     SLevelEditor* GetLevelEditor() const { return LevelEditor; }
     UnrealEd* GetUnrealEditor() const { return UnrealEditor; }
     
     FSlateAppMessageHandler* GetAppMessageHandler() const { return AppMessageHandler.get(); }
+    int32 Boneidx = 0;
+
 };
 
