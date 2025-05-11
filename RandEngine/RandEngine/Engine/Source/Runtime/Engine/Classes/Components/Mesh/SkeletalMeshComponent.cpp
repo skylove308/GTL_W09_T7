@@ -4,6 +4,8 @@
 #include "Engine/Asset/SkeletalMeshAsset.h"
 #include "Engine/FbxLoader.h"
 #include "Engine/SkeletalMeshActor.h"
+#include "Animation/AnimationAsset.h"
+#include "Animation/AnimSingleNodeInstance.h"
 
 USkeletalMeshComponent::USkeletalMeshComponent()
 {
@@ -95,57 +97,133 @@ int USkeletalMeshComponent::CheckRayIntersection(const FVector& InRayOrigin, con
     return HitCount;
 }
 
-void USkeletalMeshComponent::RotateBone(FString BoneName, FRotator Rotation)
+void USkeletalMeshComponent::SetAnimationMode(EAnimationMode::Type InAnimationMode)
 {
-    if (!SkeletalMesh) return;
-
-    FSkeletalMeshRenderData* RenderData = SkeletalMesh->GetRenderData();
-    if (!RenderData) return;
-
-    // 1. BoneName에 해당하는 인덱스 찾기
-    int32 BoneIndex = -1;
-    for (int32 i = 0; i < SkeletalMesh->Skeleton->BoneTree.Num(); ++i)
+    if (!bEnableAnimation)
     {
-        if (SkeletalMesh->Skeleton->BoneTree[i].Name == BoneName)
-        {
-            BoneIndex = i;
-            break;
-        }
-    }
-
-    if (BoneIndex == -1)
-    {
-        UE_LOG(ELogLevel::Warning, TEXT("Bone not found: %s"), *BoneName);
+        UE_LOG(ELogLevel::Warning, TEXT("SetAnimationMode: Animation is currently disabled"));
         return;
     }
 
-    Rotation = Cast<ASkeletalMeshActor>(GetOwner())->BoneGizmoSceneComponents[BoneIndex]->GetRelativeRotation();
-    FMatrix CurrentLocalMatrix = SkeletalMesh->GetBoneLocalMatrix(BoneIndex);
-    FVector LocalPos = CurrentLocalMatrix.GetTranslationVector();
-    //FRotator LocalRot = FRotator(CurrentLocalMatrix.ToQuat() * Rotation);
-    FVector LocalScale = CurrentLocalMatrix.GetScaleVector();
-
-    FMatrix NewLocalMatrix =
-        FMatrix::GetScaleMatrix(LocalScale) *
-        FMatrix::GetRotationMatrix(Rotation) *
-        FMatrix::GetTranslationMatrix(LocalPos);
-
-    if (SkeletalMesh->SetBoneLocalMatrix(BoneIndex, NewLocalMatrix))
+    // Only from Animasset currently
+    /*const bool bNeedChange = AnimationMode != InAnimationMode;
+    if (bNeedChange)
     {
-        SkeletalMesh->UpdateWorldTransforms();
+        AnimationMode = InAnimationMode;
+        ClearAnimScriptInstance();
+    }*/
 
-        SkeletalMesh->UpdateAndApplySkinning();
+    // when mode is swapped, make sure to reinitialize
+    // even if it was same mode, this was due to users who wants to use BP construction script to do this
+    // if you use it in the construction script, it gets serialized, but it never instantiate. 
+    //if (GetSkeletalMeshAsset() != nullptr && (bNeedChange || (AnimationMode == EAnimationMode::AnimationBlueprint)))
+    if (GetSkeletalMeshAsset() != nullptr)
+    {
+        //if (InitializeAnimScriptInstance(true))
+        //{
+            //OnAnimInitialized.Broadcast();
+        //}
     }
-
-    //FFBXLoader::RotateBones(RenderData->SkeletonBones, BoneIndex, FbxVector4(Rotation.Roll, Rotation.Pitch, Rotation.Yaw));
-
-    //FFBXLoader::RecalculateGlobalPoses(RenderData->SkeletonBones);
-
-    // 스킨 다시 계산
-    //FFBXLoader::ReskinVerticesCPU(
-    //    FFBXLoader::Mesh, // 필요시 원본 FbxMesh 포인터 보존 필요
-    //    RenderData->SkeletonBones,
-    //    RenderData->Vertices
-    //);
 }
 
+USkeletalMesh* USkeletalMeshComponent::GetSkeletalMeshAsset() const
+{
+    return GetSkeletalMesh();
+}
+
+EAnimationMode::Type USkeletalMeshComponent::GetAnimationMode() const
+{
+    return AnimationMode;
+}
+
+void USkeletalMeshComponent::PlayAnimation(class UAnimationAsset* NewAnimToPlay, bool bLooping)
+{
+    if (!bEnableAnimation)
+    {
+        UE_LOG(ELogLevel::Warning, TEXT("PlayAnimation: Animation is currently disabled"));
+        return;
+    }
+
+    SetAnimationMode(EAnimationMode::AnimationSingleNode);
+    SetAnimation(NewAnimToPlay);
+    Play(bLooping);
+}
+
+class UAnimSingleNodeInstance* USkeletalMeshComponent::GetSingleNodeInstance() const
+{
+    return Cast<class UAnimSingleNodeInstance>(AnimScriptInstance);
+}
+
+void USkeletalMeshComponent::SetAnimation(UAnimationAsset* NewAnimToPlay)
+{
+    if (!bEnableAnimation)
+    {
+        UE_LOG(ELogLevel::Warning, TEXT("SetAnimation: Animation is currently disabled"));
+        return;
+    }
+
+    UAnimSingleNodeInstance* SingleNodeInstance = GetSingleNodeInstance();
+    if (SingleNodeInstance)
+    {
+        SingleNodeInstance->SetAnimationAsset(NewAnimToPlay, false);
+        SingleNodeInstance->SetPlaying(false);
+    }
+    else if (AnimScriptInstance != nullptr)
+    {
+        UE_LOG(ELogLevel::Warning, TEXT("Currently in Animation Blueprint mode. Please change AnimationMode to Use Animation Asset"));
+    }
+}
+
+void USkeletalMeshComponent::Play(bool bLooping)
+{
+    if (!bEnableAnimation)
+    {
+        UE_LOG(ELogLevel::Warning, TEXT("Play: Animation is currently disabled"));
+        return;
+    }
+
+    UAnimSingleNodeInstance* SingleNodeInstance = GetSingleNodeInstance();
+    if (SingleNodeInstance)
+    {
+        SingleNodeInstance->SetPlaying(true);
+        SingleNodeInstance->SetLooping(bLooping);
+    }
+    else if (AnimScriptInstance != nullptr)
+    {
+        UE_LOG(ELogLevel::Warning, TEXT("Currently in Animation Blueprint mode. Please change AnimationMode to Use Animation Asset"));
+    }
+}
+
+void USkeletalMeshComponent::Stop()
+{
+    if (!bEnableAnimation)
+    {
+        UE_LOG(ELogLevel::Warning, TEXT("Stop: Animation is currently disabled"));
+        return;
+    }
+
+    UAnimSingleNodeInstance* SingleNodeInstance = GetSingleNodeInstance();
+    if (SingleNodeInstance)
+    {
+        SingleNodeInstance->SetPlaying(false);
+    }
+    else if (AnimScriptInstance != nullptr)
+    {
+        UE_LOG(ELogLevel::Warning, TEXT("Currently in Animation Blueprint mode. Please change AnimationMode to Use Animation Asset"));
+    }
+}
+
+bool USkeletalMeshComponent::IsPlaying() const
+{
+    UAnimSingleNodeInstance* SingleNodeInstance = GetSingleNodeInstance();
+    if (SingleNodeInstance)
+    {
+        return SingleNodeInstance->IsPlaying();
+    }
+    else if (AnimScriptInstance != nullptr)
+    {
+        UE_LOG(ELogLevel::Warning, TEXT("Currently in Animation Blueprint mode. Please change AnimationMode to Use Animation Asset"));
+    }
+
+    return false;
+}

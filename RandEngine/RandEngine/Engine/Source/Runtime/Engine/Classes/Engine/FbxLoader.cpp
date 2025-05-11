@@ -1057,8 +1057,9 @@ bool FFBXLoader::ParseFBX(const FString& FBXFilePath, FBX::FBXInfo& OutFBXInfo, 
     //FbxAxisSystem TargetAxisSystem = FbxAxisSystem::DirectX;/* = FbxAxisSystem::DirectX;*/
     if (Scene->GetGlobalSettings().GetAxisSystem() != TargetAxisSystem)
         TargetAxisSystem.DeepConvertScene(Scene);
-
-    FbxSystemUnit::m.ConvertScene(Scene);
+    
+    // 일단 단위변환 하지 않도록 함. 필요 시 수정
+    //FbxSystemUnit::m.ConvertScene(Scene);
     FbxGeometryConverter GeometryConverter(SdkManager);
     GeometryConverter.Triangulate(Scene, true);
 

@@ -389,6 +389,12 @@ void AEditorPlayer::ControlRotation(USceneComponent* Component, UGizmoBaseCompon
 
         int32 BoneIndex = SkeletalMeshActor->BoneGizmoSceneComponents.Find(Component);
 
+        if (BoneIndex == -1) 
+        {
+            Component->SetWorldRotation(RotationDelta * CurrentRotation);
+            return;
+        }
+
         FMatrix CurrentLocalMatrix = SkeletalMesh->GetBoneLocalMatrix(BoneIndex);
         FVector LocalPos = CurrentLocalMatrix.GetTranslationVector();
         FRotator LocalRot = FRotator(CurrentLocalMatrix.ToQuat() * RotationDelta);

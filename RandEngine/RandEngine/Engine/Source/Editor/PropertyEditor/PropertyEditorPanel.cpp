@@ -951,13 +951,6 @@ void PropertyEditorPanel::RenderForSkeletalComponent(USkeletalMeshComponent* Ske
         FImGuiWidget::DrawRot3Control("Rotation", SkeletalRotation, 0, 85);
         ImGui::Spacing(); 
 
-        if (ImGui::Button("Apply Bone Rotation"))
-        {
-            FString BoneName(BoneNameBuffer);
-            SkeletalMeshComponent->RotateBone(BoneName, SkeletalRotation);
-        }
-        
-
         ImGui::TreePop();
     }
     ImGui::PopStyleColor();
