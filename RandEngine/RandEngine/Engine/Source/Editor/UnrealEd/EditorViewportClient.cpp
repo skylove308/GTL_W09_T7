@@ -47,11 +47,9 @@ void FEditorViewportClient::Initialize(EViewScreenLocation InViewportIndex, cons
     
     Viewport = new FViewport(InViewportIndex);
     Viewport->Initialize(InRect);
+    
+    GizmoActor = FObjectFactory::ConstructObject<ATransformGizmo>(InEngine); // TODO : EditorEngine 외의 다른 Engine 형태가 추가되면 GEngine 대신 다른 방식으로 넣어주어야 함.
 
-    if (Engine == nullptr)
-        GizmoActor = FObjectFactory::ConstructObject<ATransformGizmo>(GEngine); // TODO : EditorEngine 외의 다른 Engine 형태가 추가되면 GEngine 대신 다른 방식으로 넣어주어야 함.
-    else
-        GizmoActor = FObjectFactory::ConstructObject<ATransformGizmo>(Engine);
     GizmoActor->Initialize(this);
 }
 

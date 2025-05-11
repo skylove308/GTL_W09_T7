@@ -6,6 +6,7 @@
 #include "BaseGizmos/GizmoCircleComponent.h"
 #include "BaseGizmos/TransformGizmo.h"
 #include "Components/Light/LightComponent.h"
+#include "Components/Mesh/SkeletalMeshComponent.h"
 #include "LevelEditor/SLevelEditor.h"
 #include "Math/JungleMath.h"
 #include "Math/MathUtility.h"
@@ -13,8 +14,9 @@
 #include "UnrealEd/EditorViewportClient.h"
 #include "UObject/UObjectIterator.h"
 #include "Engine/EditorEngine.h"
+#include "SubWindow/SkeletalSubEngine.h"
 #include "SubWindow/SubEngine.h"
-
+#include "Engine/SkeletalMeshActor.h"
 
 void AEditorPlayer::Tick(float DeltaTime)
 {
@@ -112,8 +114,16 @@ void AEditorPlayer::ProcessGizmoIntersection(UStaticMeshComponent* Component, co
 bool AEditorPlayer::PickGizmo(FVector& pickPosition, FEditorViewportClient* InActiveViewport)
 {
     bool isPickedGizmo = false;
-    UEditorEngine* Engine = Cast<UEditorEngine>(GEngine);
-    if (Engine->GetSelectedActor())
+    AActor*  SelectedActor = nullptr;
+    if (GEngine == GetOuter())
+    {
+        SelectedActor =Cast<UEditorEngine>(GEngine)->GetSelectedActor();
+    }
+    else
+    {
+        SelectedActor = Cast<USkeletalSubEngine>(GetOuter())->SkeletalMeshActor;
+    }
+    if (SelectedActor)
     {
         if (ControlMode == CM_TRANSLATION)
         {

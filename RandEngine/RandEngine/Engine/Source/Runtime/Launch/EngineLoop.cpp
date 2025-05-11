@@ -105,13 +105,14 @@ int32 FEngineLoop::Init(HINSTANCE hInstance)
     FUIManager->Initialize(AppWnd, GraphicDevice.Device, GraphicDevice.DeviceContext);
     ResourceManager.Initialize(&Renderer, &GraphicDevice);
     
+    GEngine = FObjectFactory::ConstructObject<UEditorEngine>(nullptr);
+    GEngine->Init();
+    
     uint32 ClientWidth = 0;
     uint32 ClientHeight = 0;
     GetClientSize(ClientWidth, ClientHeight);
     LevelEditor->Initialize(ClientWidth, ClientHeight);
 
-    GEngine = FObjectFactory::ConstructObject<UEditorEngine>(nullptr);
-    GEngine->Init();
 
     SkeletalViewerSubEngine = FObjectFactory::ConstructObject<USkeletalSubEngine>(nullptr);
     SkeletalViewerSubEngine->Initialize(SkeletalViewerWnd, &SkeletalViewerGD, BufferManager,FUIManager,UnrealEditor);

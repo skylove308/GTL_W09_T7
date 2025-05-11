@@ -19,7 +19,8 @@ public:
     virtual void Release();
 
     void SetSkeletalMesh(USkeletalMesh* InSkeletalMesh);    
-    USkeletalMesh* SelectedSkeletalMesh;
-    ASkeletalMeshActor* SkeletalMeshActor;
+    USkeletalMesh* SelectedSkeletalMesh = nullptr ;
+    ASkeletalMeshActor* SkeletalMeshActor = nullptr;
+    USceneComponent* SelectedComponent = nullptr ;
     ACube* BasePlane = nullptr;
 };

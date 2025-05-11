@@ -68,7 +68,17 @@ void FSubRenderer::Initialize(FGraphicsDevice* InGraphics, FDXDBufferManager* In
         // TODO: 적절한 오류 처리
         return;
     }
-
+    D3D_SHADER_MACRO DefinesBlinnPhong[] =
+{
+        { PHONG, "1" },
+        { nullptr, nullptr }
+};
+    hr = ShaderManager->AddPixelShader(L"PHONG_StaticMeshPixelShader", L"Shaders/StaticMeshPixelShader.hlsl", "mainPS", DefinesBlinnPhong);
+    if (FAILED(hr))
+    {
+        // TODO: 적절한 오류 처리
+        return;
+    }
 
 }
 
@@ -124,7 +134,7 @@ void FSubRenderer::Render()
     // 셰이더 설정
     ID3D11VertexShader* vertexShader = ShaderManager->GetVertexShaderByKey(L"StaticMeshVertexShader");
     ID3D11InputLayout* inputLayout = ShaderManager->GetInputLayoutByKey(L"StaticMeshVertexShader"); // VS와 함께 생성했으므로 같은 키 사용
-    ID3D11PixelShader* pixelShader = ShaderManager->GetPixelShaderByKey(L"StaticMeshPixelShader");
+    ID3D11PixelShader* pixelShader = ShaderManager->GetPixelShaderByKey(L"PHONG_StaticMeshPixelShader");
 
     if (!vertexShader || !inputLayout || !pixelShader)
     {
@@ -188,10 +198,10 @@ void FSubRenderer::PrepareStaticRenderArr(FEditorViewportClient* Viewport)
 {
     for (auto iter : Viewport->GetGizmoActor()->GetArrowArr())
         StaticMeshComponents.Add(iter);
-    for (auto iter : Viewport->GetGizmoActor()->GetDiscArr())
-        StaticMeshComponents.Add(iter);
-    for (auto iter : Viewport->GetGizmoActor()->GetScaleArr())
-        StaticMeshComponents.Add(iter);
+    // for (auto iter : Viewport->GetGizmoActor()->GetDiscArr())
+    //     StaticMeshComponents.Add(iter);
+    // for (auto iter : Viewport->GetGizmoActor()->GetScaleArr())
+    //     StaticMeshComponents.Add(iter);
     if(Cast<USkeletalSubEngine>(Engine))
         StaticMeshComponents.Add(Cast<USkeletalSubEngine>(Engine)->BasePlane->GetStaticMeshComponent());
     else if ( Cast<UAnimationSubEngine>(Engine))
@@ -213,7 +223,7 @@ void FSubRenderer::RenderStaticMesh()
         }
         
         FMatrix WorldMatrix = Comp->GetWorldMatrix();
-        
+        // bool bSelecet = 
         UpdateObjectConstant(WorldMatrix, FVector4(), false);
 
         RenderPrimitive(RenderData, Comp->GetStaticMesh()->GetMaterials(), Comp->GetOverrideMaterials(), Comp->GetselectedSubMeshIndex());

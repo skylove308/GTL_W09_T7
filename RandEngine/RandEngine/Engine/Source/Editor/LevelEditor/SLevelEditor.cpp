@@ -70,7 +70,7 @@ void SLevelEditor::Initialize(uint32 InEditorWidth, uint32 InEditorHeight)
             return;
         }
         ViewportClients[i] = std::make_shared<FEditorViewportClient>();
-        ViewportClients[i]->Initialize(Location, Rect,GEngine);
+        ViewportClients[i]->Initialize(Location, Rect, GEngine);
     }
     
     ActiveViewportClient = ViewportClients[0];
