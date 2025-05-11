@@ -1,4 +1,4 @@
-﻿#include "SubEngine.h"
+#include "SubEngine.h"
 
 #include "ImGuiManager.h"
 #include "ImGuiSubWindow.h"
@@ -24,6 +24,8 @@ USubEngine::~USubEngine()
 
 void USubEngine::Initialize(HWND& hWnd, FGraphicsDevice* InGraphics, FDXDBufferManager* InBufferManager, UImGuiManager* InSubWindow,UnrealEd* InUnrealEd)
 {
+
+ 
 }
 
 void USubEngine::Input(float DeltaTime)
