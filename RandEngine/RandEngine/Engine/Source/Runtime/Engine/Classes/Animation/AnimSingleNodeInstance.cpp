@@ -103,6 +103,12 @@ void UAnimSingleNodeInstance::UpdateAnimation(float DeltaSeconds, bool bNeedsVal
     }
 
     const TArray<FBoneAnimationTrack>& BoneTracks = CurrentSequence->GetDataModel()->GetBoneAnimationTracks();
+
+    if (frame >= BoneTracks[0].InternalTrackData.PosKeys.Num())
+    {
+        frame = 0;
+    }
+    
     const int32 NumBones = Skeleton->BoneTree.Num();
 
     TArray<FMatrix> LocalTransforms;
@@ -111,11 +117,14 @@ void UAnimSingleNodeInstance::UpdateAnimation(float DeltaSeconds, bool bNeedsVal
     {
         LocalTransforms[BoneIdx] = Skeleton->ReferenceSkeleton.RefBonePose[BoneIdx];
     }
-    if (frame >= BoneTracks[0].InternalTrackData.PosKeys.Num())
-        frame =0;
+
+    const FFrameRate FrameRate = CurrentSequence->GetDataModel()->GetFrameRate();
+    const float FrameTime = CurrentTime * FrameRate.AsDecimal();
+    
     for (const FBoneAnimationTrack& Track : BoneTracks)
     {
         const int32 BoneIndex = Skeleton->GetBoneIndex(Track.Name);
+
         FString tt = BoneTracks[BoneIndex].Name.ToString();
         FString nn = Skeleton->BoneTree[BoneIndex].Name.ToString();
         std::cout << GetData(tt) << GetData(nn);
@@ -125,34 +134,31 @@ void UAnimSingleNodeInstance::UpdateAnimation(float DeltaSeconds, bool bNeedsVal
         }
     
         // 키 프레임 보간
-        const FFrameRate FrameRate = CurrentSequence->GetDataModel()->GetFrameRate();
-        const float FrameTime = CurrentTime * FrameRate.AsDecimal();
         const int32 PrevKey = FMath::Clamp(FMath::FloorToInt(FrameTime), 0, Track.InternalTrackData.PosKeys.Num() - 1);
         const int32 NextKey = FMath::Clamp(PrevKey + 1, 0, Track.InternalTrackData.PosKeys.Num() - 1);
     
-        const float Alpha = FrameTime - PrevKey;
-    
+        const float Alpha = FMath::Clamp(FrameTime - PrevKey, 0.f, 1.f);
         // 변환 요소 보간
-        // const FVector Translation = FMath::Lerp(
-        //     Track.InternalTrackData.PosKeys[PrevKey],
-        //     Track.InternalTrackData.PosKeys[NextKey],
-        //     Alpha
-        // );
-        // //
-        // const FQuat Rotation = FQuat::Slerp(
-        //     Track.InternalTrackData.RotKeys[PrevKey],
-        //     Track.InternalTrackData.RotKeys[NextKey],
-        //     Alpha
-        // );
-        // //
-        // const FVector Scale = FMath::Lerp(
-        //     Track.InternalTrackData.ScaleKeys[PrevKey],
-        //     Track.InternalTrackData.ScaleKeys[NextKey],
-        //     Alpha
-        // );
-       FVector Translation = Track.InternalTrackData.PosKeys[frame];
-       FQuat Rotation = Track.InternalTrackData.RotKeys[frame];
-       FVector Scale =Track.InternalTrackData.ScaleKeys[frame];
+        const FVector Translation = FMath::Lerp(
+            Track.InternalTrackData.PosKeys[PrevKey],
+            Track.InternalTrackData.PosKeys[NextKey],
+            Alpha
+        );
+        //
+        const FQuat Rotation = FQuat::Slerp(
+            Track.InternalTrackData.RotKeys[PrevKey],
+            Track.InternalTrackData.RotKeys[NextKey],
+            Alpha
+        );
+        //
+        const FVector Scale = FMath::Lerp(
+            Track.InternalTrackData.ScaleKeys[PrevKey],
+            Track.InternalTrackData.ScaleKeys[NextKey],
+            Alpha
+        );
+       // FVector Translation = Track.InternalTrackData.PosKeys[frame];
+       // FQuat Rotation = Track.InternalTrackData.RotKeys[frame];
+       // FVector Scale =Track.InternalTrackData.ScaleKeys[frame];
        /* FMatrix NewLocalMatrix =
             FMatrix::GetScaleMatrix(Translation) *
             FMatrix::GetRotationMatrix(FRotator(Rotation)) *

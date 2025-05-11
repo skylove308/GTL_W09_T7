@@ -108,7 +108,16 @@ struct FMath
     [[nodiscard]] static FORCEINLINE double Sqrt(double A) { return sqrt(A); }
 
     /** A의 역제곱근을 구합니다. */
-    [[nodiscard]] static FORCEINLINE float InvSqrt(float A) { return 1.0f / sqrtf(A); }
+    [[nodiscard]] static FORCEINLINE float InvSqrt(float A)
+    {
+        const __m128 One = _mm_set_ss(1.0f);
+        const __m128 Y0 = _mm_set_ss(A);
+        const __m128 X0 = _mm_sqrt_ss(Y0);
+        const __m128 R0 = _mm_div_ss(One, X0);
+        float temp;
+        _mm_store_ss(&temp, R0);
+        return temp;
+    }
     [[nodiscard]] static FORCEINLINE double InvSqrt(double A) { return 1.0 / sqrt(A); }
 
     /**
@@ -495,7 +504,7 @@ struct FMath
     [[nodiscard]] static FORCEINLINE float Tan(float RadVal) { return tanf(RadVal); }
 
     [[nodiscard]] static FORCEINLINE double Acos(double Value) { return acos(Value); }
-    [[nodiscard]] static FORCEINLINE float Acos(float Value) { return acosf(Value); }
+    [[nodiscard]] static FORCEINLINE float Acos(float Value) { return acosf( (Value<-1.f) ? -1.f : ((Value<1.f) ? Value : 1.f) ); }
 
     [[nodiscard]] static FORCEINLINE double Asin(double Value) { return asin(Value); }
     [[nodiscard]] static FORCEINLINE float Asin(float Value) { return asinf(Value); }
