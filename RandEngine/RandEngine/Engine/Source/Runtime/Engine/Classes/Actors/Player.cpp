@@ -118,7 +118,7 @@ bool AEditorPlayer::PickGizmo(FVector& pickPosition, FEditorViewportClient* InAc
     AActor*  SelectedActor = nullptr;
     if (GEngine == GetOuter())
     {
-        SelectedActor =Cast<UEditorEngine>(GEngine)->GetSelectedActor();
+        SelectedActor = Cast<UEditorEngine>(GEngine)->GetSelectedActor();
     }
     else
     {
@@ -455,7 +455,7 @@ void AEditorPlayer::ControlRotation(USceneComponent* Component, UGizmoBaseCompon
         {
             SkeletalMesh->UpdateWorldTransforms();
             SkeletalMesh->UpdateAndApplySkinning();
-        }
+        } 
         //Component->SetWorldRotation(RotationDelta * CurrentRotation);
         Component->SetRelativeRotation(LocalRot);
         return;

@@ -69,10 +69,10 @@ int USkeletalMeshComponent::CheckRayIntersection(const FVector& InRayOrigin, con
         return 0;
     }
 
-    if (!AABB.Intersect(InRayOrigin, InRayDirection, OutHitDistance))
-    {
-        return 0;
-    }
+    // if (!AABB.Intersect(InRayOrigin, InRayDirection, OutHitDistance))
+    // {
+    //     return 0;
+    // }
 
     const auto* RenderData = SkeletalMesh->GetRenderData();
     const auto& Vertices = RenderData->Vertices;

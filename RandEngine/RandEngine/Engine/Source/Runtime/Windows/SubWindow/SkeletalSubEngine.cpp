@@ -35,20 +35,25 @@ void USkeletalSubEngine::Initialize(HWND& hWnd, FGraphicsDevice* InGraphics, FDX
     BasePlane = FObjectFactory::ConstructObject<ACube>(this);
     BasePlane->SetActorScale(FVector(10,10,1));
     BasePlane->SetActorLocation(FVector(0,0,-1));
+
+    SelectedActor = SkeletalMeshActor;
 }
 
 void USkeletalSubEngine::Tick(float DeltaTime)
 {
-    Input(DeltaTime);
     ViewportClient->Tick(DeltaTime);
-    EditorPlayer->Tick(DeltaTime);
+    if (::GetForegroundWindow() == *Wnd)
+    {
+        Input(DeltaTime);
+        EditorPlayer->Tick(DeltaTime);
+    }
     Render();    
 }
 
 void USkeletalSubEngine::Input(float DeltaTime)
 {
-    if (::GetForegroundWindow() != *Wnd)
-        return;
+    // if (::GetForegroundWindow() != *Wnd)
+    //     return;
     if (GetAsyncKeyState(VK_RBUTTON) & 0x8000)
     {
         if (!bRBClicked)

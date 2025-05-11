@@ -229,10 +229,10 @@ void FEngineLoop::Tick()
         
         /** Main window render */
         Render(DeltaTime);
-        if (SkeletalViewerSubEngine->bIsShowing)
-            SkeletalViewerSubEngine->Tick(DeltaTime);
         if (AnimationViewerSubEngine->bIsShowing)
             AnimationViewerSubEngine->Tick(DeltaTime);
+        if (SkeletalViewerSubEngine->bIsShowing)
+            SkeletalViewerSubEngine->Tick(DeltaTime);
         /** Sub window render */
         // RenderSubWindow();
 

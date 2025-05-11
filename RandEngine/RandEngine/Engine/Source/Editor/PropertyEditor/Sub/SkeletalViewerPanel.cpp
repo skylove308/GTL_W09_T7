@@ -8,8 +8,10 @@ void SkeletalViewerPanel::Render()
 {
     ImVec2 WinSize = ImVec2(Width, Height);
     
-    ImGui::SetNextWindowPos(ImVec2(WinSize.x * 0.75f + 2.0f, 2));
-    ImGui::SetNextWindowSize(ImVec2(WinSize.x * 0.25f - 5.0f, WinSize.y - 5.0f));
+    // ImGui::SetNextWindowPos(ImVec2(WinSize.x * 0.75f + 2.0f, 2));
+    ImGui::SetNextWindowPos(ImVec2(0, 0));
+
+    ImGui::SetNextWindowSize(ImVec2(WinSize.x * 0.2f - 5.0f, WinSize.y));
     /* Panel Flags */
     ImGuiWindowFlags PanelFlags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_HorizontalScrollbar;
     
@@ -18,6 +20,7 @@ void SkeletalViewerPanel::Render()
     CreateSkeletalTreeNode();
     
     ImGui::End();
+    DetailPanel.Render(SkeletalMesh,SelectedBoneIdx);
 }
 
 void SkeletalViewerPanel::OnResize(HWND hWnd)
@@ -26,13 +29,18 @@ void SkeletalViewerPanel::OnResize(HWND hWnd)
     GetClientRect(hWnd, &ClientRect);
     Width = ClientRect.right - ClientRect.left;
     Height = ClientRect.bottom - ClientRect.top;
+    DetailPanel.OnResize(hWnd);
 }
 
 void SkeletalViewerPanel::CreateSkeletalTreeNode()
 {
-    USkeletalMesh* Selected = static_cast<USkeletalSubEngine*>(GEngineLoop.SkeletalViewerSubEngine)->SelectedSkeletalMesh;
+    SkeletalMesh = static_cast<USkeletalSubEngine*>(GEngineLoop.SkeletalViewerSubEngine)->SelectedSkeletalMesh;
 
-    const FReferenceSkeleton& RefSkeleton = Selected->Skeleton->ReferenceSkeleton;
+    // if (Skeleton == Selected->Skeleton)
+    //     return;
+    // else
+
+    const FReferenceSkeleton& RefSkeleton = SkeletalMesh->Skeleton->ReferenceSkeleton;
     const TArray<FBoneNode>& BoneNodes = RefSkeleton.BoneInfo;
 
     // 1. 뼈 계층 구조 분석
@@ -60,16 +68,38 @@ void SkeletalViewerPanel::RenderBoneHierarchy(
     const TMap<int32, TArray<int32>>& BoneHierarchy)
 {
     const FBoneNode& CurrentBone = BoneNodes[CurrentBoneIdx];
-    const FString BoneName = CurrentBone.Name.ToString();
+    const FString BoneName = CurrentBone.Name.ToString().IsEmpty() ? TEXT("Unnamed Bone") : CurrentBone.Name.ToString();
 
-    // 4. 트리 노드 생성 및 자식 처리
-    if (ImGui::TreeNode(BoneName.IsEmpty() ? "Unnamed Bone" : (*BoneName)))
+    // selectable 트리 노드 플래그 설정
+    ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_OpenOnArrow 
+        | ImGuiTreeNodeFlags_SpanAvailWidth 
+        | ImGuiTreeNodeFlags_Leaf * !BoneHierarchy.Contains(CurrentBoneIdx)
+        | ImGuiTreeNodeFlags_Selected * (CurrentBoneIdx == SelectedBoneIdx)
+        | ImGuiTreeNodeFlags_AllowItemOverlap
+        | ImGuiTreeNodeFlags_DefaultOpen; // 원하는 경우 기본 열기
+
+    // TreeNodeEx 호출 → 반환값이 열림 여부
+    bool nodeOpen = ImGui::TreeNodeEx(
+        (void*)(intptr_t)CurrentBoneIdx, // 고유 ID
+        nodeFlags,
+        "%s",
+        *BoneName
+    );
+
+    // 클릭 시 선택 처리
+    if (ImGui::IsItemClicked())
+    {
+        SelectedBoneIdx = CurrentBoneIdx;
+        // 필요하다면, 이름도 저장
+    }
+
+    if (nodeOpen)
     {
         if (BoneHierarchy.Contains(CurrentBoneIdx))
         {
-            for (int32 ChildBoneIdx : BoneHierarchy[CurrentBoneIdx])
+            for (int32 ChildIdx : BoneHierarchy[CurrentBoneIdx])
             {
-                RenderBoneHierarchy(ChildBoneIdx, BoneNodes, BoneHierarchy);
+                RenderBoneHierarchy(ChildIdx, BoneNodes, BoneHierarchy);
             }
         }
         ImGui::TreePop();

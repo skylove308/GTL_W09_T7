@@ -196,6 +196,7 @@ void FSubRenderer::RenderMesh()
 
 void FSubRenderer::PrepareStaticRenderArr(FEditorViewportClient* Viewport)
 {
+    
     for (auto iter : Viewport->GetGizmoActor()->GetArrowArr())
         StaticMeshComponents.Add(iter);
     // for (auto iter : Viewport->GetGizmoActor()->GetDiscArr())

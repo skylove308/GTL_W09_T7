@@ -130,7 +130,7 @@ void ATransformGizmo::Tick(float DeltaTime)
     else
     {
         SelectedComponent = Cast<USkeletalSubEngine>(GetOuter())->SelectedComponent;
-        SelectedActor =  Cast<USkeletalSubEngine>(GetOuter())->BasePlane;
+        SelectedActor =  Cast<USkeletalSubEngine>(GetOuter())->SelectedActor;
     }
     USceneComponent* TargetComponent = nullptr;
 

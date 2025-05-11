@@ -56,6 +56,8 @@ private:
     USubEngine* Engine = nullptr;
     TArray<UStaticMeshComponent*> StaticMeshComponents;
     USkeletalMesh* PreviewSkeletalMesh = nullptr;
+
+    
 private:
     /** TargetPos & MaxZ Offset */
     bool bOnlyOnce = false;

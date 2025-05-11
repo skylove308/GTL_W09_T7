@@ -198,7 +198,7 @@ void SAnimationTimelinePanel::CustomDrawCompact(int displayTrackIndex, ImDrawLis
 
 void SAnimationTimelinePanel::Render()
 {
-    
+
     UpdatePlayback(0.01666);
     RenderTimelineEditor();
 
@@ -610,11 +610,14 @@ void SAnimationTimelinePanel::RenderTimelineEditor()
     }
 
     const float timelinePanelHeight = 300.0f;
-
-    ImVec2 windowPos = ImVec2(mainViewport->WorkPos.x, mainViewport->WorkPos.y + mainViewport->WorkSize.y - timelinePanelHeight);
-    ImVec2 windowSize = ImVec2(mainViewport->WorkSize.x, timelinePanelHeight);
-    ImGui::SetNextWindowPos(windowPos);
-    ImGui::SetNextWindowSize(windowSize);
+    ImVec2 WinSize = ImVec2(Width, Height);
+    // ImGui::SetNextWindowPos(ImVec2(WinSize.x * 0.75f + 2.0f, 2));
+    ImGui::SetNextWindowPos(ImVec2(WinSize.x * 0.2f - 5.0f, WinSize.y * 0.7f));
+    ImGui::SetNextWindowSize(ImVec2(WinSize.x * 0.8f + 5.0f, WinSize.y  * 0.3f + 0.5f));
+    // ImVec2 windowPos = ImVec2(mainViewport->WorkPos.x, mainViewport->WorkPos.y + mainViewport->WorkSize.y - timelinePanelHeight);
+    // ImVec2 windowSize = ImVec2(mainViewport->WorkSize.x, timelinePanelHeight);
+    // ImGui::SetNextWindowPos(windowPos);
+    // ImGui::SetNextWindowSize(windowSize);
 
     ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoTitleBar |
         ImGuiWindowFlags_NoResize |
