@@ -1,4 +1,4 @@
-﻿#include "SkeletalDetailPanel.h"
+#include "SkeletalDetailPanel.h"
 
 #include "Animation/Skeleton.h"
 #include "Components/Mesh/SkeletalMesh.h"
@@ -18,79 +18,96 @@ void SkeletalDetailPanel::Render(USkeletalMesh* InSkeletalMesh, int32 SelectedBo
     if (InSkeletalMesh == nullptr)
         return;
 
-        ImGui::Begin("Details", nullptr, PanelFlags);
+    if (ImGui::Begin("Details", nullptr, PanelFlags))
+    {
+        ImGui::PushStyleColor(ImGuiCol_Tab, ImVec4(0.05f, 0.05f, 0.08f, 0.80f));         // 비활성 탭
+        ImGui::PushStyleColor(ImGuiCol_TabHovered, ImVec4(0.35f, 0.35f, 0.40f, 1.00f));  // 호버 탭
+        ImGui::PushStyleColor(ImGuiCol_TabActive, ImVec4(0.20f, 0.20f, 0.25f, 1.00f));   // 활성 탭
 
-        if (ImGui::CollapsingHeader("Bone##BoneInfo", ImGuiTreeNodeFlags_DefaultOpen))
+        if (ImGui::BeginTabBar("DetailsTabBar", ImGuiTabBarFlags_AutoSelectNewTabs))
         {
-            ImGui::Text("Bone Name : %s ", *InSkeletalMesh->Skeleton->BoneTree[SelectedBone].Name.ToString());
-        }
-        FMatrix CurrentLocalMatrix = InSkeletalMesh->GetBoneLocalMatrix(SelectedBone);
-
-        FVector Location = CurrentLocalMatrix.GetTranslationVector();
-        FRotator Rotation = CurrentLocalMatrix.GetRotationVector();;
-        FVector Scale = CurrentLocalMatrix.GetScaleVector();
-
-        if (ImGui::CollapsingHeader("Transforms", ImGuiTreeNodeFlags_DefaultOpen))
-        {
-            // optionally indent for nicer grouping
-            ImGui::Indent(10.0f);
-
-            if (ImGui::CollapsingHeader("Bone", ImGuiTreeNodeFlags_DefaultOpen))
+            if (ImGui::BeginTabItem("Bone",nullptr))
             {
-                ImGui::PushID("BoneSection"); 
-                ImGui::Indent(10.0f);
-                FImGuiWidget::DrawVec3Control("Location", Location, 0, 85);
-                ImGui::Spacing();
+                if (ImGui::CollapsingHeader("Bone##BoneInfo", ImGuiTreeNodeFlags_DefaultOpen))
+                {
+                    ImGui::Text("Bone Name : %s ", *InSkeletalMesh->Skeleton->BoneTree[SelectedBone].Name.ToString());
+                }
+                FMatrix CurrentLocalMatrix = InSkeletalMesh->GetBoneLocalMatrix(SelectedBone);
 
-                FImGuiWidget::DrawRot3Control("Rotation", Rotation, 0, 85);
-                ImGui::Spacing();
+                FVector Location = CurrentLocalMatrix.GetTranslationVector();
+                FRotator Rotation = CurrentLocalMatrix.GetRotationVector();;
+                FVector Scale = CurrentLocalMatrix.GetScaleVector();
 
-                FImGuiWidget::DrawVec3Control("Scale", Scale, 0, 85);
-                ImGui::Spacing();
-                ImGui::Unindent(10.0f);
-                ImGui::PopID();
-            }
+                if (ImGui::CollapsingHeader("Transforms", ImGuiTreeNodeFlags_DefaultOpen))
+                {
+                    // optionally indent for nicer grouping
+                    ImGui::Indent(10.0f);
 
-            if (ImGui::CollapsingHeader("Reference", ImGuiTreeNodeFlags_DefaultOpen))
-            {
-                ImGui::PushID("RefSection");
-                FMatrix RefCurrentRefMatrix = InSkeletalMesh->Skeleton->ReferenceSkeleton.RefBonePose[SelectedBone];
-                FVector RefLocation = RefCurrentRefMatrix.GetTranslationVector();
-                FRotator RefRotation = RefCurrentRefMatrix.GetRotationVector();;
-                FVector RefScale = RefCurrentRefMatrix.GetScaleVector();
-                ImGui::Indent(10.0f);
-                FImGuiWidget::DrawVec3Control("Location", RefLocation, 0, 85);
-                ImGui::Spacing();
+                    if (ImGui::CollapsingHeader("Bone", ImGuiTreeNodeFlags_DefaultOpen))
+                    {
+                        ImGui::PushID("BoneSection");
+                        ImGui::Indent(10.0f);
+                        FImGuiWidget::DrawVec3Control("Location", Location, 0, 85);
+                        ImGui::Spacing();
 
-                FImGuiWidget::DrawRot3Control("Rotation", RefRotation, 0, 85);
-                ImGui::Spacing();
+                        FImGuiWidget::DrawRot3Control("Rotation", Rotation, 0, 85);
+                        ImGui::Spacing();
 
-                FImGuiWidget::DrawVec3Control("Scale", RefScale, 0, 85);
-                ImGui::Spacing();
-                ImGui::Unindent(10.0f);
-                ImGui::PopID();
-            }
+                        FImGuiWidget::DrawVec3Control("Scale", Scale, 0, 85);
+                        ImGui::Spacing();
+                        ImGui::Unindent(10.0f);
+                        ImGui::PopID();
+                    }
 
-            ImGui::Unindent(10.0f);
-        }
-        if (Location == PrevLocation && Rotation == PrevRotation && Scale == PrevScale)
-        {
-            ImGui::End();
-            return;
-        }
-        else
-            PrevLocation = Location; PrevRotation = Rotation; PrevScale = Scale;
-        
-        FMatrix NewLocalMatrix =
+                    if (ImGui::CollapsingHeader("Reference", ImGuiTreeNodeFlags_DefaultOpen))
+                    {
+                        ImGui::PushID("RefSection");
+                        FMatrix RefCurrentRefMatrix = InSkeletalMesh->Skeleton->ReferenceSkeleton.RefBonePose[SelectedBone];
+                        FVector RefLocation = RefCurrentRefMatrix.GetTranslationVector();
+                        FRotator RefRotation = RefCurrentRefMatrix.GetRotationVector();;
+                        FVector RefScale = RefCurrentRefMatrix.GetScaleVector();
+                        ImGui::Indent(10.0f);
+                        FImGuiWidget::DrawVec3Control("Location", RefLocation, 0, 85);
+                        ImGui::Spacing();
+
+                        FImGuiWidget::DrawRot3Control("Rotation", RefRotation, 0, 85);
+                        ImGui::Spacing();
+
+                        FImGuiWidget::DrawVec3Control("Scale", RefScale, 0, 85);
+                        ImGui::Spacing();
+                        ImGui::Unindent(10.0f);
+                        ImGui::PopID();
+                    }
+
+                    ImGui::Unindent(10.0f);
+                }
+                if (Location == PrevLocation && Rotation == PrevRotation && Scale == PrevScale)
+                {
+                    ImGui::EndTabItem();
+                    ImGui::EndTabBar();
+                    ImGui::PopStyleColor(3);
+                    ImGui::End();
+                    return;
+                }
+                else
+                    PrevLocation = Location; PrevRotation = Rotation; PrevScale = Scale;
+
+                FMatrix NewLocalMatrix =
                     FMatrix::GetScaleMatrix(Scale) *
                     FMatrix::GetRotationMatrix(Rotation) *
                     FMatrix::GetTranslationMatrix(Location);
-        if (InSkeletalMesh->SetBoneLocalMatrix(SelectedBone, NewLocalMatrix))
-        {
-            InSkeletalMesh->UpdateWorldTransforms();
-            InSkeletalMesh->UpdateAndApplySkinning();
-        } 
+                if (InSkeletalMesh->SetBoneLocalMatrix(SelectedBone, NewLocalMatrix))
+                {
+                    InSkeletalMesh->UpdateWorldTransforms();
+                    InSkeletalMesh->UpdateAndApplySkinning();
+                }
+                ImGui::EndTabItem();
+            }
+            ImGui::EndTabBar();
+        }
+        ImGui::PopStyleColor(3);
         ImGui::End();
+    }
 }
 
 void SkeletalDetailPanel::OnResize(HWND hWnd)

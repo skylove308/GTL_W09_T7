@@ -150,6 +150,6 @@ private:
     int LastSelectedUserTrackId = -1;
     // Windows 핸들 의존성 제거를 위해 Width, Height는 다른 방식으로 관리 고려
     // (예: ImGui::GetContentRegionAvail())
-    float PanelWidth;
-    float PanelHeight;
+    float Width;
+    float Height;
 };

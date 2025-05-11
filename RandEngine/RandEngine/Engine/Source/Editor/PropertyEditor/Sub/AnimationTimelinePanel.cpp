@@ -19,8 +19,6 @@ SAnimationTimelinePanel::SAnimationTimelinePanel()
     , CurrentTimeSeconds(0.0f)
     , SelectedNotifyEventId(-1)
     , bIsDraggingNotify(false)
-    , PanelWidth(800.f)  // 기본값
-    , PanelHeight(600.f) // 기본값
 {
 
     ImGuiNeoSequencerStyle& neoStyle = ImGui::GetNeoSequencerStyle();
@@ -207,15 +205,11 @@ void SAnimationTimelinePanel::Render() // UEditorPanel 오버라이드
 
 void SAnimationTimelinePanel::OnResize(HWND hWnd) // HWND 의존성은 실제 환경에 맞게 수정
 {
-    // 이 부분은 실제 윈도우 시스템과 통합 방식에 따라 달라집니다.
-    // ImGui 자체는 창 크기를 내부적으로 관리하므로,
-    // 패널 크기를 ImGui 레이아웃 시스템에 맡기는 것이 일반적입니다.
-    // RECT ClientRect;
-    // if (GetClientRect(hWnd, &ClientRect))
-    // {
-    //     PanelWidth = static_cast<float>(ClientRect.right - ClientRect.left);
-    //     PanelHeight = static_cast<float>(ClientRect.bottom - ClientRect.top);
-    // }
+    RECT ClientRect;
+    GetClientRect(hWnd, &ClientRect);
+    Width = ClientRect.right - ClientRect.left;
+    Height = ClientRect.bottom - ClientRect.top;
+
 }
 
 void SAnimationTimelinePanel::RenderTimelineEditor()
@@ -232,12 +226,12 @@ void SAnimationTimelinePanel::RenderTimelineEditor()
         return;
     }
 
-    const float timelinePanelHeight = 400.0f;
+    ImVec2 WinSize = ImVec2(Width, Height);
 
-    ImVec2 windowPos = ImVec2(mainViewport->WorkPos.x, mainViewport->WorkPos.y + mainViewport->WorkSize.y - timelinePanelHeight);
-    ImVec2 windowSize = ImVec2(mainViewport->WorkSize.x, timelinePanelHeight);
-    ImGui::SetNextWindowPos(windowPos);
-    ImGui::SetNextWindowSize(windowSize);
+    ImGui::SetNextWindowPos(ImVec2(WinSize.x * 0.2f - 5.0f, WinSize.y * 0.7f));
+    ImGui::SetNextWindowSize(ImVec2(WinSize.x * 0.8f + 5.0f, WinSize.y * 0.3f + 0.5f));
+
+
     ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoTitleBar |
         ImGuiWindowFlags_NoResize |
         ImGuiWindowFlags_NoMove;
@@ -267,7 +261,7 @@ void SAnimationTimelinePanel::RenderPlaybackControls()
     const ImGuiIO& IO = ImGui::GetIO();
     ImFont* IconFont = IO.Fonts->Fonts.size() == 1 ? IO.FontDefault : IO.Fonts->Fonts[FEATHER_FONT];
     ImGui::PushFont(IconFont);
-    if (ImGui::Button("\ue9a8", ImVec2(32,32))) // Play
+    if (ImGui::Button("\ue9a8", ImVec2(32, 32))) // Play
     {
         bIsPlaying = !bIsPlaying;
         if (bIsPlaying && CurrentTimeSeconds >= GetSequenceDurationSeconds() - FLT_EPSILON && GetSequenceDurationSeconds() > 0.f)
@@ -343,7 +337,7 @@ void SAnimationTimelinePanel::RenderNotifyPropertiesUI()
     if (ImGui::Button("Add Notify At Current Time"))
     {
         int targetTrackIdForNewNotify = -1;
-        if (LastSelectedUserTrackId != -1) // 멤버 변수로 관리
+        if (LastSelectedUserTrackId != -1) // 멤버 변수로 관리l
         {
             // 유효성 검사
             bool bIsValidTrack = false;
@@ -362,87 +356,109 @@ void SAnimationTimelinePanel::RenderNotifyPropertiesUI()
     }
     ImGui::Spacing();
 
+    ImGuiWindowFlags PanelFlags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_HorizontalScrollbar;
 
-    if (SelectedNotifyEventId != -1)
+
+    if (ImGui::Begin("Details", nullptr, PanelFlags))
     {
-        FMockAnimNotifyEvent* currentSelectedEvent = nullptr;
-        for (auto& notify : TargetSequence->Notifies)
+        // Start the tab bar. If it begins successfully, render tabs.
+        if (ImGui::BeginTabBar("DetailsTabBar", ImGuiTabBarFlags_AutoSelectNewTabs)) // Added ImGuiTabBarFlags_None for explicitness, can be omitted
         {
-            if (notify.EventId == SelectedNotifyEventId)
+            // First Tab: "Notify"
+            ImGui::PushStyleColor(ImGuiCol_Tab, ImVec4(0.05f, 0.05f, 0.08f, 0.80f));         // 비활성 탭
+            ImGui::PushStyleColor(ImGuiCol_TabHovered, ImVec4(0.35f, 0.35f, 0.40f, 1.00f));  // 호버 탭
+            ImGui::PushStyleColor(ImGuiCol_TabActive, ImVec4(0.20f, 0.20f, 0.25f, 1.00f));   // 활성 탭
+
+            if (SelectedNotifyEventId != -1)
             {
-                currentSelectedEvent = &notify;
-                break;
-            }
-        }
-
-        if (currentSelectedEvent != nullptr)
-        {
-            ImGui::Text("Name: %s ID: &d", currentSelectedEvent->NotifyName.ToString().ToAnsiString().c_str(), currentSelectedEvent->EventId);
-
-            float triggerTime = currentSelectedEvent->TriggerTime;
-            ImGui::PushItemWidth(100); // 시간 입력 필드 너비
-            if (ImGui::DragFloat("Time (s)", &triggerTime, 0.01f, 0.0f, GetSequenceDurationSeconds(), "%.2f"))
-            {
-                if (TargetSequence->FrameRate > 0)
+                FMockAnimNotifyEvent* currentSelectedEvent = nullptr;
+                // Find the selected notify event in the TargetSequence
+                if (TargetSequence != nullptr) // Ensure TargetSequence is not null
                 {
-                    int frame = static_cast<int>(round(triggerTime * TargetSequence->FrameRate));
-                    currentSelectedEvent->TriggerTime = static_cast<float>(frame) / TargetSequence->FrameRate;
-                }
-                else
-                {
-                    currentSelectedEvent->TriggerTime = triggerTime;
-                }
-                bIsDraggingNotify = true; // 정렬 트리거 (드래그 완료 시 SortNotifies 호출됨)
-            }
-            ImGui::PopItemWidth();
-
-            ImGui::Text("Assign to Track:");
-            std::string currentAssignedTrackName = "None (Default)";
-            int currentAssignedUiTrackId = currentSelectedEvent->UserInterfaceTrackId;
-
-            for (const auto& track : DisplayableTracks)
-            {
-                if (track.TrackType == EEditorTimelineTrackType::AnimNotify_UserTrack && track.TrackId == currentAssignedUiTrackId)
-                {
-                    currentAssignedTrackName = track.DisplayName;
-                    break;
-                }
-            }
-
-            ImGui::PushItemWidth(200);
-            if (ImGui::BeginCombo("##TrackAssignCombo", currentAssignedTrackName.c_str()))
-            {
-                if (ImGui::Selectable("None (Default)", currentAssignedUiTrackId <= 0))
-                {
-                    currentSelectedEvent->UserInterfaceTrackId = -1;
-                }
-                for (const auto& track : DisplayableTracks)
-                {
-                    if (track.TrackType == EEditorTimelineTrackType::AnimNotify_UserTrack)
+                    for (auto& notify : TargetSequence->Notifies)
                     {
-                        if (ImGui::Selectable(track.DisplayName.c_str(), currentAssignedUiTrackId == track.TrackId))
+                        if (notify.EventId == SelectedNotifyEventId)
                         {
-                            currentSelectedEvent->UserInterfaceTrackId = track.TrackId;
+                            currentSelectedEvent = &notify;
+                            break;
                         }
                     }
                 }
-                ImGui::EndCombo();
-            }
-            ImGui::PopItemWidth();
+                if (ImGui::BeginTabItem("Notify"))
+                {
+                    if (currentSelectedEvent != nullptr)
+                    {
+                        // ID 포맷 지정자 수정: &d -> %d
+                        ImGui::Text("Name: %s ID: %d", currentSelectedEvent->NotifyName.ToString().ToAnsiString().c_str(), currentSelectedEvent->EventId);
 
+                        float triggerTime = currentSelectedEvent->TriggerTime;
+                        ImGui::PushItemWidth(100); // 시간 입력 필드 너비
+                        if (ImGui::DragFloat("Time (s)", &triggerTime, 0.01f, 0.0f, GetSequenceDurationSeconds(), "%.2f"))
+                        {
+                            if (TargetSequence != nullptr && TargetSequence->FrameRate > 0)
+                            {
+                                int frame = static_cast<int>(round(triggerTime * TargetSequence->FrameRate));
+                                currentSelectedEvent->TriggerTime = static_cast<float>(frame) / TargetSequence->FrameRate;
+                            }
+                            else
+                            {
+                                currentSelectedEvent->TriggerTime = triggerTime;
+                            }
+                            bIsDraggingNotify = true; // 정렬 트리거
+                        }
+                        ImGui::PopItemWidth();
+
+                        ImGui::Text("Assign to Track:");
+                        std::string currentAssignedTrackName = "None (Default)";
+                        int currentAssignedUiTrackId = currentSelectedEvent->UserInterfaceTrackId;
+
+                        for (const auto& track : DisplayableTracks)
+                        {
+                            if (track.TrackType == EEditorTimelineTrackType::AnimNotify_UserTrack && track.TrackId == currentAssignedUiTrackId)
+                            {
+                                currentAssignedTrackName = track.DisplayName;
+                                break;
+                            }
+                        }
+
+                        ImGui::PushItemWidth(200);
+                        if (ImGui::BeginCombo("##TrackAssignCombo", currentAssignedTrackName.c_str()))
+                        {
+                            if (ImGui::Selectable("None (Default)", currentAssignedUiTrackId <= 0))
+                            {
+                                currentSelectedEvent->UserInterfaceTrackId = -1;
+                            }
+                            for (const auto& track : DisplayableTracks)
+                            {
+                                if (track.TrackType == EEditorTimelineTrackType::AnimNotify_UserTrack)
+                                {
+                                    if (ImGui::Selectable(track.DisplayName.c_str(), currentAssignedUiTrackId == track.TrackId))
+                                    {
+                                        currentSelectedEvent->UserInterfaceTrackId = track.TrackId;
+                                    }
+                                }
+                            }
+                            ImGui::EndCombo();
+                        }
+                        ImGui::PopItemWidth();
+                        ImGui::Separator();
+                    }
+                    else
+                    {
+                        // A notify ID was selected, but it wasn't found in the sequence data.
+                        ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "Error: Selected notify (ID: %d) not found in sequence data.", SelectedNotifyEventId);
+                    }
+                    ImGui::EndTabItem(); // End "Notify" Tab
+                }
+            }
+            ImGui::EndTabBar(); // End Tab Bar
         }
-        else
-        {
-            ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "Error: Selected notify (ID: %d) not found in sequence.", SelectedNotifyEventId);
-        }
+        ImGui::PopStyleColor(3);
+        ImGui::End(); // End "Details" Window
     }
-    else
-    {
-        ImGui::TextDisabled("No notify selected.");
-        ImGui::Dummy(ImVec2(0, 53)); // 공간
-        ImGui::TextWrapped("Click on a notify in the timeline or use 'Add Notify At Current Time' to create one.");
-    }
-}void SAnimationTimelinePanel::AddUserNotifyTrack(int ParentRootTrackId, const std::string& NewTrackName)
+}
+
+void SAnimationTimelinePanel::AddUserNotifyTrack(int ParentRootTrackId, const std::string& NewTrackName)
 {
     if (TargetSequence == nullptr)
     {
@@ -602,7 +618,7 @@ void SAnimationTimelinePanel::RenderSequencerWidget()
 
     // ImVec2(0,0)은 사용 가능한 전체 공간을 사용하려고 시도합니다.
     // 높이를 명시적으로 지정하려면 ImVec2(0, 원하는_높이)
-    if (ImGui::BeginNeoSequencer("MainSequencer", &currentFrame, &startFrame, &endFrame, ImVec2(0, 200.f), sequencerFlags))
+    if (ImGui::BeginNeoSequencer("MainSequencer", &currentFrame, &startFrame, &endFrame, ImVec2(0, 0.f), sequencerFlags))
     {
         if (currentFrame != static_cast<ImGui::FrameIndexType>(ConvertTimeToFrame()))
         {
