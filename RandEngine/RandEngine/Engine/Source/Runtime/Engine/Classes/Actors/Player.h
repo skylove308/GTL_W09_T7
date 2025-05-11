@@ -43,6 +43,7 @@ private:
 public:
     void SetMode(EControlMode Mode) { ControlMode = Mode; }
     EControlMode GetControlMode() const { return ControlMode; }
+    void SetCoordMode(ECoordMode Mode) { CoordMode = Mode; }
     ECoordMode GetCoordMode() const { return CoordMode; }
 };
 
