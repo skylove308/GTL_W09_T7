@@ -12,15 +12,12 @@
 
 ACube::ACube()
 {
-    //StaticMeshComponent->SetStaticMesh(FObjManager::GetStaticMesh(L"Contents/Reference/Reference.obj"));
-    //UStaticMesh* StaticMesh = FFBXManager::CreateStaticMesh("Contents/teamugfbx.fbx");
-    //StaticMeshComponent->SetStaticMesh(StaticMesh);
+    StaticMeshComponent->SetStaticMesh(FObjManager::GetStaticMesh(L"Contents/CubePrimitive.obj"));
 }
 
 void ACube::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
 
-    //SetActorRotation(GetActorRotation() + FRotator(0, 0, 1));
-
+    SetActorRotation(GetActorRotation() + FRotator(0, 0, 1));
 }

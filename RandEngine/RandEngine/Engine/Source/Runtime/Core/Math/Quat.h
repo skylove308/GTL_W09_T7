@@ -92,7 +92,9 @@ public:
      * @warning 영쿼터니언(W=±1) 입력 시 X축 반환
      */
     FVector GetRotationAxis() const;
-
+    
+    bool ContainsNaN() const;
+    
     /** FQuat가 오차값 이내로 같은지 확인합니다. */
     FORCEINLINE bool Equals(const FQuat& Q, float Tolerance=KINDA_SMALL_NUMBER) const
     {
@@ -134,6 +136,12 @@ public:
     FMatrix ToMatrix() const;
 
     FRotator Rotator() const;
+
+    FQuat Inverse() const;
+
+    FString ToString() const;
+
+    bool IsIdentity() const;
 };
 
 inline FArchive& operator<<(FArchive& Ar, FQuat& Q)

@@ -11,6 +11,8 @@
 #include "Engine/Asset/SkeletalMeshAsset.h"
 #include "Engine/SkeletalMeshActor.h"
 #include "Engine/FbxLoader.h"
+#include "SubWindow/SkeletalSubEngine.h"
+#include "Actors/Cube.h"
 
 ATransformGizmo::ATransformGizmo()
 {
@@ -99,21 +101,37 @@ void ATransformGizmo::Tick(float DeltaTime)
     {
         return;
     }
-
+    
     UEditorEngine* Engine = Cast<UEditorEngine>(GEngine);
     if (!Engine)
     {
         return;
     }
-    AEditorPlayer* EditorPlayer = Engine->GetEditorPlayer();
+    AEditorPlayer* EditorPlayer = nullptr;
+    UEngine* testEngine = Cast<UEngine>(GetOuter());
+    if (GEngine == Cast<UEngine>(GetOuter()))
+        EditorPlayer = Engine->GetEditorPlayer();
+    else
+    {
+        EditorPlayer = Cast<USkeletalSubEngine>(GetOuter())->EditorPlayer;
+    }
     if (!EditorPlayer)
     {
         return;
     }
     
-    USceneComponent* SelectedComponent = Engine->GetSelectedComponent();
-    AActor* SelectedActor = Engine->GetSelectedActor();
-
+    USceneComponent* SelectedComponent = nullptr;
+    AActor* SelectedActor = nullptr;
+    if (GEngine == GetOuter())
+    {
+        SelectedComponent =  Engine->GetSelectedComponent();
+        SelectedActor = Engine->GetSelectedActor();
+    }
+    else
+    {
+        SelectedComponent = Cast<USkeletalSubEngine>(GetOuter())->SelectedComponent;
+        SelectedActor =  Cast<USkeletalSubEngine>(GetOuter())->SelectedActor;
+    }
     USceneComponent* TargetComponent = nullptr;
 
     if (SelectedComponent != nullptr)
@@ -127,31 +145,6 @@ void ATransformGizmo::Tick(float DeltaTime)
 
     if (TargetComponent)
     {
-        // [TEMP] 삭제 필요 - 프레임마다 Gizmo기준으로 Bone업데이트 중
-        //ASkeletalMeshActor* SkeletalMeshActor = Cast<ASkeletalMeshActor>(TargetComponent->GetOwner());
-        //if (SkeletalMeshActor)
-        //{
-        //    USkeletalMeshComponent* SkeletalMeshComp = Cast<USkeletalMeshComponent>(SkeletalMeshActor->GetRootComponent());
-        //    USkeleton* Skeleton = SkeletalMeshComp->GetSkeletalMesh()->Skeleton;
-
-        //    for (int32 i = 0; i < Skeleton->BoneTree.Num(); ++i)
-        //    {
-        //        if (Skeleton->BoneTree[i].ParentIndex == -1)
-        //        {
-        //            Skeleton->CurrentPose.LocalTransforms[i] = Cast<ASkeletalMeshActor>(SkeletalMeshComp->GetOwner())->BoneGizmoSceneComponents[i]->GetRelativeModelMatrix();
-        //            //Skeleton->CurrentPose.GlobalTransforms[i] = Skeleton->CurrentPose.LocalTransforms[i];
-        //        }
-        //        else
-        //        {
-        //            Skeleton->CurrentPose.LocalTransforms[i] = Cast<ASkeletalMeshActor>(SkeletalMeshComp->GetOwner())->BoneGizmoSceneComponents[i]->GetRelativeModelMatrix();
-        //            //Skeleton->CurrentPose.GlobalTransforms[i] = Skeleton->CurrentPose.LocalTransforms[i] * Skeleton->CurrentPose.GlobalTransforms[i];
-        //        }
-        //    }
-
-        //    SkeletalMeshComp->GetSkeletalMesh()->UpdateWorldTransforms();
-        //    SkeletalMeshComp->GetSkeletalMesh()->UpdateAndApplySkinning();
-        //}
-
         SetActorLocation(TargetComponent->GetWorldLocation());
         if (EditorPlayer->GetCoordMode() == ECoordMode::CDM_LOCAL || EditorPlayer->GetControlMode() == EControlMode::CM_SCALE)
         {

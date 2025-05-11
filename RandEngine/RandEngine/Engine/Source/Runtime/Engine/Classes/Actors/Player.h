@@ -27,8 +27,8 @@ class AEditorPlayer : public AActor
     void AddCoordiMode();
 
 private:
-    static int RayIntersectsObject(const FVector& PickPosition, USceneComponent* Component, float& HitDistance, int& IntersectCount);
-    void ScreenToViewSpace(int32 ScreenX, int32 ScreenY, std::shared_ptr<FEditorViewportClient> ActiveViewport, FVector& RayOrigin);
+    int RayIntersectsObject(const FVector& PickPosition, USceneComponent* Component, float& HitDistance, int& IntersectCount);
+    void ScreenToViewSpace(int32 ScreenX, int32 ScreenY, FEditorViewportClient* ActiveViewport, FVector& RayOrigin);
     void PickedObjControl();
     void ControlRotation(USceneComponent* Component, UGizmoBaseComponent* Gizmo, float DeltaX, float DeltaY);
     void ControlScale(USceneComponent* Component, UGizmoBaseComponent* Gizmo, float DeltaX, float DeltaY);
@@ -39,6 +39,7 @@ private:
     EControlMode ControlMode = CM_TRANSLATION;
     ECoordMode CoordMode = CDM_WORLD;
 
+    FEditorViewportClient* ActiveViewport;
 public:
     void SetMode(EControlMode Mode) { ControlMode = Mode; }
     EControlMode GetControlMode() const { return ControlMode; }

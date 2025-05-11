@@ -1,7 +1,11 @@
 #include "SubRenderer.h"
 
+#include "AnimationSubEngine.h"
 #include "RendererHelpers.h"
+#include "SkeletalSubEngine.h"
 #include "StaticMeshRenderPass.h"
+#include "Actors/Cube.h"
+#include "BaseGizmos/TransformGizmo.h"
 #include "Components/Mesh/SkeletalMesh.h"
 #include "D3D11RHI/DXDShaderManager.h"
 #include "D3D11RHI/GraphicDevice.h"
@@ -13,8 +17,9 @@ FSubRenderer::~FSubRenderer()
     Release();
 }
 
-void FSubRenderer::Initialize(FGraphicsDevice* InGraphics, FDXDBufferManager* InBufferManager)
+void FSubRenderer::Initialize(FGraphicsDevice* InGraphics, FDXDBufferManager* InBufferManager, USubEngine* InEngine)
 {
+    Engine = InEngine;
     Graphics = InGraphics;
     BufferManager = InBufferManager;
 
@@ -63,6 +68,17 @@ void FSubRenderer::Initialize(FGraphicsDevice* InGraphics, FDXDBufferManager* In
         // TODO: 적절한 오류 처리
         return;
     }
+    D3D_SHADER_MACRO DefinesBlinnPhong[] =
+{
+        { PHONG, "1" },
+        { nullptr, nullptr }
+};
+    hr = ShaderManager->AddPixelShader(L"PHONG_StaticMeshPixelShader", L"Shaders/StaticMeshPixelShader.hlsl", "mainPS", DefinesBlinnPhong);
+    if (FAILED(hr))
+    {
+        // TODO: 적절한 오류 처리
+        return;
+    }
 
 }
 
@@ -75,22 +91,39 @@ void FSubRenderer::Release()
     }
 }
 
-void FSubRenderer::PrepareRender(FEditorViewportClient* Viewport) const
+void FSubRenderer::PrepareRender(FEditorViewportClient* Viewport)
 {
-    UpdateViewCamera(Viewport);
-
-    // Set RTV + DSV
-    Graphics->DeviceContext->OMSetRenderTargets(1, &Graphics->BackBufferRTV, Graphics->DeviceDSV);
+    const EViewModeIndex ViewMode = Viewport->GetViewMode();
     
-    // Set Viewport
-    Graphics->DeviceContext->RSSetViewports(1, &Graphics->RenderViewport);
-
-    // Set Rasterizer + DSS
-    Graphics->DeviceContext->RSSetState(Graphics->RasterizerSolidBack);
-    Graphics->DeviceContext->OMSetDepthStencilState(Graphics->DepthStencilState, 0);
+    UpdateViewCamera(Viewport);
+    FViewportResource* ViewportResource = Viewport->GetViewportResource();
+    FRenderTargetRHI* RenderTargetRHI = ViewportResource->GetRenderTarget(EResourceType::ERT_Scene);
+    FDepthStencilRHI* DepthStencilRHI = ViewportResource->GetDepthStencil(EResourceType::ERT_Scene);
+    // Set RTV + DSV
     
     // Clear RenderTarget
+    Graphics->DeviceContext->OMSetRenderTargets(0, nullptr, nullptr);
     Graphics->DeviceContext->ClearRenderTargetView(Graphics->BackBufferRTV, Graphics->ClearColor);
+    Graphics->DeviceContext->ClearDepthStencilView(Graphics->DeviceDSV, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+    // Graphics->DeviceContext->ClearRenderTargetView(RenderTargetRHI->RTV, Graphics->ClearColor);
+    // Graphics->DeviceContext->ClearDepthStencilView(DepthStencilRHI->DSV, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+
+    Graphics->DeviceContext->OMSetRenderTargets(1, &Graphics->BackBufferRTV, Graphics->DeviceDSV);
+    // Graphics->DeviceContext->OMSetRenderTargets(1, &RenderTargetRHI->RTV, DepthStencilRHI->DSV);
+    
+    // Set Viewport
+    if (ViewMode == EViewModeIndex::VMI_Wireframe)
+    {
+        Graphics->DeviceContext->RSSetState(Graphics->RasterizerWireframeBack);
+    }
+    else
+    {
+        Graphics->DeviceContext->RSSetState(Graphics->RasterizerSolidBack);
+    }
+    // Set Rasterizer + DSS
+     Graphics->DeviceContext->OMSetDepthStencilState(Graphics->DepthStencilState, 0);
+
+    PrepareStaticRenderArr(Viewport);
 }
 void FSubRenderer::Render()
 {
@@ -101,7 +134,7 @@ void FSubRenderer::Render()
     // 셰이더 설정
     ID3D11VertexShader* vertexShader = ShaderManager->GetVertexShaderByKey(L"StaticMeshVertexShader");
     ID3D11InputLayout* inputLayout = ShaderManager->GetInputLayoutByKey(L"StaticMeshVertexShader"); // VS와 함께 생성했으므로 같은 키 사용
-    ID3D11PixelShader* pixelShader = ShaderManager->GetPixelShaderByKey(L"StaticMeshPixelShader");
+    ID3D11PixelShader* pixelShader = ShaderManager->GetPixelShaderByKey(L"PHONG_StaticMeshPixelShader");
 
     if (!vertexShader || !inputLayout || !pixelShader)
     {
@@ -118,7 +151,7 @@ void FSubRenderer::Render()
     UpdateConstants();
 
     RenderMesh();
-
+    RenderStaticMesh();
 }
 
 void FSubRenderer::RenderMesh()
@@ -131,7 +164,7 @@ void FSubRenderer::RenderMesh()
     UINT Offset = 0;
 
     FVertexInfo VertexInfo;
-    BufferManager->CreateDynamicVertexBuffer(RenderData->MeshName, RenderData->BindPoseVertices, VertexInfo);
+    BufferManager->CreateDynamicVertexBuffer(RenderData->MeshName, RenderData->Vertices, VertexInfo);
 
     Graphics->DeviceContext->IASetVertexBuffers(0, 1, &VertexInfo.VertexBuffer, &Stride, &Offset);
 
@@ -161,9 +194,47 @@ void FSubRenderer::RenderMesh()
     }
 }
 
-void FSubRenderer::ClearRender() const
+void FSubRenderer::PrepareStaticRenderArr(FEditorViewportClient* Viewport)
+{
+    
+    for (auto iter : Viewport->GetGizmoActor()->GetArrowArr())
+        StaticMeshComponents.Add(iter);
+    // for (auto iter : Viewport->GetGizmoActor()->GetDiscArr())
+    //     StaticMeshComponents.Add(iter);
+    // for (auto iter : Viewport->GetGizmoActor()->GetScaleArr())
+    //     StaticMeshComponents.Add(iter);
+    if(Cast<USkeletalSubEngine>(Engine))
+        StaticMeshComponents.Add(Cast<USkeletalSubEngine>(Engine)->BasePlane->GetStaticMeshComponent());
+    else if ( Cast<UAnimationSubEngine>(Engine))
+        StaticMeshComponents.Add(Cast<UAnimationSubEngine>(Engine)->BasePlane->GetStaticMeshComponent());
+}
+
+void FSubRenderer::RenderStaticMesh()
+{
+    for (UStaticMeshComponent* Comp : StaticMeshComponents)
+    {
+        if (!Comp || !Comp->GetStaticMesh())
+        {
+            continue;
+        }
+        FStaticMeshRenderData* RenderData = Comp->GetStaticMesh()->GetRenderData();
+        if (RenderData == nullptr)
+        {
+            continue;
+        }
+        
+        FMatrix WorldMatrix = Comp->GetWorldMatrix();
+        // bool bSelecet = 
+        UpdateObjectConstant(WorldMatrix, FVector4(), false);
+
+        RenderPrimitive(RenderData, Comp->GetStaticMesh()->GetMaterials(), Comp->GetOverrideMaterials(), Comp->GetselectedSubMeshIndex());
+    }
+}
+
+void FSubRenderer::ClearRender()
 {
     ShaderManager->ReloadAllShaders();
+    StaticMeshComponents.Empty();
 }
 
 void FSubRenderer::UpdateObjectConstant(const FMatrix& WorldMatrix, const FVector4& UUIDColor, bool bIsSelected) const
@@ -231,4 +302,51 @@ void FSubRenderer::SetPreviewSkeletalMesh(USkeletalMesh* InPreviewSkeletalMesh)
 {
     PreviewSkeletalMesh = InPreviewSkeletalMesh;
     bOnlyOnce = false;
+}
+
+void FSubRenderer::RenderPrimitive(FStaticMeshRenderData* RenderData, TArray<FStaticMaterial*> Materials, TArray<UMaterial*> OverrideMaterials,
+    int SelectedSubMeshIndex) const
+{
+    UINT Stride = sizeof(FStaticMeshVertex);
+    UINT Offset = 0;
+
+    FVertexInfo VertexInfo;
+    BufferManager->CreateVertexBuffer(RenderData->ObjectName, RenderData->Vertices, VertexInfo);
+
+    Graphics->DeviceContext->IASetVertexBuffers(0, 1, &VertexInfo.VertexBuffer, &Stride, &Offset);
+
+    FIndexInfo IndexInfo;
+    BufferManager->CreateIndexBuffer(RenderData->ObjectName, RenderData->Indices, IndexInfo);
+    if (IndexInfo.IndexBuffer)
+    {
+        Graphics->DeviceContext->IASetIndexBuffer(IndexInfo.IndexBuffer, DXGI_FORMAT_R32_UINT, 0);
+    }
+
+    if (RenderData->MaterialSubsets.Num() == 0)
+    {
+        Graphics->DeviceContext->DrawIndexed(RenderData->Indices.Num(), 0, 0);
+        return;
+    }
+
+    for (int SubMeshIndex = 0; SubMeshIndex < RenderData->MaterialSubsets.Num(); SubMeshIndex++)
+    {
+        uint32 MaterialIndex = RenderData->MaterialSubsets[SubMeshIndex].MaterialIndex;
+
+        FSubMeshConstants SubMeshData = (SubMeshIndex == SelectedSubMeshIndex) ? FSubMeshConstants(true) : FSubMeshConstants(false);
+
+        BufferManager->UpdateConstantBuffer(TEXT("FSubMeshConstants"), SubMeshData);
+
+        if (OverrideMaterials[MaterialIndex] != nullptr)
+        {
+            MaterialUtils::UpdateMaterial(BufferManager, Graphics, OverrideMaterials[MaterialIndex]->GetMaterialInfo());
+        }
+        else
+        {
+            MaterialUtils::UpdateMaterial(BufferManager, Graphics, Materials[MaterialIndex]->Material->GetMaterialInfo());
+        }
+
+        uint32 StartIndex = RenderData->MaterialSubsets[SubMeshIndex].IndexStart;
+        uint32 IndexCount = RenderData->MaterialSubsets[SubMeshIndex].IndexCount;
+        Graphics->DeviceContext->DrawIndexed(IndexCount, StartIndex, 0);
+    }
 }

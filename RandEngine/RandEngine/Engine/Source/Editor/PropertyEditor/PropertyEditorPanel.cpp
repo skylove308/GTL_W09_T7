@@ -7,6 +7,7 @@
 
 #include "World/World.h"
 #include "Actors/Player.h"
+#include "Animation/AnimationAsset.h"
 #include "Components/BoxComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/Light/LightComponent.h"
@@ -382,6 +383,10 @@ void PropertyEditorPanel::RenderForStaticMesh(UStaticMeshComponent* StaticMeshCo
         {
             for (const auto& Asset : Assets)
             {
+                if (Asset.Value.AssetType != EAssetType::StaticMesh)
+                {
+                    continue;
+                }
                 if (ImGui::Selectable(GetData(Asset.Value.AssetName.ToString()), false))
                 {
                     FString MeshName = Asset.Value.PackagePath.ToString() + "/" + Asset.Value.AssetName.ToString();
@@ -933,30 +938,62 @@ void PropertyEditorPanel::RenderForSkeletalComponent(USkeletalMeshComponent* Ske
     ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.1f, 0.1f, 0.1f, 1.0f));
     if (ImGui::TreeNodeEx("Skeletal Mesh", ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_DefaultOpen)) // 트리 노드 생성
     {
-        ImGui::Text("Skeletal Mesh");
-        ImGui::SameLine();
-
-        FString PreviewName = FString("None");
-      /*  if (USkeletalMesh* SkeletalMesh = SkeletalMeshComponent->GetSkeletalMesh())
+        if (USkeletalMesh* SkeletalMesh = SkeletalMeshComponent->GetSkeletalMesh())
         {
             if (FSkeletalMeshRenderData* RenderData = SkeletalMesh->GetRenderData())
             {
-                PreviewName = RenderData->DisplayName;
+                ImGui::Text(GetData(RenderData->MeshName));
             }
-        }*/
+        }
+
+        static FString PreviewAnimationName = FString("None");
+        const TMap<FName, FAssetInfo> Assets = UAssetManager::Get().GetAssetRegistry();
+
+        if (ImGui::BeginCombo("##Animation", GetData(PreviewAnimationName), ImGuiComboFlags_None))
+        {
+            if (ImGui::Selectable("None", false))
+            {
+                SkeletalMeshComponent->SetAnimation(nullptr);
+            }
+            
+            for (const auto& Asset : Assets)
+            {
+                if (Asset.Value.AssetType != EAssetType::Animation)
+                {
+                    continue;
+                }
+                
+                if (ImGui::Selectable(GetData(Asset.Value.AssetName.ToString()), false))
+                {
+                    FString AssetName = Asset.Value.PackagePath.ToString() + "/" + Asset.Value.AssetName.ToString();
+                    UAnimationAsset* AnimationAsset = UAssetManager::Get().GetAnimationAsset(AssetName);
+                    if (AnimationAsset)
+                    {
+                        PreviewAnimationName = Asset.Value.AssetName.ToString();
+                        SkeletalMeshComponent->SetAnimation(AnimationAsset);
+                    }
+                }
+            }
+            ImGui::EndCombo();
+        }
+
+        if (ImGui::Button("Play"))
+        {
+            SkeletalMeshComponent->SetAnimationMode(EAnimationMode::AnimationSingleNode);
+            SkeletalMeshComponent->Play(true);
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Stop"))
+        {
+            SkeletalMeshComponent->Stop();
+        }
 
         static char BoneNameBuffer[64] = "mixamorig:Spine";
 
         ImGui::InputText("Bone Name", BoneNameBuffer, IM_ARRAYSIZE(BoneNameBuffer));
+        static FRotator SkeletalRotation = FRotator(0, 0, 0);
         FImGuiWidget::DrawRot3Control("Rotation", SkeletalRotation, 0, 85);
         ImGui::Spacing(); 
-
-        if (ImGui::Button("Apply Bone Rotation"))
-        {
-            FString BoneName(BoneNameBuffer);
-            SkeletalMeshComponent->RotateBone(BoneName, SkeletalRotation);
-        }
-        
 
         ImGui::TreePop();
     }

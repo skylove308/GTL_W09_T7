@@ -14,6 +14,7 @@
 #include "Camera/CameraComponent.h"
 #include "LevelEditor/SLevelEditor.h"
 #include "SlateCore/Input/Events.h"
+#include "SubWindow/SubEngine.h"
 
 FVector FEditorViewportClient::Pivot = FVector(0.0f, 0.0f, 0.0f);
 float FEditorViewportClient::OrthoSize = 10.0f;
@@ -37,7 +38,7 @@ void FEditorViewportClient::Draw(FViewport* Viewport)
 {
 }
 
-void FEditorViewportClient::Initialize(EViewScreenLocation InViewportIndex, const FRect& InRect)
+void FEditorViewportClient::Initialize(EViewScreenLocation InViewportIndex, const FRect& InRect,UEngine* InEngine)
 {
     ViewportIndex = static_cast<int32>(InViewportIndex);
     
@@ -46,8 +47,9 @@ void FEditorViewportClient::Initialize(EViewScreenLocation InViewportIndex, cons
     
     Viewport = new FViewport(InViewportIndex);
     Viewport->Initialize(InRect);
+    
+    GizmoActor = FObjectFactory::ConstructObject<ATransformGizmo>(InEngine); // TODO : EditorEngine 외의 다른 Engine 형태가 추가되면 GEngine 대신 다른 방식으로 넣어주어야 함.
 
-    GizmoActor = FObjectFactory::ConstructObject<ATransformGizmo>(GEngine); // TODO : EditorEngine 외의 다른 Engine 형태가 추가되면 GEngine 대신 다른 방식으로 넣어주어야 함.
     GizmoActor->Initialize(this);
 }
 
@@ -742,6 +744,7 @@ FVector FViewportCamera::GetUpVector() const
 }
 void FEditorViewportClient::CameraReset()
 {
-    PerspectiveCamera.SetLocation(FVector(0.0f, 30.0f, 30.0f));
-    PerspectiveCamera.SetRotation(FVector(60,0,90));
+    PerspectiveCamera.SetLocation(FVector(0.0f, 1.0f, 1.0f));
+    PerspectiveCamera.SetRotation(FVector(0,0,-90));
+    CameraSpeedSetting = 1.0f;
 }

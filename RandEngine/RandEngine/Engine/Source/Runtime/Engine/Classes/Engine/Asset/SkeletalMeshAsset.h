@@ -98,11 +98,11 @@ struct FSkeletalMeshRenderData
     FString MeshName;
     FString FilePath;
 
-    TArray<FSkeletalMeshVertex> BindPoseVertices; // 최종 고유 정점 배열 (바인드 포즈)
-    TArray<uint32> Indices;                       // 정점 인덱스 배열
+    TArray<FSkeletalMeshVertex> Vertices; // 최종 고유 정점 배열
+    TArray<uint32> Indices; // 정점 인덱스 배열
 
-    TArray<FFbxMaterialInfo> Materials;           // 이 메시에 사용된 재질 정보 배열
-    TArray<FMeshSubset> Subsets;                  // 재질별 인덱스 범위 정보
+    TArray<FFbxMaterialInfo> Materials; // 이 메시에 사용된 재질 정보 배열
+    TArray<FMeshSubset> Subsets; // 재질별 인덱스 범위 정보
 
     // DirectX 버퍼 포인터 (생성 후 채워짐)
     ID3D11Buffer* DynamicVertexBuffer = nullptr;
@@ -119,7 +119,7 @@ struct FSkeletalMeshRenderData
     FSkeletalMeshRenderData(FSkeletalMeshRenderData&& Other) noexcept
         : MeshName(std::move(Other.MeshName)), // std::move 사용
         FilePath(std::move(Other.FilePath)),
-        BindPoseVertices(std::move(Other.BindPoseVertices)),
+        Vertices(std::move(Other.Vertices)),
         Indices(std::move(Other.Indices)),
         Materials(std::move(Other.Materials)),
         Subsets(std::move(Other.Subsets)), // Subsets 이동 추가
@@ -138,7 +138,7 @@ struct FSkeletalMeshRenderData
             ReleaseBuffers();
             MeshName = std::move(Other.MeshName);
             FilePath = std::move(Other.FilePath);
-            BindPoseVertices = std::move(Other.BindPoseVertices);
+            Vertices = std::move(Other.Vertices);
             Indices = std::move(Other.Indices);
             Materials = std::move(Other.Materials);
             Subsets = std::move(Other.Subsets); // Subsets 이동 추가
@@ -159,18 +159,18 @@ struct FSkeletalMeshRenderData
 
     void CalculateBounds()
     {
-        if (BindPoseVertices.IsEmpty())
+        if (Vertices.IsEmpty())
         {
             Bounds.MinLocation = FVector::ZeroVector;
             Bounds.MaxLocation = FVector::ZeroVector;
             return;
         }
-        Bounds.MinLocation = BindPoseVertices[0].Position;
-        Bounds.MaxLocation = BindPoseVertices[0].Position;
-        for (int32 i = 1; i < BindPoseVertices.Num(); ++i)
+        Bounds.MinLocation = Vertices[0].Position;
+        Bounds.MaxLocation = Vertices[0].Position;
+        for (int32 i = 1; i < Vertices.Num(); ++i)
         {
-            Bounds.MinLocation = FVector::Min(Bounds.MinLocation, BindPoseVertices[i].Position);
-            Bounds.MaxLocation = FVector::Max(Bounds.MaxLocation, BindPoseVertices[i].Position);
+            Bounds.MinLocation = FVector::Min(Bounds.MinLocation, Vertices[i].Position);
+            Bounds.MaxLocation = FVector::Max(Bounds.MaxLocation, Vertices[i].Position);
         }
     }
 };

@@ -33,6 +33,8 @@ public:
     const T& operator[](SizeType Index) const;
     void operator+(const TArray& OtherArray);
 
+    // bool operator==(const TArray& OtherArray) const;
+
     T& Last() { return ContainerPrivate.back(); }
     const T& Last() const { return ContainerPrivate.back(); }
 public:
@@ -180,6 +182,30 @@ void TArray<T, Allocator>::operator+(const TArray& OtherArray)
 {
     ContainerPrivate.insert(end(), OtherArray.begin(), OtherArray.end());
 }
+
+// template <typename T, typename Allocator>
+// bool TArray<T, Allocator>::operator==(const TArray& OtherArray) const
+// {
+//     SizeType Count = Num();
+//
+//     const ElementType* A = GetData();
+//     const ElementType* B = OtherArray.GetData();
+//     
+//     bool bIsEqual = true;
+//     while (Count)
+//     {
+//         if (!(*A == *B))
+//         {
+//             bIsEqual = false;
+//         }
+//
+//         ++A;
+//         ++B;
+//         --Count;
+//     }
+//
+//     return Count == OtherArray.Num() && bIsEqual;
+// }
 
 template <typename T, typename Allocator>
 TArray<T, Allocator>::TArray()

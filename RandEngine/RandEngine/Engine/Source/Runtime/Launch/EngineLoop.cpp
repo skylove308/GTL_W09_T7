@@ -31,6 +31,7 @@ FResourceMgr FEngineLoop::ResourceManager;
 FEngineLoop::FEngineLoop()
     : AppWnd(nullptr)
     , SkeletalViewerWnd(nullptr)
+    , AnimationViewerWnd(nullptr)
     , FUIManager(nullptr)
     , CurrentImGuiContext(nullptr)
     , LevelEditor(nullptr)
@@ -50,8 +51,7 @@ int32 FEngineLoop::Init(HINSTANCE hInstance)
 
     /* must be initialized before window. */
     WindowInit(hInstance);
-    SkeletalSubWindowInit(hInstance);
-    AnimationSubWindowInit(hInstance);
+
     
     UnrealEditor = new UnrealEd();
     BufferManager = new FDXDBufferManager();
@@ -62,20 +62,6 @@ int32 FEngineLoop::Init(HINSTANCE hInstance)
     UnrealEditor->Initialize();
     GraphicDevice.Initialize(AppWnd);
 
-    if (SkeletalViewerWnd)
-    {
-        SkeletalViewerGD.Initialize(SkeletalViewerWnd, GraphicDevice.Device);
-        SkeletalViewerGD.ClearColor[0] = 0.025f;
-        SkeletalViewerGD.ClearColor[1] = 0.025f;
-        SkeletalViewerGD.ClearColor[2] = 0.025f;
-    }
-    if (AnimationViewerWnd)
-    {
-        AnimationViewerGD.Initialize(AnimationViewerWnd, GraphicDevice.Device);
-        AnimationViewerGD.ClearColor[0] = 0.025f;
-        AnimationViewerGD.ClearColor[1] = 0.025f;
-        AnimationViewerGD.ClearColor[2] = 0.025f;
-    }
     if (!GPUTimingManager.Initialize(GraphicDevice.Device, GraphicDevice.DeviceContext))
     {
         UE_LOG(ELogLevel::Error, TEXT("Failed to initialize GPU Timing Manager!"));
@@ -105,21 +91,35 @@ int32 FEngineLoop::Init(HINSTANCE hInstance)
     FUIManager->Initialize(AppWnd, GraphicDevice.Device, GraphicDevice.DeviceContext);
     ResourceManager.Initialize(&Renderer, &GraphicDevice);
     
-    SkeletalViewerSubEngine = new FSkeletalSubEngine();
-    SkeletalViewerSubEngine->Initialize(SkeletalViewerWnd, &SkeletalViewerGD, BufferManager,FUIManager,UnrealEditor);
-    AnimationViewerSubEngine = new FAnimationSubEngine();
-    AnimationViewerSubEngine->Initialize(AnimationViewerWnd, &AnimationViewerGD, BufferManager,FUIManager,UnrealEditor);
-
+    GEngine = FObjectFactory::ConstructObject<UEditorEngine>(nullptr);
+    GEngine->Init();
     
     uint32 ClientWidth = 0;
     uint32 ClientHeight = 0;
     GetClientSize(ClientWidth, ClientHeight);
     LevelEditor->Initialize(ClientWidth, ClientHeight);
 
-    GEngine = FObjectFactory::ConstructObject<UEditorEngine>(nullptr);
-    GEngine->Init();
-
-
+    SkeletalSubWindowInit(hInstance);
+    AnimationSubWindowInit(hInstance);
+    if (SkeletalViewerWnd)
+    {
+        SkeletalViewerGD.Initialize(SkeletalViewerWnd, GraphicDevice.Device);
+        SkeletalViewerGD.ClearColor[0] = 0.025f;
+        SkeletalViewerGD.ClearColor[1] = 0.025f;
+        SkeletalViewerGD.ClearColor[2] = 0.025f;
+    }
+    if (AnimationViewerWnd)
+    {
+        AnimationViewerGD.Initialize(AnimationViewerWnd, GraphicDevice.Device);
+        AnimationViewerGD.ClearColor[0] = 0.025f;
+        AnimationViewerGD.ClearColor[1] = 0.025f;
+        AnimationViewerGD.ClearColor[2] = 0.025f;
+    }
+    SkeletalViewerSubEngine = FObjectFactory::ConstructObject<USkeletalSubEngine>(nullptr);
+    SkeletalViewerSubEngine->Initialize(SkeletalViewerWnd, &SkeletalViewerGD, BufferManager,FUIManager,UnrealEditor);
+    AnimationViewerSubEngine =  FObjectFactory::ConstructObject<UAnimationSubEngine>(nullptr);
+    AnimationViewerSubEngine->Initialize(AnimationViewerWnd, &AnimationViewerGD, BufferManager,FUIManager,UnrealEditor);
+    
     FSoundManager::GetInstance().Initialize();
     FSoundManager::GetInstance().LoadSound("fishdream", "Contents/Sounds/fishdream.mp3");
     FSoundManager::GetInstance().LoadSound("sizzle", "Contents/Sounds/sizzle.mp3");
@@ -229,8 +229,10 @@ void FEngineLoop::Tick()
         
         /** Main window render */
         Render(DeltaTime);
-        SkeletalViewerSubEngine->Tick(DeltaTime);
-        AnimationViewerSubEngine->Tick(DeltaTime);
+        if (AnimationViewerSubEngine->bIsShowing)
+            AnimationViewerSubEngine->Tick(DeltaTime);
+        if (SkeletalViewerSubEngine->bIsShowing)
+            SkeletalViewerSubEngine->Tick(DeltaTime);
         /** Sub window render */
         // RenderSubWindow();
 
@@ -451,14 +453,11 @@ void FEngineLoop::AnimationSubWindowInit(HINSTANCE hInstance)
 
     if (!AnimationViewerWnd)
     {
-        // 오류 처리
         UE_LOG(ELogLevel::Error, TEXT("Failed to create sub window!"));
     }
     else
     {
-        // 필요할 때
-        // ShowWindow(SubAppWnd, SW_SHOW);
-        // 호출하여 표시
+
     }
 }
 
@@ -497,6 +496,7 @@ LRESULT CALLBACK FEngineLoop::AppWndProc(HWND hWnd, uint32 Msg, WPARAM wParam, L
         case WM_CLOSE:
             // GEngineLoop.SelectSkeletalMesh(nullptr);
             GEngineLoop.SkeletalViewerSubEngine->ViewportClient->CameraReset();
+            GEngineLoop.SkeletalViewerSubEngine->RequestShowWindow(false);
             ::ShowWindow(hWnd, SW_HIDE);
             return 0;
         
@@ -537,6 +537,7 @@ LRESULT CALLBACK FEngineLoop::AppWndProc(HWND hWnd, uint32 Msg, WPARAM wParam, L
         case WM_CLOSE:
             // GEngineLoop.SelectSkeletalMesh(nullptr);
             GEngineLoop.AnimationViewerSubEngine->ViewportClient->CameraReset();
+            GEngineLoop.AnimationViewerSubEngine->RequestShowWindow(false);
             ::ShowWindow(hWnd, SW_HIDE);
             return 0;
         

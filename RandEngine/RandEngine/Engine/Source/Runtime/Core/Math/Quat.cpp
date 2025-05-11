@@ -184,6 +184,11 @@ FVector FQuat::GetRotationAxis() const
     return FVector{X * Scale, Y * Scale, Z * Scale};
 }
 
+bool FQuat::ContainsNaN() const
+{
+    return FMath::IsNaN(X) || FMath::IsNaN(Y) || FMath::IsNaN(Z) || FMath::IsNaN(W);
+}
+
 FQuat FQuat::Slerp_NotNormalized(const FQuat& Quat1, const FQuat& Quat2, float Slerp)
 {
     // Get cosine of angle between quats.
@@ -294,4 +299,19 @@ FRotator FQuat::Rotator() const
     FRotator RotatorFromQuat = FRotator(Pitch, Yaw, Roll);
 
     return RotatorFromQuat;
+}
+
+FQuat FQuat::Inverse() const
+{
+    return FQuat(-X, -Y, -Z, W);
+}
+
+FString FQuat::ToString() const
+{
+    return FString::Printf(TEXT("X=%.9f Y=%.9f Z=%.9f W=%.9f"), X, Y, Z, W);
+}
+
+bool FQuat::IsIdentity() const
+{
+    return X == 0.0f && Y == 0.0f && Z == 0.0f && W == 1.0f;
 }

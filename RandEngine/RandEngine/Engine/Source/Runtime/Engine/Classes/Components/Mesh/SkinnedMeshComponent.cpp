@@ -92,7 +92,7 @@ int USkinnedMeshComponent::CheckRayIntersection(const FVector& InRayOrigin, cons
     int IntersectionNum = 0;
 
     FSkeletalMeshRenderData* RenderData = SkeletalMesh->GetRenderData();
-    const TArray<FSkeletalMeshVertex>& Vertices = RenderData->BindPoseVertices;
+    const TArray<FSkeletalMeshVertex>& Vertices = RenderData->Vertices;
 
     const int32 VertexNum = Vertices.Num();
     if (VertexNum == 0)

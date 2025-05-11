@@ -1,11 +1,16 @@
 ﻿#pragma once
 #include "SubEngine.h"
 
-class FSkeletalSubEngine : public FSubEngine
+
+class ACube;
+class ASkeletalMeshActor;
+
+class USkeletalSubEngine : public USubEngine
 {
+    DECLARE_CLASS(USkeletalSubEngine, USubEngine)
 public:
-    FSkeletalSubEngine();
-    ~FSkeletalSubEngine();
+    USkeletalSubEngine();
+    ~USkeletalSubEngine();
 public:
     virtual void Initialize(HWND& hWnd, FGraphicsDevice* InGraphics, FDXDBufferManager* InBufferManager, UImGuiManager* InSubWindow,UnrealEd* InUnrealEd);
     virtual void Tick(float DeltaTime);
@@ -14,5 +19,8 @@ public:
     virtual void Release();
 
     void SetSkeletalMesh(USkeletalMesh* InSkeletalMesh);    
-    USkeletalMesh* SelectedSkeletalMesh;
+    USkeletalMesh* SelectedSkeletalMesh = nullptr ;
+    ASkeletalMeshActor* SkeletalMeshActor = nullptr;
+    USceneComponent* SelectedComponent = nullptr ;
+    ACube* BasePlane = nullptr;
 };

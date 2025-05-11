@@ -3,11 +3,11 @@
 
 ACubeActor::ACubeActor()
 {
-    BoxComponent = AddComponent<UBoxComponent>();
-    RootComponent = BoxComponent;
+     BoxComponent = AddComponent<UBoxComponent>();
+     RootComponent = BoxComponent;
 }
 
 UBoxComponent* ACubeActor::GetShapeComponent() const
 {
-    return BoxComponent;
+     return BoxComponent;
 }

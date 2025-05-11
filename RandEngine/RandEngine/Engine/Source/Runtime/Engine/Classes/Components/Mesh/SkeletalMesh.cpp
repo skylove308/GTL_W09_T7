@@ -231,7 +231,7 @@ void USkeletalMesh::UpdateWorldTransforms()
 bool USkeletalMesh::UpdateAndApplySkinning()
 {
     if (!SkeletalMeshRenderData || !SkeletalMeshRenderData->DynamicVertexBuffer ||
-        SkeletalMeshRenderData->BindPoseVertices.IsEmpty() || !Skeleton || Skeleton->BoneTree.IsEmpty())
+        SkeletalMeshRenderData->Vertices.IsEmpty() || !Skeleton || Skeleton->BoneTree.IsEmpty())
     {
         return false;
     }
@@ -243,7 +243,7 @@ bool USkeletalMesh::UpdateAndApplySkinning()
     if (FAILED(hr)) return false;
 
     FSkeletalMeshVertex* SkinnedVertices = static_cast<FSkeletalMeshVertex*>(MappedResource.pData);
-    const TArray<FSkeletalMeshVertex>& BindVertices = SkeletalMeshRenderData->BindPoseVertices;
+    const TArray<FSkeletalMeshVertex>& BindVertices = SkeletalMeshRenderData->Vertices;
     const int32 VertexCount = BindVertices.Num();
 
     // 스키닝 계산
@@ -364,11 +364,11 @@ void USkeletalMesh::SetData(FSkeletalMeshRenderData* renderData)
 
     SkeletalMeshRenderData = renderData;
 
-    uint32 verticeNum = SkeletalMeshRenderData->BindPoseVertices.Num();
+    uint32 verticeNum = SkeletalMeshRenderData->Vertices.Num();
 
     if (verticeNum <= 0) return;
 
-    SkeletalMeshRenderData->DynamicVertexBuffer = FEngineLoop::Renderer.CreateDynamicVertexBuffer(SkeletalMeshRenderData->MeshName, SkeletalMeshRenderData->BindPoseVertices);
+    SkeletalMeshRenderData->DynamicVertexBuffer = FEngineLoop::Renderer.CreateDynamicVertexBuffer(SkeletalMeshRenderData->MeshName, SkeletalMeshRenderData->Vertices);
 
     uint32 indexNum = SkeletalMeshRenderData->Indices.Num();
     if (indexNum > 0)

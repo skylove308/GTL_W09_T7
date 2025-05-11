@@ -1,6 +1,20 @@
 #pragma once
+#include <filesystem>
+
+#include "Animation/Skeleton.h"
 #include "UObject/Object.h"
 #include "UObject/ObjectMacros.h"
+
+class UAnimationAsset;
+
+enum class EExtensionType : uint8
+{
+    None = 0,
+    Obj = 1ULL << 0,
+    Fbx = 1ULL << 1,
+
+    All = ~0ULL, 
+};
 
 enum class EAssetType : uint8
 {
@@ -8,6 +22,7 @@ enum class EAssetType : uint8
     SkeletalMesh,
     Texture2D,
     Material,
+    Animation
 };
 
 struct FAssetInfo
@@ -23,6 +38,16 @@ struct FAssetRegistry
     TMap<FName, FAssetInfo> PathNameToAssetInfo;
 };
 
+struct FFbxLoadResult
+{
+    //TArray<USkeleton*> Skeletons;
+    TArray<USkeletalMesh*> SkeletalMeshes;
+    //TArray<UStaticMesh*> StaticMeshes;
+    //TArray<UMaterial*> Materials;
+    TArray<UAnimationAsset*> Animations;
+};
+
+
 class UAssetManager : public UObject
 {
     DECLARE_CLASS(UAssetManager, UObject)
@@ -32,6 +57,7 @@ private:
 
 public:
     UAssetManager() = default;
+    ~UAssetManager();
 
     static bool IsInitialized();
 
@@ -45,6 +71,17 @@ public:
 
     const TMap<FName, FAssetInfo>& GetAssetRegistry();
 
+    USkeletalMesh* GetSkeletalMesh(const FName& Name);
+    UAnimationAsset* GetAnimationAsset(const FName& Name);
+
+    void AddSkeletalMesh(const FName& Key, USkeletalMesh* Mesh);
+    void AddAnimationAsset(const FName& InKey, UAnimationAsset* InValue);
+
 private:
-    void LoadObjFiles();
+    void LoadFiles(uint8 ExtensionFlags);
+    void LoadFile(std::filesystem::path Entry, uint8 ExtensionFlags);
+
+    inline static TMap<FName, USkeletalMesh*> SkeletalMeshMap;
+    //inline static TMap<FName, UMaterial*> MaterialMap;
+    inline static TMap<FName, UAnimationAsset*> AnimationMap;
 };
