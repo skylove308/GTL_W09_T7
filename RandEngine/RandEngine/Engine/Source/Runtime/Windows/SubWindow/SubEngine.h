@@ -7,9 +7,9 @@
 #include "UnrealEd/UnrealEd.h"
 
 //자신의 꿈을 펼쳐볼 수 있는 서브 엔진입니다.
-class USubEngine : public UObject
+class USubEngine : public UEngine
 {
-    DECLARE_CLASS(USubEngine, UObject)
+    DECLARE_CLASS(USubEngine, UEngine)
 public:
     USubEngine();
     ~USubEngine();

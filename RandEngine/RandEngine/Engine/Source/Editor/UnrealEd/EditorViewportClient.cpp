@@ -14,6 +14,7 @@
 #include "Camera/CameraComponent.h"
 #include "LevelEditor/SLevelEditor.h"
 #include "SlateCore/Input/Events.h"
+#include "SubWindow/SubEngine.h"
 
 FVector FEditorViewportClient::Pivot = FVector(0.0f, 0.0f, 0.0f);
 float FEditorViewportClient::OrthoSize = 10.0f;
@@ -37,7 +38,7 @@ void FEditorViewportClient::Draw(FViewport* Viewport)
 {
 }
 
-void FEditorViewportClient::Initialize(EViewScreenLocation InViewportIndex, const FRect& InRect)
+void FEditorViewportClient::Initialize(EViewScreenLocation InViewportIndex, const FRect& InRect,UEngine* InEngine)
 {
     ViewportIndex = static_cast<int32>(InViewportIndex);
     
@@ -47,7 +48,10 @@ void FEditorViewportClient::Initialize(EViewScreenLocation InViewportIndex, cons
     Viewport = new FViewport(InViewportIndex);
     Viewport->Initialize(InRect);
 
-    GizmoActor = FObjectFactory::ConstructObject<ATransformGizmo>(GEngine); // TODO : EditorEngine 외의 다른 Engine 형태가 추가되면 GEngine 대신 다른 방식으로 넣어주어야 함.
+    if (Engine == nullptr)
+        GizmoActor = FObjectFactory::ConstructObject<ATransformGizmo>(GEngine); // TODO : EditorEngine 외의 다른 Engine 형태가 추가되면 GEngine 대신 다른 방식으로 넣어주어야 함.
+    else
+        GizmoActor = FObjectFactory::ConstructObject<ATransformGizmo>(Engine);
     GizmoActor->Initialize(this);
 }
 

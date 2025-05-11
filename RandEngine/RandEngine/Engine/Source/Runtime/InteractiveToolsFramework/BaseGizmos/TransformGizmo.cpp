@@ -99,7 +99,7 @@ void ATransformGizmo::Tick(float DeltaTime)
     {
         return;
     }
-
+    
     UEditorEngine* Engine = Cast<UEditorEngine>(GEngine);
     if (!Engine)
     {

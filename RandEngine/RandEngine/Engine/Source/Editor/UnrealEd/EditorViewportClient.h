@@ -10,6 +10,7 @@
 #define  MIN_ORTHOZOOM (1.0)  // 2D ortho viewport zoom >= MIN_ORTHOZOOM
 #define MAX_ORTHOZOOM (1e25)
 
+class UEngine;
 struct FPointerEvent;
 enum class EViewScreenLocation : uint8;
 class FViewportResource;
@@ -88,7 +89,7 @@ public:
 
     virtual void Draw(FViewport* Viewport) override;
     virtual UWorld* GetWorld() const override { return nullptr; }
-    void Initialize(EViewScreenLocation InViewportIndex, const FRect& InRect);
+    void Initialize(EViewScreenLocation InViewportIndex, const FRect& InRect, UEngine* InEngine);
     void Tick(float DeltaTime);
     void Release() const;
 
@@ -244,5 +245,7 @@ private:
     ATransformGizmo* GizmoActor = nullptr;
     USceneComponent* PickedGizmoComponent = nullptr;
     bool bShowGizmo = true;
+
+    UEngine* Engine = nullptr;
 };
 

@@ -1,4 +1,5 @@
 #pragma once
+#include "SkeletalSubEngine.h"
 #include "SubEngine.h"
 
 
@@ -6,9 +7,9 @@ class ACube;
 class ASkeletalMeshActor;
 class SAnimationTimelinePanel;
 
-class UAnimationSubEngine : public USubEngine
+class UAnimationSubEngine : public USkeletalSubEngine
 {
-    DECLARE_CLASS(UAnimationSubEngine, USubEngine)
+    DECLARE_CLASS(UAnimationSubEngine, USkeletalSubEngine)
 public:
     UAnimationSubEngine();
     ~UAnimationSubEngine();
@@ -18,8 +19,4 @@ public:
     virtual void Input(float DeltaTime);
     virtual void Render();
     virtual void Release();
-
-    void SetSkeletalMesh(USkeletalMesh* InSkeletalMesh);    
-    USkeletalMesh* SelectedSkeletalMesh;
-    ACube* BasePlane = nullptr;
 };

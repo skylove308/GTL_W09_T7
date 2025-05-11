@@ -4,6 +4,8 @@
 #include "SubRenderer.h"
 #include "UnrealClient.h"
 #include "Actors/Cube.h"
+#include "Animation/Skeleton.h"
+
 UAnimationSubEngine::UAnimationSubEngine()
 {
 }
@@ -15,87 +17,17 @@ UAnimationSubEngine::~UAnimationSubEngine()
 void UAnimationSubEngine::Initialize(HWND& hWnd, FGraphicsDevice* InGraphics, FDXDBufferManager* InBufferManager, UImGuiManager* InSubWindow,
     UnrealEd* InUnrealEd)
 {
-    Graphics = InGraphics;
-    BufferManager = InBufferManager;
-    Wnd = &hWnd;
-    SubRenderer = new FSubRenderer;
-    UnrealEditor = InUnrealEd;
-    SubUI = new FImGuiSubWindow(hWnd, InGraphics->Device, InGraphics->DeviceContext);
-    UImGuiManager::ApplySharedStyle(InSubWindow->GetContext(), SubUI->Context);
-    SubRenderer->Initialize(InGraphics, InBufferManager,this);
-
-    ViewportClient = new FEditorViewportClient();
-    ViewportClient->Initialize(EViewScreenLocation::EVL_MAX, FRect(0,0,800,600));
-    ViewportClient->CameraReset();
-    EditorPlayer = FObjectFactory::ConstructObject<AEditorPlayer>(this);
-
-    BasePlane = FObjectFactory::ConstructObject<ACube>(this);
-    BasePlane->SetActorScale(FVector(10,10,1));
-    BasePlane->SetActorLocation(FVector(0,0,-1));
+    USkeletalSubEngine::Initialize(hWnd,InGraphics, InBufferManager, InSubWindow,InUnrealEd);
 }
 
 void UAnimationSubEngine::Tick(float DeltaTime)
 {
-    Input(DeltaTime);
-    ViewportClient->Tick(DeltaTime);
-    EditorPlayer->Tick(DeltaTime);
-    Render();    
+    USkeletalSubEngine::Tick(DeltaTime);  
 }
 
 void UAnimationSubEngine::Input(float DeltaTime)
 {
-    if (::GetForegroundWindow() != *Wnd)
-        return;
-    if (GetAsyncKeyState(VK_RBUTTON) & 0x8000)
-    {
-        if (!bRBClicked)
-        {
-            bRBClicked = true;
-            GetCursorPos(&LastMousePos);
-        }
-        POINT CursorPos;
-        GetCursorPos(&CursorPos);
-
-        float DeltaX = CursorPos.x - LastMousePos.x;
-        float DeltaY = CursorPos.y - LastMousePos.y;
-        ViewportClient->CameraRotateYaw(DeltaX * 0.1f);
-        ViewportClient->CameraRotatePitch(DeltaY*0.1f);
-        LastMousePos = CursorPos;
-    }
-    else
-    {
-        if (bRBClicked)
-        {
-            bRBClicked = false;
-        }
-    }
-    if (bRBClicked)
-    {
-        if (GetAsyncKeyState('A') & 0x8000)
-        {
-            ViewportClient->CameraMoveRight(-100.f * DeltaTime);
-        }
-        if (GetAsyncKeyState('D') & 0x8000)
-        {
-            ViewportClient->CameraMoveRight(100.f * DeltaTime);
-        }
-        if (GetAsyncKeyState('W') & 0x8000)
-        {
-            ViewportClient->CameraMoveForward(100.f * DeltaTime);
-        }
-        if (GetAsyncKeyState('S') & 0x8000)
-        {
-            ViewportClient->CameraMoveForward(-100.f * DeltaTime);
-        }
-        if (GetAsyncKeyState('E') & 0x8000)
-        {
-            ViewportClient->CameraMoveUp(100.f * DeltaTime);
-        }
-        if (GetAsyncKeyState('Q') & 0x8000)
-        {
-            ViewportClient->CameraMoveUp(-100.f * DeltaTime);
-        }
-    }
+    USkeletalSubEngine::Input(DeltaTime);
 }
 
 void UAnimationSubEngine::Render()
@@ -122,26 +54,5 @@ void UAnimationSubEngine::Render()
 
 void UAnimationSubEngine::Release()
 {
-    USubEngine::Release();
-    if (SubUI)
-    {
-        SubUI->Shutdown();
-        delete SubUI;
-        SubUI = nullptr;
-    }
-    if (SubRenderer)
-    {
-        SubRenderer->Release();
-        delete SubRenderer;
-        SubRenderer = nullptr;
-    }
-}
-
-void UAnimationSubEngine::SetSkeletalMesh(USkeletalMesh* InSkeletalMesh)
-{
-    SelectedSkeletalMesh = InSkeletalMesh;
-    if (SubRenderer)
-    {
-        SubRenderer->SetPreviewSkeletalMesh(SelectedSkeletalMesh);
-    }
+    USkeletalSubEngine::Release();
 }
