@@ -196,13 +196,21 @@ void FSubRenderer::RenderMesh()
 
 void FSubRenderer::PrepareStaticRenderArr(FEditorViewportClient* Viewport)
 {
-    
-    for (auto iter : Viewport->GetGizmoActor()->GetArrowArr())
-        StaticMeshComponents.Add(iter);
-    // for (auto iter : Viewport->GetGizmoActor()->GetDiscArr())
-    //     StaticMeshComponents.Add(iter);
-    // for (auto iter : Viewport->GetGizmoActor()->GetScaleArr())
-    //     StaticMeshComponents.Add(iter);
+    if (Engine->EditorPlayer->GetControlMode() == CM_TRANSLATION)
+    {
+        for (auto iter : Viewport->GetGizmoActor()->GetArrowArr())
+            StaticMeshComponents.Add(iter);
+    }
+    else if (Engine->EditorPlayer->GetControlMode() == CM_ROTATION)
+    {
+        for (auto iter : Viewport->GetGizmoActor()->GetDiscArr())
+            StaticMeshComponents.Add(iter);
+    }
+    else
+    {
+        for (auto iter : Viewport->GetGizmoActor()->GetScaleArr())
+            StaticMeshComponents.Add(iter);
+    }
     if(Cast<USkeletalSubEngine>(Engine))
         StaticMeshComponents.Add(Cast<USkeletalSubEngine>(Engine)->BasePlane->GetStaticMeshComponent());
     else if ( Cast<UAnimationSubEngine>(Engine))

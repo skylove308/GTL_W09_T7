@@ -104,6 +104,21 @@ void USkeletalSubEngine::Input(float DeltaTime)
             ViewportClient->CameraMoveUp(-100.f * DeltaTime);
         }
     }
+    else
+    {
+        if (GetAsyncKeyState('W') & 0x8000)
+        {
+            EditorPlayer->SetMode(CM_TRANSLATION);
+        }
+        if (GetAsyncKeyState('E') & 0x8000)
+        {
+            EditorPlayer->SetMode(CM_ROTATION);
+        }
+        if (GetAsyncKeyState('R') & 0x8000)
+        {
+            EditorPlayer->SetMode(CM_SCALE);
+        }
+    }
 }
 
 void USkeletalSubEngine::Render()
