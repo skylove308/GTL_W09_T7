@@ -1609,9 +1609,7 @@
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\Mesh\SkinnedMeshComponent.cpp" />
     <ClCompile Include="Engine\Source\Editor\PropertyEditor\Sub\SkeletalViewerPanel.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\UserInterface\Drawer.cpp" />
-    <ClCompile Include="Engine\Source\Runtime\Windows\SubWindow\SubCamera.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Windows\SubWindow\SubRenderer.cpp" />
-    <ClCompile Include="Engine\Source\Editor\PropertyEditor\Animation\AnimationTimelinePanel.cpp" />
     <ClCompile Include="Engine\Source\ThirdParty\ImGui\include\ImGui\GraphEditor.cpp" />
     <ClCompile Include="Engine\Source\ThirdParty\ImGui\include\ImGui\ImCurveEdit.cpp" />
     <ClCompile Include="Engine\Source\ThirdParty\ImGui\include\ImGui\ImGradient.cpp" />
@@ -1627,9 +1625,30 @@
     <ClCompile Include="Engine\Source\ThirdParty\ImGui\include\ImGui\ImGuizmo.cpp" />
     <ClCompile Include="Engine\Source\ThirdParty\ImGui\include\ImGui\ImSequencer.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\SkeletalMeshDebugger.cpp" />
-    <ClCompile Include="Engine\Source\Runtime\Engine\Animation\Skeleton.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Animation\Skeleton.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Components\Mesh\SkeletalMesh.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Renderer\SkeletalMeshRenderPass.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Animation\AnimInstance.cpp" />
+    <ClCompile Include="Engine\Source\Editor\PropertyEditor\Sub\AnimationTimelinePanel.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Core\Math\Transform.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Core\Misc\FrameNumber.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Core\Misc\FrameRate.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Core\Misc\FrameTime.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Animation\AnimationAsset.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Animation\AnimCurveTypes.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Animation\AnimData\AnimDataModel.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Animation\AnimData\IAnimationDataModel.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Animation\AnimSequence.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Animation\AnimSequenceBase.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Animation\AnimTypes.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Curves\KeyHandle.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Curves\IndexedCurve.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Curves\RealCurve.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Curves\RichCurve.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Windows\SubWindow\AnimationSubEngine.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Windows\SubWindow\SubEngine.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Windows\SubWindow\SkeletalSubEngine.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Animation\AnimSingleNodeInstance.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="RandEngine.natvis" />
@@ -1652,7 +1671,6 @@
     <ClInclude Include="Engine\Source\Editor\PropertyEditor\Sub\SkeletalViewerPanel.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\UserInterface\Drawer.h" />
     <ClInclude Include="Engine\Source\Runtime\Windows\SubWindow\ImGuiSubWindow.h" />
-    <ClInclude Include="Engine\Source\Runtime\Windows\SubWindow\SubCamera.h" />
     <ClInclude Include="Engine\Source\Runtime\Windows\SubWindow\SubRenderer.h" />
     <ClInclude Include="Engine\Source\ThirdParty\FBX\include\fbxsdk.h" />
     <ClInclude Include="Engine\Source\ThirdParty\FBX\include\fbxsdk\core\arch\fbxalloc.h" />
@@ -1936,7 +1954,6 @@
     <ClInclude Include="Engine\Source\ThirdParty\FBX\include\libxml2\libxml\xpathInternals.h" />
     <ClInclude Include="Engine\Source\ThirdParty\FBX\include\libxml2\libxml\xpointer.h" />
     <ClInclude Include="resource.h" />
-    <ClInclude Include="Engine\Source\Editor\PropertyEditor\Animation\AnimationTimelinePanel.h" />
     <ClInclude Include="Engine\Source\ThirdParty\ImGui\include\ImGui\GraphEditor.h" />
     <ClInclude Include="Engine\Source\ThirdParty\ImGui\include\ImGui\ImCurveEdit.h" />
     <ClInclude Include="Engine\Source\ThirdParty\ImGui\include\ImGui\ImGradient.h" />
@@ -1949,9 +1966,31 @@
     <ClInclude Include="Engine\Source\ThirdParty\ImGui\include\ImGui\ImGuizmo.h" />
     <ClInclude Include="Engine\Source\ThirdParty\ImGui\include\ImGui\ImSequencer.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\SkeletalMeshDebugger.h" />
-    <ClInclude Include="Engine\Source\Runtime\Engine\Animation\Skeleton.h" />
+    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Animation\Skeleton.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Components\Mesh\SkeletalMesh.h" />
     <ClInclude Include="Engine\Source\Runtime\Renderer\SkeletalMeshRenderPass.h" />
+    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Animation\AnimInstance.h" />
+    <ClInclude Include="Engine\Source\Editor\PropertyEditor\Sub\AnimationTimelinePanel.h" />
+    <ClInclude Include="Engine\Source\Runtime\Core\Math\Axis.h" />
+    <ClInclude Include="Engine\Source\Runtime\Core\Math\Transform.h" />
+    <ClInclude Include="Engine\Source\Runtime\Core\Misc\FrameNumber.h" />
+    <ClInclude Include="Engine\Source\Runtime\Core\Misc\FrameRate.h" />
+    <ClInclude Include="Engine\Source\Runtime\Core\Misc\FrameTime.h" />
+    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Animation\AnimationAsset.h" />
+    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Animation\AnimCurveTypes.h" />
+    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Animation\AnimData\AnimDataModel.h" />
+    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Animation\AnimData\IAnimationDataModel.h" />
+    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Animation\AnimSequence.h" />
+    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Animation\AnimSequenceBase.h" />
+    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Animation\AnimTypes.h" />
+    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Curves\KeyHandle.h" />
+    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Curves\IndexedCurve.h" />
+    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Curves\RealCurve.h" />
+    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Curves\RichCurve.h" />
+    <ClInclude Include="Engine\Source\Runtime\Windows\SubWindow\AnimationSubEngine.h" />
+    <ClInclude Include="Engine\Source\Runtime\Windows\SubWindow\SubEngine.h" />
+    <ClInclude Include="Engine\Source\Runtime\Windows\SubWindow\SkeletalSubEngine.h" />
+    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Animation\AnimSingleNodeInstance.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\CompositingShader.hlsl" />

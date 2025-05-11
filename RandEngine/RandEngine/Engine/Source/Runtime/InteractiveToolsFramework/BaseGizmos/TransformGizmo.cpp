@@ -145,31 +145,6 @@ void ATransformGizmo::Tick(float DeltaTime)
 
     if (TargetComponent)
     {
-        // [TEMP] 삭제 필요 - 프레임마다 Gizmo기준으로 Bone업데이트 중
-        //ASkeletalMeshActor* SkeletalMeshActor = Cast<ASkeletalMeshActor>(TargetComponent->GetOwner());
-        //if (SkeletalMeshActor)
-        //{
-        //    USkeletalMeshComponent* SkeletalMeshComp = Cast<USkeletalMeshComponent>(SkeletalMeshActor->GetRootComponent());
-        //    USkeleton* Skeleton = SkeletalMeshComp->GetSkeletalMesh()->Skeleton;
-
-        //    for (int32 i = 0; i < Skeleton->BoneTree.Num(); ++i)
-        //    {
-        //        if (Skeleton->BoneTree[i].ParentIndex == -1)
-        //        {
-        //            Skeleton->CurrentPose.LocalTransforms[i] = Cast<ASkeletalMeshActor>(SkeletalMeshComp->GetOwner())->BoneGizmoSceneComponents[i]->GetRelativeModelMatrix();
-        //            //Skeleton->CurrentPose.GlobalTransforms[i] = Skeleton->CurrentPose.LocalTransforms[i];
-        //        }
-        //        else
-        //        {
-        //            Skeleton->CurrentPose.LocalTransforms[i] = Cast<ASkeletalMeshActor>(SkeletalMeshComp->GetOwner())->BoneGizmoSceneComponents[i]->GetRelativeModelMatrix();
-        //            //Skeleton->CurrentPose.GlobalTransforms[i] = Skeleton->CurrentPose.LocalTransforms[i] * Skeleton->CurrentPose.GlobalTransforms[i];
-        //        }
-        //    }
-
-        //    SkeletalMeshComp->GetSkeletalMesh()->UpdateWorldTransforms();
-        //    SkeletalMeshComp->GetSkeletalMesh()->UpdateAndApplySkinning();
-        //}
-
         SetActorLocation(TargetComponent->GetWorldLocation());
         if (EditorPlayer->GetCoordMode() == ECoordMode::CDM_LOCAL || EditorPlayer->GetControlMode() == EControlMode::CM_SCALE)
         {

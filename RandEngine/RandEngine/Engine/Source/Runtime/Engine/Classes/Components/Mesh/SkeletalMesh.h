@@ -2,7 +2,7 @@
 #include "UObject/Object.h"
 #include "UObject/ObjectMacros.h"
 #include "Components/Material/Material.h"
-#include "Engine/Animation/Skeleton.h"
+#include "Engine/Classes/Animation/Skeleton.h"
 #include "Define.h"
 
 struct FSkeletalMeshRenderData;
