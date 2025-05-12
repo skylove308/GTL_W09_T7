@@ -1649,6 +1649,9 @@
     <ClCompile Include="Engine\Source\Runtime\Windows\SubWindow\SubEngine.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Windows\SubWindow\SkeletalSubEngine.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Classes\Animation\AnimSingleNodeInstance.cpp" />
+    <ClCompile Include="Engine\Source\Editor\PropertyEditor\Sub\SkeletalDetailPanel.cpp" />
+    <ClCompile Include="Engine\Source\ThirdParty\ImGui\include\ImGui\imgui_neo_internal.cpp" />
+    <ClCompile Include="Engine\Source\ThirdParty\ImGui\include\ImGui\imgui_neo_sequencer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="RandEngine.natvis" />
@@ -1660,6 +1663,7 @@
     <FxCompile Include="Shaders\DepthOnlyVS.hlsl" />
     <FxCompile Include="Shaders\LightPBR.hlsl" />
     <FxCompile Include="Shaders\PointLightCubemapGS.hlsl" />
+    <FxCompile Include="Shaders\SkeletalMeshVertexShader.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Engine\Asset\SkeletalMeshAsset.h" />
@@ -1991,6 +1995,9 @@
     <ClInclude Include="Engine\Source\Runtime\Windows\SubWindow\SubEngine.h" />
     <ClInclude Include="Engine\Source\Runtime\Windows\SubWindow\SkeletalSubEngine.h" />
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Animation\AnimSingleNodeInstance.h" />
+    <ClInclude Include="Engine\Source\Editor\PropertyEditor\Sub\SkeletalDetailPanel.h" />
+    <ClInclude Include="Engine\Source\ThirdParty\ImGui\include\ImGui\imgui_neo_internal.h" />
+    <ClInclude Include="Engine\Source\ThirdParty\ImGui\include\ImGui\imgui_neo_sequencer.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\CompositingShader.hlsl" />

@@ -531,3 +531,9 @@ struct FDiffuseMultiplier
     FVector DiffuseOverrideColor;
 };
 #pragma endregion
+
+#define MAX_BONES 120
+struct FBonesConstants
+{
+    FMatrix BoneMatrices[MAX_BONES];
+};
