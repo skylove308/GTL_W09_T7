@@ -90,8 +90,14 @@ void UAnimSingleNodeInstance::UpdateAnimation(float DeltaSeconds, bool bNeedsVal
     {
         return;
     }
-
-    CurrentTime += DeltaSeconds * PlayRate;
+    if (bUseExternalTime) 
+    {
+        CurrentTime = ExternalTime;
+    }
+    else {
+        CurrentTime += DeltaSeconds * PlayRate;
+    }
+   
     const double PlayLength = CurrentSequence->GetDataModel()->GetPlayLength();
     if (PlayLength > 0.0)
     {
@@ -124,7 +130,7 @@ void UAnimSingleNodeInstance::UpdateAnimation(float DeltaSeconds, bool bNeedsVal
     for (const FBoneAnimationTrack& Track : BoneTracks)
     {
         const int32 BoneIndex = Skeleton->GetBoneIndex(Track.Name);
-
+        if (BoneIndex == INDEX_NONE) continue;
         FString tt = BoneTracks[BoneIndex].Name.ToString();
         FString nn = Skeleton->BoneTree[BoneIndex].Name.ToString();
         std::cout << GetData(tt) << GetData(nn);

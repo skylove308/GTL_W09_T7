@@ -7,7 +7,7 @@
 #include "UnrealEd/EditorPanel.h" // UEditorPanel 상속 가정
 #include "Animation/AnimSequence.h"
 #include "Animation/AnimData/AnimDataModel.h" 
-
+#include "Components/Mesh/SkeletalMeshComponent.h"
 
 #include "Imgui/imgui.h"
 #include "Imgui/imgui_internal.h" // 필요한 경우 (하지만 직접 사용은 최소화)
@@ -33,37 +33,37 @@ struct FMockAnimNotifyEvent
     static int NextEventId;
 };
 
-class MockAnimSequence
-{
-public:
-    TArray<FMockAnimNotifyEvent> Notifies;
-    float SequenceLength = 10.0f;
-    float FrameRate = 30.0f;
-
-    MockAnimSequence() {}
-
-    void AddNotify(float TriggerTime, const FName& Name, int AssignedTrackId = -1) // 트랙 ID 인자 추가
-    {
-        Notifies.Add(FMockAnimNotifyEvent(TriggerTime, Name, AssignedTrackId));
-        // 정렬은 필요시 외부에서 수행하거나, 추가 직후가 아닌 다른 시점에 수행
-    }
-
-    void RemoveNotifyByEventId(int EventId)
-    {
-        Notifies.RemoveAll([EventId](const FMockAnimNotifyEvent& Event)
-            {
-                return Event.EventId == EventId;
-            });
-    }
-
-    void SortNotifies()
-    {
-        Notifies.Sort([](const FMockAnimNotifyEvent& A, const FMockAnimNotifyEvent& B)
-            {
-                return A.TriggerTime < B.TriggerTime;
-            });
-    }
-};
+//class MockAnimSequence
+//{
+//public:
+//    TArray<FMockAnimNotifyEvent> Notifies;
+//    float SequenceLength = 10.0f;
+//    float FrameRate = 30.0f;
+//
+//    MockAnimSequence() {}
+//
+//    void AddNotify(float TriggerTime, const FName& Name, int AssignedTrackId = -1) // 트랙 ID 인자 추가
+//    {
+//        Notifies.Add(FMockAnimNotifyEvent(TriggerTime, Name, AssignedTrackId));
+//        // 정렬은 필요시 외부에서 수행하거나, 추가 직후가 아닌 다른 시점에 수행
+//    }
+//
+//    void RemoveNotifyByEventId(int EventId)
+//    {
+//        Notifies.RemoveAll([EventId](const FMockAnimNotifyEvent& Event)
+//            {
+//                return Event.EventId == EventId;
+//            });
+//    }
+//
+//    void SortNotifies()
+//    {
+//        Notifies.Sort([](const FMockAnimNotifyEvent& A, const FMockAnimNotifyEvent& B)
+//            {
+//                return A.TriggerTime < B.TriggerTime;
+//            });
+//    }
+//};
 
 // --- Editor Specific Data Structures (ImGui 연동용) ---
 enum class EEditorTimelineTrackType
@@ -102,8 +102,9 @@ public:
     virtual ~SAnimationTimelinePanel(); // 가상 소멸자 권장
 
     // --- Public Interface Methods ---
-    void SetTargetSequence(MockAnimSequence* Sequence);
-
+    void InitSkeletalMeshComponent();
+    void InitTargetSequence();
+    
     // 데이터 접근 및 변환 함수
     float GetSequenceDurationSeconds() const;
     float GetSequenceFrameRate() const;
@@ -117,6 +118,7 @@ public:
 
 private:
     // --- Private Helper Methods for UI Rendering ---
+    void RenderAnimationSelector(); // 애니메이션 선택 UI
     void RenderTimelineEditor();      // 전체 타임라인 UI를 그리는 메인 함수
     void RenderPlaybackControls();    // 재생 관련 컨트롤 UI
     void RenderSequencerWidget();     // im-neo-sequencer를 사용하여 실제 시퀀서 부분을 그리는 함수
@@ -134,12 +136,12 @@ private:
 
 
     // --- Member Variables ---
-    MockAnimSequence* MockAnimSequenceInstance; // 생성자에서 할당, 소멸자에서 해제
-    MockAnimSequence* TargetSequence;           // 현재 편집 대상 시퀀스
+    UAnimSequence* TargetSequence;           // 현재 편집 대상 시퀀스
 
     TArray<FEditorTimelineTrack> DisplayableTracks; // UI에 표시될 트랙 정보
 
     // Playback state
+    float AnimationDeltaTime = 0;
     bool bIsPlaying;
     bool bIsLooping;
     float PlaybackSpeed;
@@ -155,4 +157,6 @@ private:
     // (예: ImGui::GetContentRegionAvail())
     float Width;
     float Height;
+
+    USkeletalMeshComponent* SelectedComponent = nullptr;
 };
