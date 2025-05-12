@@ -1,16 +1,15 @@
 // CustomAnimInstance.cpp
 #include "AnimInstance.h"
+#include "Animation/AnimTypes.h"
 #include "UObject/Casts.h"
+
 
 UAnimInstance::UAnimInstance()
 {
-    AnimProxy = new FAnimInstanceProxy();
-    AnimProxy->Initialize(this);
 }
 
 UAnimInstance::~UAnimInstance()
 {
-    delete AnimProxy;
 }
 
 void UAnimInstance::Initialize()
@@ -45,16 +44,6 @@ void UAnimInstance::TriggerAnimNotifies(float DeltaTime)
 //void UAnimInstance::HandleNotify(const FAnimNotifyEvent& NotifyEvent)
 //{
 //}
-
-void UAnimInstance::FAnimInstanceProxy::Initialize(UAnimInstance* InAnimInstance)
-{
-    AnimInstance = InAnimInstance;
-    ProxyRequiredBones = AnimInstance->RequiredBones;
-}
-
-void UAnimInstance::FAnimInstanceProxy::Update(float DeltaTime)
-{
-}
 
 USkeletalMeshComponent* UAnimInstance::GetSkelMeshComponent() const
 {
