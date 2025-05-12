@@ -3,7 +3,6 @@
 
 #include "UObject/Object.h"
 #include "UObject/ObjectMacros.h"
-#include "Animation/AnimTypes.h"
 
 class USkeleton;
 class USkeletalMeshComponent;
@@ -30,14 +29,8 @@ public:
     void TriggerAnimNotifies(float DeltaTime);
     //void HandleNotify(const FAnimNotifyEvent& NotifyEvent);
 
-    // 뼈/커브 데이터
-    struct FBoneContainer
-    {
-        TArray<FName> BoneNames;
-        TArray<int32> ParentIndices;
-    };
-
-    const FBoneContainer& GetRequiredBones() const { return RequiredBones; }
+    
+    //const FBoneContainer& GetRequiredBones() const { return RequiredBones; }
 
     USkeletalMeshComponent* GetSkelMeshComponent() const;
     // [TEMP]
@@ -52,23 +45,10 @@ public:
 
 protected:
     // 필수 데이터
-    FBoneContainer RequiredBones;
+    //FBoneContainer RequiredBones;
     TMap<FName, float> AnimationCurves;
     FAnimNotifyQueue NotifyQueue;
 
     // 컴포넌트 참조
     USkeletalMeshComponent* OwningComponent = nullptr;
-
-    // 프록시 시스템
-    class FAnimInstanceProxy
-    {
-    public:
-        void Initialize(UAnimInstance* InAnimInstance);
-        void Update(float DeltaTime);
-
-        UAnimInstance* AnimInstance = nullptr;
-        FBoneContainer ProxyRequiredBones;
-    };
-
-    FAnimInstanceProxy* AnimProxy = nullptr;
 };
