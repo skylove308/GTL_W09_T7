@@ -117,13 +117,12 @@ void UAnimSingleNodeInstance::UpdateAnimation(float DeltaSeconds, bool bNeedsVal
     {
         CurrentTime = ExternalTime;
     }
-    else {
+    else 
+    {
         CurrentTime += DeltaSeconds * PlayRate;
     }
    
     const double PlayLength = CurrentSequence->GetDataModel()->GetPlayLength();
-
-    CurrentTime += DeltaSeconds * PlayRate;
 
     if (PlayLength > 0.0)
     {
