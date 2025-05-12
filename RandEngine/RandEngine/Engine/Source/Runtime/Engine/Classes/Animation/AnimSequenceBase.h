@@ -13,9 +13,8 @@ public:
     // 언리얼에서는 Set이 없음.
     void SetAnimDataModel(UAnimDataModel* InDataModel);
 
-
     //TArray<struct FAnimNotifyEvent> Notifies;
     
-private:
+protected:
     UAnimDataModel* DataModel;
 };

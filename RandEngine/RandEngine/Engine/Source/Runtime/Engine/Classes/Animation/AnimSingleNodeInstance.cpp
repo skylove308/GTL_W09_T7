@@ -149,74 +149,16 @@ void UAnimSingleNodeInstance::UpdateAnimation(float DeltaSeconds, bool bNeedsVal
         }
     }
 
-    const TArray<FBoneAnimationTrack>& BoneTracks = CurrentSequence->GetDataModel()->GetBoneAnimationTracks();
+    FPoseContext Pose(this);
 
-    const int32 NumBones = Skeleton->BoneTree.Num();
+    FAnimExtractContext Extract(CurrentTime, false);
 
-    TArray<FMatrix> LocalTransforms;
-    LocalTransforms.SetNum(NumBones);
+    CurrentSequence->GetAnimationPose(Pose, Extract);
 
-    for (int32 BoneIdx = 0; BoneIdx < NumBones; BoneIdx++)
-    {
-        LocalTransforms[BoneIdx] = Skeleton->ReferenceSkeleton.RefBonePose[BoneIdx];
-    }
-
-    const FFrameRate FrameRate = CurrentSequence->GetDataModel()->GetFrameRate();
-    const float FrameTime = CurrentTime * FrameRate.AsDecimal();
-    
-    for (const FBoneAnimationTrack& Track : BoneTracks)
-    {
-        const int32 BoneIndex = Skeleton->GetBoneIndex(Track.Name);
-        if (BoneIndex == INDEX_NONE) continue;
-        FString tt = BoneTracks[BoneIndex].Name.ToString();
-        FString nn = Skeleton->BoneTree[BoneIndex].Name.ToString();
-        std::cout << GetData(tt) << GetData(nn);
-        if (BoneIndex == INDEX_NONE)
-        {
-            continue;
-        }
-    
-        // 키 프레임 보간
-        int32 PrevKey = FMath::Clamp(FMath::FloorToInt(FrameTime), 0, Track.InternalTrackData.PosKeys.Num() - 1);
-        int32 NextKey = FMath::Clamp(PrevKey + 1, 0, Track.InternalTrackData.PosKeys.Num() - 1);
-    
-        float Alpha = FMath::Clamp(FrameTime - PrevKey, 0.f, 1.f);
-
-        if (PlayRate < 0.0f)
-        {
-            int32 Temp = 0;
-            Temp = PrevKey;
-            PrevKey = NextKey;
-            NextKey = Temp;
-            Alpha = 1.0f - Alpha;
-        }
-
-        // 변환 요소 보간
-        const FVector Translation = FMath::Lerp(
-            Track.InternalTrackData.PosKeys[PrevKey],
-            Track.InternalTrackData.PosKeys[NextKey],
-            Alpha
-        );
-        //
-        const FQuat Rotation = FQuat::Slerp(
-            Track.InternalTrackData.RotKeys[PrevKey],
-            Track.InternalTrackData.RotKeys[NextKey],
-            Alpha
-        );
-        //
-        const FVector Scale = FMath::Lerp(
-            Track.InternalTrackData.ScaleKeys[PrevKey],
-            Track.InternalTrackData.ScaleKeys[NextKey],
-            Alpha
-        );
-
-        LocalTransforms[BoneIndex] = JungleMath::CreateModelMatrix(Translation, Rotation, Scale);
-    }
-    
     //LocalTransforms[GEngineLoop.Boneidx].Print();
-    for (int32 i = 0; i < LocalTransforms.Num(); i++)
+    for (int32 i = 0; i < Pose.Pose.BonContainer.BoneLocalTransforms.Num(); i++)
     {
-        OwningComponent->GetSkeletalMesh()->SetBoneLocalMatrix(i, LocalTransforms[i]);
+        OwningComponent->GetSkeletalMesh()->SetBoneLocalMatrix(i, Pose.Pose.BonContainer.BoneLocalTransforms[i]);
     }
 
     OwningComponent->GetSkeletalMesh()->UpdateWorldTransforms();
