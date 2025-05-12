@@ -195,8 +195,25 @@ void USkeletalMeshComponent::Play(bool bLooping)
     UAnimSingleNodeInstance* SingleNodeInstance = GetSingleNodeInstance();
     if (SingleNodeInstance)
     {
+        UAnimSequence* CurrentSequence = Cast<UAnimSequence>(SingleNodeInstance->CurrentAsset);
+
+        if (!CurrentSequence)
+        {
+            UE_LOG(ELogLevel::Warning, TEXT("No animation asset set currently"));
+            return;
+        }
+
+        const double PlayLength = CurrentSequence->GetDataModel()->GetPlayLength();
+
         // [TEMP] 확인 편의를 위해 Play시 CurrentTime 초기화
-        SingleNodeInstance->CurrentTime = 0.0f;
+        if (SingleNodeInstance->PlayRate >= 0.0f) 
+        {
+            SingleNodeInstance->CurrentTime = 0.0f;
+        }
+        else 
+        {
+            SingleNodeInstance->CurrentTime = PlayLength;
+        }
         SingleNodeInstance->SetPlaying(true);
         SingleNodeInstance->SetLooping(bLooping);
     }

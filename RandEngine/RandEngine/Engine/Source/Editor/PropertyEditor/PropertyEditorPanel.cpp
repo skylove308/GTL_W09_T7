@@ -38,6 +38,7 @@
 #include "imgui/imgui_curve.h"
 #include "Components/Mesh/SkeletalMeshComponent.h"
 #include "Engine/Asset/SkeletalMeshAsset.h"
+#include "Animation/AnimSingleNodeInstance.h"
 
 void PropertyEditorPanel::Render()
 {
@@ -984,6 +985,14 @@ void PropertyEditorPanel::RenderForSkeletalComponent(USkeletalMeshComponent* Ske
             bIsLooping = !bIsLooping;
         }
         ImGui::SameLine();
+
+        UAnimSingleNodeInstance* AnimationInstance = SkeletalMeshComponent->GetSingleNodeInstance();
+
+        if (AnimationInstance) 
+        {
+            ImGui::DragFloat("Playrate", &AnimationInstance->PlayRate, 1.0f, -3.0f, 3.0f);
+        }
+
         if (ImGui::Button("Play"))
         {
             SkeletalMeshComponent->SetAnimationMode(EAnimationMode::AnimationSingleNode);

@@ -114,9 +114,9 @@ void UAnimSingleNodeInstance::UpdateAnimation(float DeltaSeconds, bool bNeedsVal
         return;
     }
 
-    CurrentTime += DeltaSeconds * PlayRate;
-
     const double PlayLength = CurrentSequence->GetDataModel()->GetPlayLength();
+
+    CurrentTime += DeltaSeconds * PlayRate;
 
     if (PlayLength > 0.0)
     {
@@ -130,9 +130,13 @@ void UAnimSingleNodeInstance::UpdateAnimation(float DeltaSeconds, bool bNeedsVal
         }
         else
         {
-            CurrentTime = FMath::Clamp(CurrentTime, 0.0f, static_cast<float>(PlayLength));
+            CurrentTime = FMath::Clamp(CurrentTime,
+                (PlayRate < 0) ? 0.0f : 0.0f,
+                static_cast<float>(PlayLength)
+            );
 
-            if (CurrentTime >= PlayLength)
+            if ((PlayRate > 0 && CurrentTime >= PlayLength) ||
+                (PlayRate < 0 && CurrentTime <= 0.0f))
             {
                 bIsPlaying = false;
             }
@@ -167,10 +171,20 @@ void UAnimSingleNodeInstance::UpdateAnimation(float DeltaSeconds, bool bNeedsVal
         }
     
         // 키 프레임 보간
-        const int32 PrevKey = FMath::Clamp(FMath::FloorToInt(FrameTime), 0, Track.InternalTrackData.PosKeys.Num() - 1);
-        const int32 NextKey = FMath::Clamp(PrevKey + 1, 0, Track.InternalTrackData.PosKeys.Num() - 1);
+        int32 PrevKey = FMath::Clamp(FMath::FloorToInt(FrameTime), 0, Track.InternalTrackData.PosKeys.Num() - 1);
+        int32 NextKey = FMath::Clamp(PrevKey + 1, 0, Track.InternalTrackData.PosKeys.Num() - 1);
     
-        const float Alpha = FMath::Clamp(FrameTime - PrevKey, 0.f, 1.f);
+        float Alpha = FMath::Clamp(FrameTime - PrevKey, 0.f, 1.f);
+
+        if (PlayRate < 0.0f)
+        {
+            int32 Temp = 0;
+            Temp = PrevKey;
+            PrevKey = NextKey;
+            NextKey = Temp;
+            Alpha = 1.0f - Alpha;
+        }
+
         // 변환 요소 보간
         const FVector Translation = FMath::Lerp(
             Track.InternalTrackData.PosKeys[PrevKey],
