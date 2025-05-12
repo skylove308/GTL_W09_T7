@@ -19,10 +19,13 @@ void UnrealEd::Initialize()
     AddEditorPanel("PropertyPanel", PropertyPanel);
 
     auto SubSkeletalViewerPanel = std::make_shared<SkeletalViewerPanel>();
+    SubSkeletalViewerPanel->WindowType = WT_SkeletalSubWindow;
     AddEditorPanel("SubSkeletalViewerPanel", SubSkeletalViewerPanel, EWindowType::WT_SkeletalSubWindow);
 
     auto SubAnimationViewerPanel = std::make_shared<SAnimationTimelinePanel>();
+    SubAnimationViewerPanel->WindowType = WT_AnimationSubWindow;
     auto SubSkeletalViewerPanel2 = std::make_shared<SkeletalViewerPanel>();
+    SubSkeletalViewerPanel2->WindowType = WT_AnimationSubWindow;
     AddEditorPanel("SubSkeletalViewerPanel", SubSkeletalViewerPanel2, EWindowType::WT_AnimationSubWindow);
     AddEditorPanel("SubAnimationViewerPanel", SubAnimationViewerPanel, EWindowType::WT_AnimationSubWindow);
  

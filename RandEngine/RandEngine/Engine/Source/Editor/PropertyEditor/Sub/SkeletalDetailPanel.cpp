@@ -2,7 +2,9 @@
 
 #include "Animation/Skeleton.h"
 #include "Components/Mesh/SkeletalMesh.h"
+#include "Engine/SkeletalMeshActor.h"
 #include "Math/JungleMath.h"
+#include "SubWindow/SkeletalSubEngine.h"
 #include "UnrealEd/ImGuiWidget.h"
 
 void SkeletalDetailPanel::Render(USkeletalMesh* InSkeletalMesh, int32 SelectedBone)
@@ -37,7 +39,6 @@ void SkeletalDetailPanel::Render(USkeletalMesh* InSkeletalMesh, int32 SelectedBo
                 FVector Location = CurrentLocalMatrix.GetTranslationVector();
                 FRotator Rotation = CurrentLocalMatrix.GetRotationVector();;
                 FVector Scale = CurrentLocalMatrix.GetScaleVector();
-
                 if (ImGui::CollapsingHeader("Transforms", ImGuiTreeNodeFlags_DefaultOpen))
                 {
                     // optionally indent for nicer grouping
@@ -83,6 +84,7 @@ void SkeletalDetailPanel::Render(USkeletalMesh* InSkeletalMesh, int32 SelectedBo
                 }
                 if (Location == PrevLocation && Rotation == PrevRotation && Scale == PrevScale)
                 {
+                    
                     ImGui::EndTabItem();
                     ImGui::EndTabBar();
                     ImGui::PopStyleColor(3);
@@ -90,8 +92,17 @@ void SkeletalDetailPanel::Render(USkeletalMesh* InSkeletalMesh, int32 SelectedBo
                     return;
                 }
                 else
+                {
                     PrevLocation = Location; PrevRotation = Rotation; PrevScale = Scale;
-
+                    USkeletalSubEngine* SkeletalSubEngine = Cast<USkeletalSubEngine>(GEngineLoop.SkeletalViewerSubEngine);
+                    SkeletalSubEngine->SkeletalMeshActor->BoneGizmoSceneComponents[SelectedBone]->SetRelativeLocation(Location);
+                    SkeletalSubEngine->SkeletalMeshActor->BoneGizmoSceneComponents[SelectedBone]->SetRelativeRotation(Rotation);
+                    SkeletalSubEngine->SkeletalMeshActor->BoneGizmoSceneComponents[SelectedBone]->SetRelativeScale3D(Scale);
+                    USkeletalSubEngine* AnimationSubEngine = Cast<USkeletalSubEngine>(GEngineLoop.AnimationViewerSubEngine);
+                    AnimationSubEngine->SkeletalMeshActor->BoneGizmoSceneComponents[SelectedBone]->SetRelativeLocation(Location);
+                    AnimationSubEngine->SkeletalMeshActor->BoneGizmoSceneComponents[SelectedBone]->SetRelativeRotation(Rotation);
+                    AnimationSubEngine->SkeletalMeshActor->BoneGizmoSceneComponents[SelectedBone]->SetRelativeScale3D(Scale);
+                }
                 FMatrix NewLocalMatrix =
                     FMatrix::GetScaleMatrix(Scale) *
                     FMatrix::GetRotationMatrix(Rotation) *

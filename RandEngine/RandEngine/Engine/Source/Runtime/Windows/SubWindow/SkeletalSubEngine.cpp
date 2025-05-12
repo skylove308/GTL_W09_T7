@@ -31,11 +31,13 @@ void USkeletalSubEngine::Initialize(HWND& hWnd, FGraphicsDevice* InGraphics, FDX
     ViewportClient->CameraReset();
 
     EditorPlayer = FObjectFactory::ConstructObject<AEditorPlayer>(this);
+    EditorPlayer->SetCoordMode(CDM_LOCAL); 
     SkeletalMeshActor = FObjectFactory::ConstructObject<ASkeletalMeshActor>(this);
+
     BasePlane = FObjectFactory::ConstructObject<ACube>(this);
     BasePlane->SetActorScale(FVector(10,10,1));
     BasePlane->SetActorLocation(FVector(0,0,-1));
-
+    SelectedBoneComponent = FObjectFactory::ConstructObject<USceneComponent>(this);
     SelectedActor = SkeletalMeshActor;
 }
 
@@ -104,6 +106,21 @@ void USkeletalSubEngine::Input(float DeltaTime)
             ViewportClient->CameraMoveUp(-100.f * DeltaTime);
         }
     }
+    else
+    {
+        if (GetAsyncKeyState('W') & 0x8000)
+        {
+            EditorPlayer->SetMode(CM_TRANSLATION);
+        }
+        if (GetAsyncKeyState('E') & 0x8000)
+        {
+            EditorPlayer->SetMode(CM_ROTATION);
+        }
+        if (GetAsyncKeyState('R') & 0x8000)
+        {
+            EditorPlayer->SetMode(CM_SCALE);
+        }
+    }
 }
 
 void USkeletalSubEngine::Render()
@@ -120,7 +137,6 @@ void USkeletalSubEngine::Render()
         UnrealEditor->Render(EWindowType::WT_SkeletalSubWindow);
         
         SubUI->EndFrame();
-        
         // Sub swap
         Graphics->SwapBuffer();
     }
@@ -146,7 +162,7 @@ void USkeletalSubEngine::Release()
 void USkeletalSubEngine::SetSkeletalMesh(USkeletalMesh* InSkeletalMesh)
 {
     SelectedSkeletalMesh = InSkeletalMesh;
-    
+    SkeletalMeshActor->SetSkeletalMesh(SelectedSkeletalMesh);
     if (SubRenderer)
     {
         SubRenderer->SetPreviewSkeletalMesh(SelectedSkeletalMesh);
