@@ -1,5 +1,18 @@
 #include "ShaderRegisters.hlsl"
 
+#ifdef LIGHTING_MODEL_GOURAUD
+SamplerState DiffuseSampler : register(s0);
+
+Texture2D DiffuseTexture : register(t0);
+
+cbuffer MaterialConstants : register(b1)
+{
+    FMaterial Material;
+}
+
+#include "Light.hlsl"
+#endif
+
 #define MAX_BONE_INFLUENCES 4
 #define MAX_BONES 120
 
@@ -11,40 +24,44 @@ struct VS_INPUT_SkeletalMesh
     float4 Tangent : TANGENT;
     float2 UV : TEXCOORD;
     uint MaterialIndex : MATERIAL_INDEX;
-    float BoneIndices[MAX_BONE_INFLUENCES] : BONEINDICES;
-    float BoneWeights[MAX_BONE_INFLUENCES] : BONEWEIGHTS;
+    uint4    BoneIndices    : BONEINDICES;
+    float4   BoneWeights    : BONEWEIGHTS;
 };
-cbuffer FBonesConstants : register(b0)
+cbuffer FBonesConstants : register(b2)
 {
-    float4x4 BoneMatrices[MAX_BONES];
+    row_major float4x4 BoneMatrices[MAX_BONES];
 };
 
 PS_INPUT_StaticMesh mainVS(VS_INPUT_SkeletalMesh Input) 
 {
     PS_INPUT_StaticMesh Output;
 
-    // --- GPU 스키닝 처리 ---
-    float4 skinnedPos = float4(0,0,0,0);
-    float3 skinnedNormal = float3(0,0,0);
+    // 스키닝 전
+    float4 skinnedPos     = float4(0,0,0,0);
+    float3 skinnedNormal  = float3(0,0,0);
     float3 skinnedTangent = float3(0,0,0);
 
-    // 각 본 인덱스와 가중치로 변형 적용
+    // 1) 가중치 합 계산
+    float weightSum = dot(Input.BoneWeights, float4(1,1,1,1));
+
+    // 2) (선택) 가중치 정규화 벡터
+    float4 normWeights = (weightSum > 0) 
+        ? Input.BoneWeights / weightSum 
+        : Input.BoneWeights;  // weightSum==0 이면 그대로
+
+    // 3) 스키닝 루프: normWeights 사용
     [unroll]
     for (int i = 0; i < MAX_BONE_INFLUENCES; ++i)
     {
         uint idx = Input.BoneIndices[i];
-        float w = Input.BoneWeights[i];
+        float w  = normWeights[i];  // 정규화된 가중치 사용
+
         if (w > 0 && idx < MAX_BONES)
         {
             float4x4 m = BoneMatrices[idx];
-            skinnedPos += mul(float4(Input.Position, 1.0), m) * w;
-            
-            // 노멀과 탄젠트는 회전+스케일만 고려
-            float3 n = mul(Input.Normal, (float3x3)m);
-            skinnedNormal += n * w;
-
-            float3 t = mul(Input.Tangent.xyz, (float3x3)m);
-            skinnedTangent += t * w;
+            skinnedPos     += mul(float4(Input.Position, 1.0), m) * w;
+            skinnedNormal  += mul(Input.Normal,   (float3x3)m) * w;
+            skinnedTangent += mul(Input.Tangent.xyz, (float3x3)m) * w;
         }
     }
 

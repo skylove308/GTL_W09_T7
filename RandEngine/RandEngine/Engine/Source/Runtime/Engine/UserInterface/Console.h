@@ -100,6 +100,7 @@ public:
     void AddLog(ELogLevel Level, const WIDECHAR* Fmt, ...);
     void Draw();
     void ExecuteCommand(const std::string& Command);
+    void SetCommand(const std::string& Command);
     void OnResize(HWND hWnd);
 
     virtual void Toggle() override

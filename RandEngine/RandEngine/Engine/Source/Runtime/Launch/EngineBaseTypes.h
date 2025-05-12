@@ -41,3 +41,9 @@ enum ELevelViewportType : uint8
     LVT_MAX,
     LVT_None = 255,
 };
+
+enum ESkinningType : uint8
+{
+    ST_GPU =0,
+    ST_CPU
+};

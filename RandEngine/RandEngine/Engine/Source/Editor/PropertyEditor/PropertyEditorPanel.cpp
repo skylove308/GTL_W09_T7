@@ -1012,7 +1012,6 @@ void PropertyEditorPanel::RenderForSkeletalComponent(USkeletalMeshComponent* Ske
         FImGuiWidget::DrawRot3Control("Rotation", SkeletalRotation, 0, 85);
         ImGui::Spacing(); 
 
-        ImGui::InputInt("Int Value", &GEngineLoop.Boneidx, /*step=*/0, /*stepFast=*/50);
         ImGui::TreePop();
     }
     ImGui::PopStyleColor();

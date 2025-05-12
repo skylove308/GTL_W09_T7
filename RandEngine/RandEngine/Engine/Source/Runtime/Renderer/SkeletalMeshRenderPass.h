@@ -40,7 +40,7 @@ public:
     void UpdateObjectConstant(const FMatrix& WorldMatrix, const FVector4& UUIDColor, bool bIsSelected) const;
 
     void UpdateLitUnlitConstant(int32 isLit) const;
-
+    void UpdateBoneConstants(USkeletalMesh* InSkeletalMesh) const;
     void RenderPrimitive(FSkeletalMeshRenderData* RenderData, TArray<FStaticMaterial*> Materials, TArray<UMaterial*> OverrideMaterials, int SelectedSubMeshIndex) const;
 
     // Shader 관련 함수 (생성/해제 등)
@@ -68,3 +68,5 @@ protected:
     FShadowManager* ShadowManager;
     FLoaderFBX* FBXLoader;
 };
+
+

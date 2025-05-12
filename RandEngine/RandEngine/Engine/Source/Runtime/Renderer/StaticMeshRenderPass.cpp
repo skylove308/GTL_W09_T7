@@ -26,6 +26,7 @@
 #include "PropertyEditor/ShowFlags.h"
 #include "UnrealEd/EditorViewportClient.h"
 #include "Components/Light/PointLightComponent.h"
+#include "Components/Mesh/SkeletalMesh.h"
 
 FStaticMeshRenderPass::FStaticMeshRenderPass()
     : BufferManager(nullptr)

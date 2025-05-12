@@ -161,10 +161,7 @@ void UAnimSingleNodeInstance::UpdateAnimation(float DeltaSeconds, bool bNeedsVal
     for (const FBoneAnimationTrack& Track : BoneTracks)
     {
         const int32 BoneIndex = Skeleton->GetBoneIndex(Track.Name);
-
-        FString tt = BoneTracks[BoneIndex].Name.ToString();
-        FString nn = Skeleton->BoneTree[BoneIndex].Name.ToString();
-        std::cout << GetData(tt) << GetData(nn);
+        
         if (BoneIndex == INDEX_NONE)
         {
             continue;

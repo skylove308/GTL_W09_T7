@@ -43,7 +43,7 @@ public:
 
     void UpdateLightConstant() const;
     void UpdateConstants() const;
-
+    void UpdateBoneConstants() const;
     /** Update Buffer */
     void UpdateViewCamera(FEditorViewportClient* Viewport) const;
     /** Set */

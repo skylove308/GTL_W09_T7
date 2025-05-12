@@ -96,9 +96,10 @@ void FSkeletalMeshRenderPass::CreateShader()
 
 #pragma endregion UberShader
 
+
     VertexShader = ShaderManager->GetVertexShaderByKey(L"StaticMeshVertexShader");
     InputLayout = ShaderManager->GetInputLayoutByKey(L"StaticMeshVertexShader");
-
+    
     PixelShader = ShaderManager->GetPixelShaderByKey(L"PHONG_StaticMeshPixelShader");
     DebugDepthShader = ShaderManager->GetPixelShaderByKey(L"StaticMeshPixelShaderDepth");
     DebugWorldNormalShader = ShaderManager->GetPixelShaderByKey(L"StaticMeshPixelShaderWorldNormal");
@@ -111,7 +112,7 @@ void FSkeletalMeshRenderPass::ReleaseShader()
 
 void FSkeletalMeshRenderPass::ChangeViewMode(EViewModeIndex ViewModeIndex)
 {
-    switch (ViewModeIndex)
+switch (ViewModeIndex)
     {
     case EViewModeIndex::VMI_Lit_Gouraud:
         VertexShader = ShaderManager->GetVertexShaderByKey(L"GOURAUD_StaticMeshVertexShader");
@@ -121,47 +122,49 @@ void FSkeletalMeshRenderPass::ChangeViewMode(EViewModeIndex ViewModeIndex)
         break;
 
     case EViewModeIndex::VMI_Lit_Lambert:
-        VertexShader = ShaderManager->GetVertexShaderByKey(L"StaticMeshVertexShader");
-        InputLayout = ShaderManager->GetInputLayoutByKey(L"StaticMeshVertexShader");
         PixelShader = ShaderManager->GetPixelShaderByKey(L"LAMBERT_StaticMeshPixelShader");
         UpdateLitUnlitConstant(1);
         break;
 
     case EViewModeIndex::VMI_Lit_BlinnPhong:
-        VertexShader = ShaderManager->GetVertexShaderByKey(L"StaticMeshVertexShader");
-        InputLayout = ShaderManager->GetInputLayoutByKey(L"StaticMeshVertexShader");
         PixelShader = ShaderManager->GetPixelShaderByKey(L"PHONG_StaticMeshPixelShader");
         UpdateLitUnlitConstant(1);
         break;
 
     case EViewModeIndex::VMI_Wireframe:
     case EViewModeIndex::VMI_Unlit:
-        VertexShader = ShaderManager->GetVertexShaderByKey(L"StaticMeshVertexShader");
-        InputLayout = ShaderManager->GetInputLayoutByKey(L"StaticMeshVertexShader");
         PixelShader = ShaderManager->GetPixelShaderByKey(L"PHONG_StaticMeshPixelShader");
         UpdateLitUnlitConstant(0);
         break;
 
     case EViewModeIndex::VMI_SceneDepth:
-        VertexShader = ShaderManager->GetVertexShaderByKey(L"StaticMeshVertexShader");
-        InputLayout = ShaderManager->GetInputLayoutByKey(L"StaticMeshVertexShader");
         PixelShader = ShaderManager->GetPixelShaderByKey(L"StaticMeshPixelShaderDepth");
         UpdateLitUnlitConstant(0);
         break;
 
     case EViewModeIndex::VMI_WorldNormal:
-        VertexShader = ShaderManager->GetVertexShaderByKey(L"StaticMeshVertexShader");
-        InputLayout = ShaderManager->GetInputLayoutByKey(L"StaticMeshVertexShader");
         PixelShader = ShaderManager->GetPixelShaderByKey(L"StaticMeshPixelShaderWorldNormal");
         UpdateLitUnlitConstant(0);
         break;
 
     default:
-        VertexShader = ShaderManager->GetVertexShaderByKey(L"StaticMeshVertexShader");
-        InputLayout = ShaderManager->GetInputLayoutByKey(L"StaticMeshVertexShader");
         PixelShader = ShaderManager->GetPixelShaderByKey(L"PHONG_StaticMeshPixelShader");
         UpdateLitUnlitConstant(1);
         break;
+    }
+    if (ViewModeIndex != EViewModeIndex::VMI_Lit_Gouraud)
+    {
+        
+        if (GEngineLoop.GetSkinningType() == ST_CPU)
+        {
+            VertexShader = ShaderManager->GetVertexShaderByKey(L"StaticMeshVertexShader");
+            InputLayout = ShaderManager->GetInputLayoutByKey(L"StaticMeshVertexShader");
+        }
+        else if ( GEngineLoop.GetSkinningType() == ST_GPU)
+        {
+            VertexShader = ShaderManager->GetVertexShaderByKey(L"SkeletalMeshVertexShader");
+            InputLayout = ShaderManager->GetInputLayoutByKey(L"SkeletalMeshVertexShader");
+        }
     }
 }
 
@@ -214,8 +217,11 @@ void FSkeletalMeshRenderPass::PrepareRenderState(const std::shared_ptr<FEditorVi
 
     BufferManager->BindConstantBuffer(TEXT("FLightInfoBuffer"), 0, EShaderStage::Vertex);
     BufferManager->BindConstantBuffer(TEXT("FMaterialConstants"), 1, EShaderStage::Vertex);
+    if (GEngineLoop.GetSkinningType() == ST_GPU)
+    {
+        BufferManager->BindConstantBuffer(TEXT("FBonesConstants"), 2, EShaderStage::Vertex);
+    }
     BufferManager->BindConstantBuffer(TEXT("FObjectConstantBuffer"), 12, EShaderStage::Vertex);
-
 
     Graphics->DeviceContext->RSSetViewports(1, &Viewport->GetViewportResource()->GetD3DViewport());
 
@@ -269,7 +275,13 @@ void FSkeletalMeshRenderPass::UpdateLitUnlitConstant(int32 isLit) const
     Data.bIsLit = isLit;
     BufferManager->UpdateConstantBuffer(TEXT("FLitUnlitConstants"), Data);
 }
-
+void FSkeletalMeshRenderPass::UpdateBoneConstants(USkeletalMesh* InSkeletalMesh) const
+{
+    FBonesConstants Data;
+    for (int32 i = 0; i < InSkeletalMesh->Skeleton->CurrentPose.SkinningMatrices.Num(); i++)
+        Data.BoneMatrices[i] = InSkeletalMesh->Skeleton->CurrentPose.SkinningMatrices[i];
+    BufferManager->UpdateConstantBuffer(TEXT("FBonesConstants"), Data);
+}
 void FSkeletalMeshRenderPass::RenderPrimitive(FSkeletalMeshRenderData* RenderData, TArray<FStaticMaterial*> Materials, TArray<UMaterial*> OverrideMaterials, int SelectedSubMeshIndex) const
 {
     // 정점 스트라이드 변경: FStaticMeshVertex -> FBX::FSkeletalMeshVertex
@@ -407,7 +419,10 @@ void FSkeletalMeshRenderPass::RenderAllSkeletalMeshes(const std::shared_ptr<FEdi
         FVector4 UUIDColor = Comp->EncodeUUID() / 255.0f;
 
         UpdateObjectConstant(WorldMatrix, UUIDColor, bIsSelected);
-
+        if (GEngineLoop.GetSkinningType()==ST_GPU)
+        {
+            UpdateBoneConstants(Comp->GetSkeletalMeshAsset());
+        }
         RenderPrimitive(RenderData, Comp->GetSkeletalMesh()->GetMaterials(), Comp->GetOverrideMaterials(), Comp->GetselectedSubMeshIndex());
 
         if (Viewport->GetShowFlag() & static_cast<uint64>(EEngineShowFlags::SF_AABB))

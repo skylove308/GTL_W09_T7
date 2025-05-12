@@ -197,9 +197,10 @@ void USkeletalMesh::UpdateWorldTransforms()
                 Skeleton->CurrentPose.GlobalTransforms[BoneIndex] = LocalTransform;
             }
 
-            Skeleton->CurrentPose.SkinningMatrices[BoneIndex] =
-                Skeleton->CalculateSkinningMatrix(BoneIndex, Skeleton->CurrentPose.GlobalTransforms[BoneIndex]);
-
+             Skeleton->CurrentPose.SkinningMatrices[BoneIndex] =
+                 Skeleton->CalculateSkinningMatrix(BoneIndex, Skeleton->CurrentPose.GlobalTransforms[BoneIndex]);
+            // Skeleton->CurrentPose.SkinningMatrices[BoneIndex] = Skeleton->CurrentPose.GlobalTransforms[BoneIndex]
+            // * FMatrix::Inverse(Skeleton->ReferenceSkeleton.RefBonePose[BoneIndex]);
             Skeleton->CurrentPose.BoneTransformDirtyFlags[BoneIndex] = false; // 업데이트 완료 후 플래그 해제
         }
     }
@@ -230,6 +231,8 @@ void USkeletalMesh::UpdateWorldTransforms()
 
 bool USkeletalMesh::UpdateAndApplySkinning()
 {
+    if (GEngineLoop.GetSkinningType() == ST_GPU)
+        return false;
     if (!SkeletalMeshRenderData || !SkeletalMeshRenderData->DynamicVertexBuffer ||
         SkeletalMeshRenderData->Vertices.IsEmpty() || !Skeleton || Skeleton->BoneTree.IsEmpty())
     {

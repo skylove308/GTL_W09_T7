@@ -366,9 +366,25 @@ void FConsole::ExecuteCommand(const std::string& Command)
     {
         Overlay.ToggleStat(Command);
     }
+    else if (Command.starts_with("set "))
+    {
+        SetCommand(Command);
+    }
     else
     {
         AddLog(ELogLevel::Error, "Unknown command: %s", Command.c_str());
+    }
+}
+
+void FConsole::SetCommand(const std::string& Command)
+{
+    if (Command == "set CPU Skinning")
+    {
+        GEngineLoop.SetSkinningType(ST_CPU);
+    }
+    else if (Command == "set GPU Skinning")
+    {
+        GEngineLoop.SetSkinningType(ST_GPU);
     }
 }
 

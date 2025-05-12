@@ -81,14 +81,14 @@ private:
     bool bKClicked = false;
     bool bIsExit = false;
 
-    
+    ESkinningType SkinningType = ST_GPU;
     int32 TargetFPS = 999;
 public:
+    ESkinningType GetSkinningType() { return SkinningType; }
+    void SetSkinningType(ESkinningType InWay) { SkinningType = InWay; }
     SLevelEditor* GetLevelEditor() const { return LevelEditor; }
     UnrealEd* GetUnrealEditor() const { return UnrealEditor; }
     
     FSlateAppMessageHandler* GetAppMessageHandler() const { return AppMessageHandler.get(); }
-    int32 Boneidx = 0;
-
 };
 

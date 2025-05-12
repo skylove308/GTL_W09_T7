@@ -23,4 +23,6 @@ public:
     ASkeletalMeshActor* SkeletalMeshActor = nullptr;
     USceneComponent* SelectedBoneComponent = nullptr ;
     ACube* BasePlane = nullptr;
+
+    bool bGPUSkinning = true;
 };

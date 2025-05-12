@@ -40,6 +40,10 @@ void FSubRenderer::Initialize(FGraphicsDevice* InGraphics, FDXDBufferManager* In
     UINT CameraConstantBufferSize = sizeof(FCameraConstantBuffer);
     BufferManager->CreateBufferGeneric<FCameraConstantBuffer>("FCameraConstantBuffer", nullptr, CameraConstantBufferSize, D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
 
+    UINT BonesBufferSize = sizeof(FBonesConstants);
+    BufferManager->CreateBufferGeneric<FBonesConstants>("FBonesConstants", nullptr, BonesBufferSize, D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
+
+    
     ID3D11Buffer* ObjectBuffer = BufferManager->GetConstantBuffer(TEXT("FObjectConstantBuffer"));
     ID3D11Buffer* CameraConstantBuffer = BufferManager->GetConstantBuffer(TEXT("FCameraConstantBuffer"));
     Graphics->DeviceContext->VSSetConstantBuffers(12, 1, &ObjectBuffer);
@@ -164,8 +168,21 @@ void FSubRenderer::Render()
         return;
     }
     // 셰이더 설정
-    ID3D11VertexShader* vertexShader = ShaderManager->GetVertexShaderByKey(L"StaticMeshVertexShader");
-    ID3D11InputLayout* inputLayout = ShaderManager->GetInputLayoutByKey(L"StaticMeshVertexShader"); // VS와 함께 생성했으므로 같은 키 사용
+
+    // GPU SKinning 
+    ID3D11VertexShader* vertexShader = nullptr;
+    ID3D11InputLayout* inputLayout = nullptr;
+    if (GEngineLoop.GetSkinningType()==ST_GPU)
+    {
+        vertexShader = ShaderManager->GetVertexShaderByKey(L"SkeletalMeshVertexShader");
+        inputLayout = ShaderManager->GetInputLayoutByKey(L"SkeletalMeshVertexShader"); // VS와 함께 생성했으므로 같은 키 사용
+        UpdateBoneConstants();
+    }
+    else if (GEngineLoop.GetSkinningType()==ST_CPU)
+    {
+        vertexShader = ShaderManager->GetVertexShaderByKey(L"StaticMeshVertexShader");
+        inputLayout = ShaderManager->GetInputLayoutByKey(L"StaticMeshVertexShader"); // VS와 함께 생성했으므로 같은 키 사용
+    }
     ID3D11PixelShader* pixelShader = ShaderManager->GetPixelShaderByKey(L"PHONG_StaticMeshPixelShader");
 
     if (!vertexShader || !inputLayout || !pixelShader)
@@ -179,10 +196,17 @@ void FSubRenderer::Render()
     Graphics->DeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
     
     UpdateObjectConstant(FMatrix::Identity, FVector4(), false);
-
     UpdateConstants();
-
     RenderMesh();
+    if (GEngineLoop.GetSkinningType()==ST_GPU)
+    {
+        vertexShader = ShaderManager->GetVertexShaderByKey(L"StaticMeshVertexShader");
+        inputLayout = ShaderManager->GetInputLayoutByKey(L"StaticMeshVertexShader"); // VS와 함께 생성했으므로 같은 키 사용
+
+        Graphics->DeviceContext->VSSetShader(vertexShader, nullptr, 0);
+        Graphics->DeviceContext->PSSetShader(pixelShader, nullptr, 0);
+        Graphics->DeviceContext->IASetInputLayout(inputLayout);
+    }
     RenderStaticMesh();
 }
 
@@ -194,7 +218,6 @@ void FSubRenderer::RenderMesh()
     
     UINT Stride = sizeof(FSkeletalMeshVertex);
     UINT Offset = 0;
-
     FVertexInfo VertexInfo;
     BufferManager->CreateDynamicVertexBuffer(RenderData->MeshName, RenderData->Vertices, VertexInfo);
 
@@ -328,6 +351,16 @@ void FSubRenderer::UpdateConstants() const
 
     /** Light */
     UpdateLightConstant();
+}
+
+void FSubRenderer::UpdateBoneConstants() const
+{
+    BufferManager->BindConstantBuffer(TEXT("FBonesConstants"), 2, EShaderStage::Vertex);
+
+    FBonesConstants Data;
+    for (int32 i = 0; i < PreviewSkeletalMesh->Skeleton->CurrentPose.SkinningMatrices.Num(); i++)
+        Data.BoneMatrices[i] = PreviewSkeletalMesh->Skeleton->CurrentPose.SkinningMatrices[i];
+    BufferManager->UpdateConstantBuffer(TEXT("FBonesConstants"), Data);
 }
 
 void FSubRenderer::UpdateViewCamera(FEditorViewportClient* Viewport) const
