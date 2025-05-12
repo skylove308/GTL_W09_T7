@@ -10,19 +10,25 @@ ASkeletalMeshActor::ASkeletalMeshActor()
     SkeletalMeshComponent = AddComponent<USkeletalMeshComponent>();
     RootComponent = SkeletalMeshComponent;
     //SkeletalMeshComponent->SetSkeletalMesh(UAssetManager::Get().GetSkeletalMesh(L"Contents/Sharkry_NoTwist.fbx"));
-    SkeletalMeshComponent->SetSkeletalMesh(UAssetManager::Get().GetSkeletalMesh(L"Contents/Sharkry_NoTwist.fbx"));
-
+    SkeletalMeshComponent->SetSkeletalMesh(UAssetManager::Get().GetSkeletalMesh(L"Contents/Rumba Dancing.fbx"));
+    // [TEMP] test for animation
+    SetActorTickInEditor(true);
     CreateBoneComponents();
 }
+
 void ASkeletalMeshActor::SetSkeletalMesh(USkeletalMesh* InSkeletalMesh)
 {
-    BoneGizmoSceneComponent->DestroyComponent();
-    BoneGizmoSceneComponents.Empty();
-    BoneGizmoSceneComponent->DestroyComponent();
-    BoneGizmoSceneComponent = nullptr;
-    SkeletalMeshComponent->SetSkeletalMesh(InSkeletalMesh);
+    // for (int i = 0; i < BoneGizmoSceneComponents.Num(); i++)
+    // {
+    //     if (BoneGizmoSceneComponents[i])
+    //         BoneGizmoSceneComponent[i].DestroyComponent();
+    // }
+    // BoneGizmoSceneComponents.Empty();
+    // BoneGizmoSceneComponent->DestroyComponent();
+    // BoneGizmoSceneComponent = nullptr;
+    // SkeletalMeshComponent->SetSkeletalMesh(InSkeletalMesh);
 
-    CreateBoneComponents();
+    // CreateBoneComponents();
 }
 
 void ASkeletalMeshActor::CreateBoneComponents()

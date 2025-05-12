@@ -3,7 +3,7 @@
 #include "Vector.h"
 #include "Matrix.h"
 
-const FQuat FQuat::Identity = FQuat{0.0f, 0.0f, 0.0f, 1.0f};
+const FQuat FQuat::Identity = FQuat{1.0f, 0.0f, 0.0f, 0.0f};
 
 
 FQuat::FQuat(const FVector& Axis, float Angle)
@@ -80,10 +80,10 @@ FQuat FQuat::FindBetween(const FVector& A, const FVector& B)
     {
         // Result = FVector::CrossProduct(A, B);
         Result = FQuat(
+            W,
             A.Y * B.Z - A.Z * B.Y,
             A.Z * B.X - A.X * B.Z,
-            A.X * B.Y - A.Y * B.X,
-            W
+            A.X * B.Y - A.Y * B.X
         );
     }
     else
@@ -99,10 +99,10 @@ FQuat FQuat::FindBetween(const FVector& A, const FVector& B)
 
         // Result = FVector::CrossProduct(A, Basis);
         Result = FQuat(
+            W,
             A.Y * Basis.Z - A.Z * Basis.Y,
             A.Z * Basis.X - A.X * Basis.Z,
-            A.X * Basis.Y - A.Y * Basis.X,
-            W
+            A.X * Basis.Y - A.Y * Basis.X
         );
     }
 
@@ -214,10 +214,10 @@ FQuat FQuat::Slerp_NotNormalized(const FQuat& Quat1, const FQuat& Quat2, float S
     }
 		
     return FQuat{
+        Scale0 * Quat1.W + Scale1 * Quat2.W,
         Scale0 * Quat1.X + Scale1 * Quat2.X,
         Scale0 * Quat1.Y + Scale1 * Quat2.Y,
         Scale0 * Quat1.Z + Scale1 * Quat2.Z,
-        Scale0 * Quat1.W + Scale1 * Quat2.W
     };
 }
 
@@ -303,7 +303,8 @@ FRotator FQuat::Rotator() const
 
 FQuat FQuat::Inverse() const
 {
-    return FQuat(-X, -Y, -Z, W);
+    FQuat Result = GetNormalized();
+    return FQuat(Result.W, -Result.X, -Result.Y, -Result.Z);
 }
 
 FString FQuat::ToString() const

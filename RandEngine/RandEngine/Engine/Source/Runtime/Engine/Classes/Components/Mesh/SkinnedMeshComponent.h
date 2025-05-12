@@ -10,7 +10,6 @@ public:
     USkinnedMeshComponent() = default;
 
     virtual UObject* Duplicate(UObject* InOuter) override;
-
     virtual void TickComponent(float DeltaTime) override;
 
     void SetselectedSubMeshIndex(const int& value) { selectedSubMeshIndex = value; }

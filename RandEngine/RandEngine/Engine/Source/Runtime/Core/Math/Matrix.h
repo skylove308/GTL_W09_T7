@@ -80,6 +80,19 @@ public:
     {
         return a * (e * i - f * h) - b * (d * i - f * g) + c * (d * h - e * g);
     }
+    void Print() const
+    {
+        std::cout << "FMatrix:" << std::endl;
+        for (int row = 0; row < 4; ++row)
+        {
+            std::cout << "| ";
+            for (int col = 0; col < 4; ++col)
+            {
+                std::cout  << M[row][col] << " ";
+            }
+            std::cout << "|" << std::endl;
+        }
+    }
 };
 
 inline FArchive& operator<<(FArchive& Ar, FMatrix& M)
