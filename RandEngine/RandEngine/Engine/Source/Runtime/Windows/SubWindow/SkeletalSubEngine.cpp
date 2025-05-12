@@ -44,18 +44,15 @@ void USkeletalSubEngine::Initialize(HWND& hWnd, FGraphicsDevice* InGraphics, FDX
 void USkeletalSubEngine::Tick(float DeltaTime)
 {
     ViewportClient->Tick(DeltaTime);
-    if (::GetForegroundWindow() == *Wnd)
-    {
-        Input(DeltaTime);
-        EditorPlayer->Tick(DeltaTime);
-    }
+    Input(DeltaTime);
+    EditorPlayer->Tick(DeltaTime);
     Render();    
 }
 
 void USkeletalSubEngine::Input(float DeltaTime)
 {
-    // if (::GetForegroundWindow() != *Wnd)
-    //     return;
+     if (::GetForegroundWindow() != *Wnd)
+         return;
     if (GetAsyncKeyState(VK_RBUTTON) & 0x8000)
     {
         if (!bRBClicked)
@@ -168,4 +165,5 @@ void USkeletalSubEngine::SetSkeletalMesh(USkeletalMesh* InSkeletalMesh)
         SubRenderer->SetPreviewSkeletalMesh(SelectedSkeletalMesh);
     }
     SkeletalMeshActor->SetSkeletalMesh(InSkeletalMesh);
+    SelectedActor = SkeletalMeshActor;
 }

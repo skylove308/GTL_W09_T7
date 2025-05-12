@@ -69,17 +69,33 @@ void FSubRenderer::Initialize(FGraphicsDevice* InGraphics, FDXDBufferManager* In
         return;
     }
     D3D_SHADER_MACRO DefinesBlinnPhong[] =
-{
+    {
         { PHONG, "1" },
         { nullptr, nullptr }
-};
+    };
     hr = ShaderManager->AddPixelShader(L"PHONG_StaticMeshPixelShader", L"Shaders/StaticMeshPixelShader.hlsl", "mainPS", DefinesBlinnPhong);
     if (FAILED(hr))
     {
         // TODO: 적절한 오류 처리
         return;
     }
-
+    D3D_SHADER_MACRO DefinesPBR[] =
+    {
+        { PBR, "1" },
+        { nullptr, nullptr }
+    };
+    hr = ShaderManager->AddPixelShader(L"PBR_StaticMeshPixelShader", L"Shaders/StaticMeshPixelShader.hlsl", "mainPS", DefinesPBR);
+    if (FAILED(hr))
+    {
+        // TODO: 적절한 오류 처리
+        return;
+    }
+    hr = ShaderManager->AddPixelShader(L"StaticMeshPixelShaderWorldNormal", L"Shaders/StaticMeshPixelShaderWorldNormal.hlsl", "mainPS", DefinesPBR);
+    if (FAILED(hr))
+    {
+        // TODO: 적절한 오류 처리
+        return;
+    }
 }
 
 void FSubRenderer::Release()
@@ -94,7 +110,7 @@ void FSubRenderer::Release()
 void FSubRenderer::PrepareRender(FEditorViewportClient* Viewport)
 {
     const EViewModeIndex ViewMode = Viewport->GetViewMode();
-    
+    TargetViewport = Viewport;
     UpdateViewCamera(Viewport);
     FViewportResource* ViewportResource = Viewport->GetViewportResource();
     FRenderTargetRHI* RenderTargetRHI = ViewportResource->GetRenderTarget(EResourceType::ERT_Scene);
@@ -232,8 +248,13 @@ void FSubRenderer::RenderStaticMesh()
         }
         
         FMatrix WorldMatrix = Comp->GetWorldMatrix();
-        // bool bSelecet = 
-        UpdateObjectConstant(WorldMatrix, FVector4(), false);
+        bool bSelecet = false;
+        if (Cast<UGizmoBaseComponent>(Comp))
+        {
+            USceneComponent* Gizmo=  TargetViewport->GetPickedGizmoComponent();
+            bSelecet = (Gizmo== Comp);
+        }
+        UpdateObjectConstant(WorldMatrix, FVector4(), bSelecet);
 
         RenderPrimitive(RenderData, Comp->GetStaticMesh()->GetMaterials(), Comp->GetOverrideMaterials(), Comp->GetselectedSubMeshIndex());
     }
@@ -266,7 +287,7 @@ void FSubRenderer::UpdateLightConstant() const
     LightBufferData.SpotLightsCount = 0;
 
     FAmbientLightInfo AmbientLightInfo;
-    AmbientLightInfo.AmbientColor = FLinearColor(1.0f, 1.0f, 1.0f, 1.0f);
+    AmbientLightInfo.AmbientColor = FLinearColor(.1f, .1f, .1f, 1.0f);
     
     LightBufferData.AmbientLightsCount = 1;
     LightBufferData.Ambient[0] = AmbientLightInfo;

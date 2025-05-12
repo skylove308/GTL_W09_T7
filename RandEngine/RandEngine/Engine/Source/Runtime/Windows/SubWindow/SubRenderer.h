@@ -56,7 +56,7 @@ private:
     USubEngine* Engine = nullptr;
     TArray<UStaticMeshComponent*> StaticMeshComponents;
     USkeletalMesh* PreviewSkeletalMesh = nullptr;
-
+    FEditorViewportClient* TargetViewport = nullptr;
     
 private:
     /** TargetPos & MaxZ Offset */

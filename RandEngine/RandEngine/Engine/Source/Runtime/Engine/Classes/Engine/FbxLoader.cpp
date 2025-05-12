@@ -1811,99 +1811,31 @@ void FFBXLoader::TraverseNodeBoneTrack(FbxNode* Node, TArray<FBoneAnimationTrack
         FBoneAnimationTrack Track;
         Track.Name = FName(Node->GetName());
 
-        // for (int32 FrameIdx = 0; FrameIdx < NumFrames; ++FrameIdx)
-        // {
-        //     FbxTime CurrentTime;
-        //     CurrentTime.SetFrame(FrameIdx, TimeMode);
-        //
-        //     const FbxAMatrix LocalTransform = Node->EvaluateLocalTransform(CurrentTime);
-        //
-        //     FbxVector4 FbxTranslate = LocalTransform.GetT();
-        //     FVector Position = FVector(FbxTranslate[0], FbxTranslate[1], FbxTranslate[2]);
-        //
-        //     // w, x, y, z임
-        //     FbxQuaternion FbxQuat = LocalTransform.GetQ();
-        //
-        //     FQuat Rotation = FQuat(FbxQuat[3], FbxQuat[0], FbxQuat[1], FbxQuat[2]);
-        //
-        //     FbxVector4 FbxScale = LocalTransform.GetS();
-        //
-        //     FVector Scale = FVector(FbxScale[0], FbxScale[1], FbxScale[2]);
-        //
-        //     Track.InternalTrackData.PosKeys.Add(Position);
-        //     Track.InternalTrackData.RotKeys.Add(Rotation);
-        //     Track.InternalTrackData.ScaleKeys.Add(Scale);
-        //     
-        //     ++OutTotalKeyCount;
-        //     
-        // }
         for (int32 FrameIdx = 0; FrameIdx < NumFrames; ++FrameIdx)
         {
             FbxTime CurrentTime;
             CurrentTime.SetFrame(FrameIdx, TimeMode);
-
-            // 1) 자식 글로벌 분해
-            FbxAMatrix ChildGlobalXform = Node->EvaluateGlobalTransform(CurrentTime);
-            FbxVector4 C_T = ChildGlobalXform.GetT();
-            FbxQuaternion C_Q = ChildGlobalXform.GetQ();
-            FbxVector4 C_S = ChildGlobalXform.GetS();
-
-            // 2) 부모 글로벌 분해 (없으면 Identity)
-            FbxVector4 P_T(0,0,0);
-            FbxQuaternion P_Q(0,0,0,1);
-            FbxVector4 P_S(1,1,1);
-
-            FbxNode* Parent = Node->GetParent();
-            if (Parent && Parent->GetSkeleton())
-            {
-                FbxAMatrix ParentGlobalXform = Parent->EvaluateGlobalTransform(CurrentTime);
-                P_T = ParentGlobalXform.GetT();
-                P_Q = ParentGlobalXform.GetQ();
-                P_S = ParentGlobalXform.GetS();
-            }
-
-            // 3) 부모 역스케일 & 역회전
-            FbxVector4 InvP_S(
-                P_S[0] != 0.0 ? 1.0 / P_S[0] : 0.0,
-                P_S[1] != 0.0 ? 1.0 / P_S[1] : 0.0,
-                P_S[2] != 0.0 ? 1.0 / P_S[2] : 0.0
-            );
-            FbxQuaternion InvP_Q  = P_Q;
-            InvP_Q.Inverse();
-
-            // 4) Local Scale = C_S / P_S
-            FbxVector4 LocalScaleFbx(
-                C_S[0] * InvP_S[0],
-                C_S[1] * InvP_S[1],
-                C_S[2] * InvP_S[2]
-            );
-
-            // 5) Local Rotation = InvP_Q * C_Q
-            FbxQuaternion LocalQuatFbx = InvP_Q * C_Q;
-
-            // 6) Local Translation
-            //   a) 부모 이동만큼 빼고
-            FbxVector4 DeltaT = C_T - P_T;
-            //   b) 부모 회전 역으로 돌리고
-            FbxAMatrix InvRotMat; InvRotMat.SetIdentity(); InvRotMat.SetQ(InvP_Q);
-            FbxVector4 RotUnapplied = InvRotMat.MultT(DeltaT);
-            //   c) 부모 스케일 역으로 나누기
-            FbxVector4 LocalTransFbx(
-                RotUnapplied[0] * InvP_S[0],
-                RotUnapplied[1] * InvP_S[1],
-                RotUnapplied[2] * InvP_S[2]
-            );
-
-            // 7) 언리얼 타입으로 변환해 키프레임에 저장
-            FVector Position(LocalTransFbx[0], LocalTransFbx[1], LocalTransFbx[2]);
-            FQuat   Rotation(LocalQuatFbx[3], LocalQuatFbx[0], LocalQuatFbx[1], LocalQuatFbx[2]);
-            FVector Scale(   LocalScaleFbx[0],   LocalScaleFbx[1],   LocalScaleFbx[2]);
-
-            Track.InternalTrackData.PosKeys .Add(Position);
-            Track.InternalTrackData.RotKeys .Add(Rotation);
+        
+            const FbxAMatrix LocalTransform = Node->EvaluateLocalTransform(CurrentTime);
+        
+            FbxVector4 FbxTranslate = LocalTransform.GetT();
+            FVector Position = FVector(FbxTranslate[0], FbxTranslate[1], FbxTranslate[2]);
+        
+            // w, x, y, z임
+            FbxQuaternion FbxQuat = LocalTransform.GetQ();
+        
+            FQuat Rotation = FQuat(FbxQuat[3], FbxQuat[0], FbxQuat[1], FbxQuat[2]);
+        
+            FbxVector4 FbxScale = LocalTransform.GetS();
+        
+            FVector Scale = FVector(FbxScale[0], FbxScale[1], FbxScale[2]);
+        
+            Track.InternalTrackData.PosKeys.Add(Position);
+            Track.InternalTrackData.RotKeys.Add(Rotation);
             Track.InternalTrackData.ScaleKeys.Add(Scale);
-
+            
             ++OutTotalKeyCount;
+            
         }
         OutBoneTracks.Add(Track);
     }

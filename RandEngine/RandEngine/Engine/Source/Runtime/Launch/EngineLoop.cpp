@@ -448,7 +448,7 @@ void FEngineLoop::AnimationSubWindowInit(HINSTANCE hInstance)
     AnimationViewerWnd = CreateWindowExW(
         0, SubWindowClass, SubTitle, WS_OVERLAPPEDWINDOW, // WS_VISIBLE 제거 (초기에는 숨김)
         CW_USEDEFAULT, CW_USEDEFAULT, 800, 600, // 원하는 크기
-        AppWnd, // 부모 윈도우를 메인 윈도우로 설정 (선택 사항)
+        nullptr, // 부모 윈도우를 메인 윈도우로 설정 (선택 사항)
         nullptr, hInstance, nullptr
     );
 

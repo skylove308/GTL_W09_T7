@@ -131,6 +131,7 @@ bool AEditorPlayer::PickGizmo(FVector& pickPosition, FEditorViewportClient* InAc
             for (UStaticMeshComponent* iter : InActiveViewport->GetGizmoActor()->GetArrowArr())
             {
                 ProcessGizmoIntersection(iter, pickPosition, InActiveViewport, isPickedGizmo);
+
             }
         }
         else if (ControlMode == CM_ROTATION)
@@ -138,6 +139,8 @@ bool AEditorPlayer::PickGizmo(FVector& pickPosition, FEditorViewportClient* InAc
             for (UStaticMeshComponent* iter : InActiveViewport->GetGizmoActor()->GetDiscArr())
             {
                 ProcessGizmoIntersection(iter, pickPosition, InActiveViewport, isPickedGizmo);
+                isPickedGizmo = true;
+                InActiveViewport->SetPickedGizmoComponent(iter);
             }
         }
         else if (ControlMode == CM_SCALE)
