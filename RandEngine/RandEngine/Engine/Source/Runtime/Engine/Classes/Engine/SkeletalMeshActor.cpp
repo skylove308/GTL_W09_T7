@@ -24,7 +24,7 @@ void ASkeletalMeshActor::SetSkeletalMesh(USkeletalMesh* InSkeletalMesh)
     BoneGizmoSceneComponent = nullptr;
     SkeletalMeshComponent->SetSkeletalMesh(InSkeletalMesh);
 
-    // CreateBoneComponents();
+    CreateBoneComponents();
 }
 
 void ASkeletalMeshActor::CreateBoneComponents()
