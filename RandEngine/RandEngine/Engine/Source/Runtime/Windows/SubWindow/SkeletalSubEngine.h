@@ -22,6 +22,5 @@ public:
     USkeletalMesh* SelectedSkeletalMesh = nullptr ;
     ASkeletalMeshActor* SkeletalMeshActor = nullptr;
     USceneComponent* SelectedBoneComponent = nullptr ;
-    USceneComponent* SelectedComponent = nullptr ;
     ACube* BasePlane = nullptr;
 };
