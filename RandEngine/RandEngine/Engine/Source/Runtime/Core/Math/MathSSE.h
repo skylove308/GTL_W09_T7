@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <immintrin.h>
 #include "HAL/PlatformType.h"
 
@@ -101,6 +101,11 @@ FORCEINLINE float TruncToFloat(float F)
 FORCEINLINE double TruncToDouble(double F)
 {
     return _mm_cvtsd_f64(_mm_round_pd(_mm_set_sd(F), 3));
+}
+
+FORCEINLINE float FloorToInt(float F)
+{
+    return _mm_cvtss_si32(_mm_floor_ps(_mm_set_ss(F)));
 }
 
 FORCEINLINE float FloorToFloat(float F)

@@ -25,7 +25,7 @@ void UAnimInstance::Initialize()
 
 void UAnimInstance::Update(float DeltaTime)
 {
-    AnimProxy->Update(DeltaTime);
+    //AnimProxy->Update(DeltaTime);
     TriggerAnimNotifies(DeltaTime);
 }
 
@@ -60,4 +60,10 @@ USkeletalMeshComponent* UAnimInstance::GetSkelMeshComponent() const
 {
     //return CastChecked<USkeletalMeshComponent>(GetOuter());
     return OwningComponent;
+}
+
+// 일단 여기서 관절 업데이트 로직 시행하도록 함
+void UAnimInstance::UpdateAnimation(float DeltaSeconds, bool bNeedsValidRootMotion)
+{
+    //
 }

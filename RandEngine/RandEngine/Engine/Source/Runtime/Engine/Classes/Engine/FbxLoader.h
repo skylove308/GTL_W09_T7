@@ -57,6 +57,7 @@ struct FFBXLoader
                                NumFrames);
     static void TraverseNodeCurveData(FbxNode* Node, FbxAnimLayer* AnimLayer, FAnimationCurveData& OutCurveData);
 
+    static void CollectAllBones(FbxNode* InNode, TArray<FbxNode*>& OutBones);
     
     static bool ParseFBX(const FString& FBXFilePath, FBX::FBXInfo& OutFBXInfo, UAnimSequence*& OutAnimSequence);
 

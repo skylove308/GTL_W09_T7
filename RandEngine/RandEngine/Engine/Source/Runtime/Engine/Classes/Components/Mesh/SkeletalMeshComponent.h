@@ -24,6 +24,7 @@ public:
     USkeletalMeshComponent();
 
     virtual UObject* Duplicate(UObject* InOuter) override;
+    virtual void TickComponent(float DeltaTime) override;
 
     void SetselectedSubMeshIndex(const int& value) { selectedSubMeshIndex = value; }
     int GetselectedSubMeshIndex() const { return selectedSubMeshIndex; };
@@ -44,8 +45,10 @@ public:
     void Play(bool bLooping);
     void Stop();
     bool IsPlaying() const;
+    void TickAnimation(float DeltaTime, bool bNeedsValidRootMotion);
+    void TickAnimInstances(float DeltaTime, bool bNeedsValidRootMotion);
 public:
-    UAnimInstance* AnimScriptInstance;
+    UAnimSingleNodeInstance* AnimScriptInstance = nullptr;
     uint8 bEnableAnimation : 1;
 protected:
     int selectedSubMeshIndex = -1;
