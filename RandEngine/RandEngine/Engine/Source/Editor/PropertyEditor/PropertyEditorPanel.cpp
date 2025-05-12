@@ -977,16 +977,24 @@ void PropertyEditorPanel::RenderForSkeletalComponent(USkeletalMeshComponent* Ske
             ImGui::EndCombo();
         }
 
+        static bool bIsLooping = false;
+
+        if (ImGui::Button(bIsLooping ? "Loop: ON" : "Loop: OFF"))
+        {
+            bIsLooping = !bIsLooping;
+        }
+        ImGui::SameLine();
         if (ImGui::Button("Play"))
         {
             SkeletalMeshComponent->SetAnimationMode(EAnimationMode::AnimationSingleNode);
-            SkeletalMeshComponent->Play(true);
+            SkeletalMeshComponent->Play(bIsLooping);
         }
         ImGui::SameLine();
         if (ImGui::Button("Stop"))
         {
             SkeletalMeshComponent->Stop();
         }
+        ImGui::SameLine();
 
         static char BoneNameBuffer[64] = "mixamorig:Spine";
 

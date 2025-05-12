@@ -19,6 +19,8 @@ public:
 
     bool IsPlaying() const;
 
+    void ResetToReferencePose();
+
     virtual void UpdateAnimation(float DeltaSeconds, bool bNeedsValidRootMotion) override;
 public:
     UAnimationAsset* CurrentAsset = nullptr;

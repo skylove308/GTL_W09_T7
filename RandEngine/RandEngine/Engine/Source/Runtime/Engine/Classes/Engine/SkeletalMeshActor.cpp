@@ -59,7 +59,7 @@ void ASkeletalMeshActor::Tick(float DeltaTime)
 {
     AActor::Tick(DeltaTime);
 
-    SetActorRotation(GetActorRotation()+FRotator(0, 0.05, 0));
+    // SetActorRotation(GetActorRotation()+FRotator(0, 0.05, 0));
 }
 
 UObject* ASkeletalMeshActor::Duplicate(UObject* InOuter)

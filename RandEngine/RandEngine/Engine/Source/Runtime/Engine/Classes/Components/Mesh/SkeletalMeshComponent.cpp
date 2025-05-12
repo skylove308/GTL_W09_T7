@@ -195,6 +195,8 @@ void USkeletalMeshComponent::Play(bool bLooping)
     UAnimSingleNodeInstance* SingleNodeInstance = GetSingleNodeInstance();
     if (SingleNodeInstance)
     {
+        // [TEMP] 확인 편의를 위해 Play시 CurrentTime 초기화
+        SingleNodeInstance->CurrentTime = 0.0f;
         SingleNodeInstance->SetPlaying(true);
         SingleNodeInstance->SetLooping(bLooping);
     }
@@ -213,9 +215,11 @@ void USkeletalMeshComponent::Stop()
     }
 
     UAnimSingleNodeInstance* SingleNodeInstance = GetSingleNodeInstance();
+    
     if (SingleNodeInstance)
     {
         SingleNodeInstance->SetPlaying(false);
+        SingleNodeInstance->ResetToReferencePose();
     }
     else if (AnimScriptInstance != nullptr)
     {

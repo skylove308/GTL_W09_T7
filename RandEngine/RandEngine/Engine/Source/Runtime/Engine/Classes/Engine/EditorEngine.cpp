@@ -40,12 +40,14 @@ void UEditorEngine::Init()
         assert(AssetManager);
         AssetManager->InitAssetManager();
     }
-    LoadLevel("Saved/AutoSaves.scene");
+    // [TEMP] Autosave 일단 주석
+    //LoadLevel("Saved/AutoSaves.scene");
 }
 
 void UEditorEngine::Release()
 {
-    SaveLevel("Saved/AutoSaves.scene");
+    // [TEMP] Autosave 일단 주석
+    //SaveLevel("Saved/AutoSaves.scene");
 }
 
 void UEditorEngine::Tick(float DeltaTime)
