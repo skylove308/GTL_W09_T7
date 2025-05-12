@@ -76,6 +76,29 @@ bool UAnimSingleNodeInstance::IsPlaying() const
     return bIsPlaying;
 }
 
+void UAnimSingleNodeInstance::ResetToReferencePose()
+{
+    USkeleton* Skeleton = OwningComponent->GetSkeletalMesh()->Skeleton;
+
+    const int32 NumBones = Skeleton->BoneTree.Num();
+
+    TArray<FMatrix> LocalTransforms;
+    LocalTransforms.SetNum(NumBones);
+
+    for (int32 BoneIdx = 0; BoneIdx < NumBones; BoneIdx++)
+    {
+        LocalTransforms[BoneIdx] = Skeleton->BoneTree[BoneIdx].BindTransform;
+    }
+
+    for (int32 i = 0; i < LocalTransforms.Num(); i++)
+    {
+        OwningComponent->GetSkeletalMesh()->SetBoneLocalMatrix(i, LocalTransforms[i]);
+    }
+
+    OwningComponent->GetSkeletalMesh()->UpdateWorldTransforms();
+    OwningComponent->GetSkeletalMesh()->UpdateAndApplySkinning();
+}
+
 void UAnimSingleNodeInstance::UpdateAnimation(float DeltaSeconds, bool bNeedsValidRootMotion)
 {
     if (!CurrentAsset || !bIsPlaying)
@@ -99,26 +122,41 @@ void UAnimSingleNodeInstance::UpdateAnimation(float DeltaSeconds, bool bNeedsVal
     }
    
     const double PlayLength = CurrentSequence->GetDataModel()->GetPlayLength();
+
+    CurrentTime += DeltaSeconds * PlayRate;
+
     if (PlayLength > 0.0)
     {
-        CurrentTime = FMath::Fmod(CurrentTime, PlayLength);
-        if (CurrentTime < 0.0)
+        if (bIsLooping)
         {
-            CurrentTime += PlayLength;
+            CurrentTime = FMath::Fmod(CurrentTime, PlayLength);
+            if (CurrentTime < 0.0)
+            {
+                CurrentTime += PlayLength;
+            }
+        }
+        else
+        {
+            CurrentTime = FMath::Clamp(CurrentTime,
+                (PlayRate < 0) ? 0.0f : 0.0f,
+                static_cast<float>(PlayLength)
+            );
+
+            if ((PlayRate > 0 && CurrentTime >= PlayLength) ||
+                (PlayRate < 0 && CurrentTime <= 0.0f))
+            {
+                bIsPlaying = false;
+            }
         }
     }
 
     const TArray<FBoneAnimationTrack>& BoneTracks = CurrentSequence->GetDataModel()->GetBoneAnimationTracks();
 
-    if (frame >= BoneTracks[0].InternalTrackData.PosKeys.Num())
-    {
-        frame = 0;
-    }
-    
     const int32 NumBones = Skeleton->BoneTree.Num();
 
     TArray<FMatrix> LocalTransforms;
     LocalTransforms.SetNum(NumBones);
+
     for (int32 BoneIdx = 0; BoneIdx < NumBones; BoneIdx++)
     {
         LocalTransforms[BoneIdx] = Skeleton->ReferenceSkeleton.RefBonePose[BoneIdx];
@@ -140,10 +178,20 @@ void UAnimSingleNodeInstance::UpdateAnimation(float DeltaSeconds, bool bNeedsVal
         }
     
         // 키 프레임 보간
-        const int32 PrevKey = FMath::Clamp(FMath::FloorToInt(FrameTime), 0, Track.InternalTrackData.PosKeys.Num() - 1);
-        const int32 NextKey = FMath::Clamp(PrevKey + 1, 0, Track.InternalTrackData.PosKeys.Num() - 1);
+        int32 PrevKey = FMath::Clamp(FMath::FloorToInt(FrameTime), 0, Track.InternalTrackData.PosKeys.Num() - 1);
+        int32 NextKey = FMath::Clamp(PrevKey + 1, 0, Track.InternalTrackData.PosKeys.Num() - 1);
     
-        const float Alpha = FMath::Clamp(FrameTime - PrevKey, 0.f, 1.f);
+        float Alpha = FMath::Clamp(FrameTime - PrevKey, 0.f, 1.f);
+
+        if (PlayRate < 0.0f)
+        {
+            int32 Temp = 0;
+            Temp = PrevKey;
+            PrevKey = NextKey;
+            NextKey = Temp;
+            Alpha = 1.0f - Alpha;
+        }
+
         // 변환 요소 보간
         const FVector Translation = FMath::Lerp(
             Track.InternalTrackData.PosKeys[PrevKey],
@@ -162,68 +210,16 @@ void UAnimSingleNodeInstance::UpdateAnimation(float DeltaSeconds, bool bNeedsVal
             Track.InternalTrackData.ScaleKeys[NextKey],
             Alpha
         );
-       // FVector Translation = Track.InternalTrackData.PosKeys[frame];
-       // FQuat Rotation = Track.InternalTrackData.RotKeys[frame];
-       // FVector Scale =Track.InternalTrackData.ScaleKeys[frame];
-       /* FMatrix NewLocalMatrix =
-            FMatrix::GetScaleMatrix(Translation) *
-            FMatrix::GetRotationMatrix(FRotator(Rotation)) *
-            FMatrix::GetTranslationMatrix(Scale);*/
-    
-        //LocalTransforms[BoneIndex] = NewLocalMatrix;
-        // LocalTransforms[BoneIndex] = FTransform(Rotation, Translation, Scale).ToMatrixWithScale();
+
         LocalTransforms[BoneIndex] = JungleMath::CreateModelMatrix(Translation, Rotation, Scale);
     }
-    // int32 BoneIdx = GEngineLoop.Boneidx;
-    //     const int32 BoneIndex = Skeleton->GetBoneIndex(BoneTracks[BoneIdx].Name);
-    //     // if (BoneIndex == INDEX_NONE)
-    //     // {
-    //     //     continue;
-    //     // }
-    //
-    //     // 키 프레임 보간
-    //     const FFrameRate FrameRate = CurrentSequence->GetDataModel()->GetFrameRate();
-    //     const float FrameTime = CurrentTime * FrameRate.AsDecimal();
-    //     const int32 PrevKey = FMath::Clamp(FMath::FloorToInt(FrameTime), 0, BoneTracks[BoneIdx].InternalTrackData.PosKeys.Num() - 1);
-    //     const int32 NextKey = FMath::Clamp(PrevKey + 1, 0, BoneTracks[BoneIdx].InternalTrackData.PosKeys.Num() - 1);
-    //
-    //     const float Alpha = FrameTime - PrevKey;
-    //
-    //     // 변환 요소 보간
-    //     const FVector Translation = FMath::Lerp(
-    //         BoneTracks[BoneIdx].InternalTrackData.PosKeys[PrevKey],
-    //         BoneTracks[BoneIdx].InternalTrackData.PosKeys[NextKey],
-    //         Alpha
-    //     );
-    //
-    //     const FQuat Rotation = FQuat::Slerp(
-    //         BoneTracks[BoneIdx].InternalTrackData.RotKeys[PrevKey],
-    //         BoneTracks[BoneIdx].InternalTrackData.RotKeys[NextKey],
-    //         Alpha
-    //     );
-    //
-    //     const FVector Scale = FMath::Lerp(
-    //         BoneTracks[BoneIdx].InternalTrackData.ScaleKeys[PrevKey],
-    //         BoneTracks[BoneIdx].InternalTrackData.ScaleKeys[NextKey],
-    //         Alpha
-    //     );
-    //
-       /* FMatrix NewLocalMatrix =
-            FMatrix::GetScaleMatrix(Translation) *
-            FMatrix::GetRotationMatrix(FRotator(Rotation)) *
-            FMatrix::GetTranslationMatrix(Scale);*/
     
-        //LocalTransforms[BoneIndex] = NewLocalMatrix;
-        // LocalTransforms[BoneIndex] = FTransform(Rotation, Translation, Scale).ToMatrixWithScale();
-        // LocalTransforms[BoneIndex] = JungleMath::CreateModelMatrix(Translation, Rotation, Scale);
-    LocalTransforms[GEngineLoop.Boneidx].Print();
+    //LocalTransforms[GEngineLoop.Boneidx].Print();
     for (int32 i = 0; i < LocalTransforms.Num(); i++)
     {
         OwningComponent->GetSkeletalMesh()->SetBoneLocalMatrix(i, LocalTransforms[i]);
     }
-    // OwningComponent->GetSkeletalMesh()->SetBoneLocalMatrix(BoneIndex, LocalTransforms[BoneIndex]);
+
     OwningComponent->GetSkeletalMesh()->UpdateWorldTransforms();
-    //Skeleton->UpdateCurrentPose(LocalTransforms);
     OwningComponent->GetSkeletalMesh()->UpdateAndApplySkinning();
-    frame++;
 }

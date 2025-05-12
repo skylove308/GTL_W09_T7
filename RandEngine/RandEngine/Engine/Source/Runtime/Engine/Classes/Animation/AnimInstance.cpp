@@ -62,8 +62,6 @@ USkeletalMeshComponent* UAnimInstance::GetSkelMeshComponent() const
     return OwningComponent;
 }
 
-// 일단 여기서 관절 업데이트 로직 시행하도록 함
 void UAnimInstance::UpdateAnimation(float DeltaSeconds, bool bNeedsValidRootMotion)
 {
-    //
 }

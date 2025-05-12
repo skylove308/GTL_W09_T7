@@ -18,15 +18,11 @@ ASkeletalMeshActor::ASkeletalMeshActor()
 
 void ASkeletalMeshActor::SetSkeletalMesh(USkeletalMesh* InSkeletalMesh)
 {
-    // for (int i = 0; i < BoneGizmoSceneComponents.Num(); i++)
-    // {
-    //     if (BoneGizmoSceneComponents[i])
-    //         BoneGizmoSceneComponent[i].DestroyComponent();
-    // }
-    // BoneGizmoSceneComponents.Empty();
-    // BoneGizmoSceneComponent->DestroyComponent();
-    // BoneGizmoSceneComponent = nullptr;
-    // SkeletalMeshComponent->SetSkeletalMesh(InSkeletalMesh);
+    BoneGizmoSceneComponent->DestroyComponent();
+    BoneGizmoSceneComponents.Empty();
+    BoneGizmoSceneComponent->DestroyComponent();
+    BoneGizmoSceneComponent = nullptr;
+    SkeletalMeshComponent->SetSkeletalMesh(InSkeletalMesh);
 
     // CreateBoneComponents();
 }
@@ -63,7 +59,7 @@ void ASkeletalMeshActor::Tick(float DeltaTime)
 {
     AActor::Tick(DeltaTime);
 
-    SetActorRotation(GetActorRotation()+FRotator(0, 0.05, 0));
+    // SetActorRotation(GetActorRotation()+FRotator(0, 0.05, 0));
 }
 
 UObject* ASkeletalMeshActor::Duplicate(UObject* InOuter)
