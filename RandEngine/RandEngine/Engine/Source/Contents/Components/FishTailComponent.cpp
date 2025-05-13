@@ -1,6 +1,7 @@
 
 #include "FishTailComponent.h"
 
+#include "Engine/AssetManager.h"
 #include "Engine/FObjLoader.h"
 
 UFishTailComponent::UFishTailComponent()
@@ -22,5 +23,5 @@ void UFishTailComponent::InitializeComponent()
 {
     UStaticMeshComponent::InitializeComponent();
     
-    SetStaticMesh(FObjManager::GetStaticMesh(L"Contents/Fish/Fish_Back.obj"));
+    SetStaticMesh(UAssetManager::Get().GetStaticMesh(L"Contents/Fish/Fish_Back.obj"));
 }

@@ -1,10 +1,10 @@
 #include <algorithm>
 #include "StaticMeshComponent.h"
-#include "Engine/FObjLoader.h"
+
+#include "Engine/AssetManager.h"
 #include "Launch/EngineLoop.h"
 #include "UObject/Casts.h"
 #include "UObject/ObjectFactory.h"
-#include "GameFramework/Actor.h"
 
 UObject* UStaticMeshComponent::Duplicate(UObject* InOuter)
 {
@@ -55,7 +55,7 @@ void UStaticMeshComponent::SetProperties(const TMap<FString, FString>& InPropert
         {
             // 경로 문자열로 UStaticMesh 에셋 로드 시도
            
-            if (UStaticMesh* MeshToSet = FObjManager::CreateStaticMesh(*TempStr))
+            if (UStaticMesh* MeshToSet = UAssetManager::Get().GetStaticMesh(*TempStr))
             {
                 SetStaticMesh(MeshToSet); // 성공 시 메시 설정
                 UE_LOG(ELogLevel::Display, TEXT("Set StaticMesh '%s' for %s"), **TempStr, *GetName());

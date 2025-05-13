@@ -32,8 +32,11 @@ public:
     //ObjectName은 경로까지 포함
     FWString GetObjectName() const;
 
-    void SetData(FSkeletalMeshRenderData* renderData);
+    void SetData(FSkeletalMeshRenderData* renderData, TArray<UMaterial*> InMaterials = TArray<UMaterial*>());
 
+    void SetSkeleton(USkeleton* InSkeleton);
+    const USkeleton* GetSkeleton() const { return Skeleton; }
+    
 public:
     USkeleton* Skeleton;
 private:

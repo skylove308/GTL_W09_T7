@@ -44,4 +44,44 @@ struct Serializer
         InString = Buffer;
         delete[] Buffer;
     }
+
+
+    /* Write TArray */
+    template<typename T>
+    static void WriteArray(std::ofstream& Stream, const TArray<T>& InArray)
+    {
+        uint32 BoneInfoCount = InArray.Num();                                                                     
+        Stream.write(reinterpret_cast<const char*>(&BoneInfoCount), sizeof(BoneInfoCount));                                                    
+        Stream.write(reinterpret_cast<const char*>(InArray.GetData()), BoneInfoCount * sizeof(T));
+    }
+
+    /* Read TArray */
+    template<typename T>
+    static void ReadArray(std::ifstream& Stream, TArray<T>& OutArray)
+    {
+        uint32 Length = 0;
+        Stream.read(reinterpret_cast<char*>(&Length), sizeof(Length));
+        OutArray.SetNum(Length);
+        Stream.read(reinterpret_cast<char*>(OutArray.GetData()), Length * sizeof(T));
+    }
+
+
+    // /* Write TArray */
+    // template<typename Key, typename Value>
+    // static void WriteMap(std::ofstream& Stream, const TMap<Key, Value>& InArray)
+    // {
+    //     uint32 BoneInfoCount = InArray.Num();                                                                     
+    //     Stream.write(reinterpret_cast<const char*>(&BoneInfoCount), sizeof(BoneInfoCount));                                                    
+    //     Stream.write(reinterpret_cast<const char*>(InArray.GetData()), BoneInfoCount * sizeof(T));
+    // }
+    //
+    // /* Read TArray */
+    // template<typename Key, typename Value>
+    // static void ReadMap(std::ifstream& Stream, const TMap<Key, Value>& OutArray)
+    // {
+    //     uint32 Length = 0;
+    //     Stream.read(reinterpret_cast<char*>(&Length), sizeof(Length));
+    //     OutArray.SetNum(Length);
+    //     Stream.read(reinterpret_cast<char*>(OutArray.GetData()), Length * sizeof(T));
+    // }
 };

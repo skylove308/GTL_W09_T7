@@ -7,16 +7,10 @@
 #include "Actors/FireballActor.h"
 
 #include "Components/Light/LightComponent.h"
-#include "Components/Light/PointLightComponent.h"
-#include "Components/Light/SpotLightComponent.h"
 #include "Components/SphereComp.h"
 #include "Components/ParticleSubUVComponent.h"
 #include "Components/TextComponent.h"
-#include "Camera/CameraComponent.h"
-#include "Components/ProjectileMovementComponent.h"
 
-#include "Engine/FObjLoader.h"
-#include "Engine/StaticMeshActor.h"
 #include "LevelEditor/SLevelEditor.h"
 #include "PropertyEditor/ShowFlags.h"
 #include "UnrealEd/EditorViewportClient.h"
@@ -40,6 +34,7 @@
 #include "Contents/Actors/PlatformActor.h"
 #include "Contents/Actors/GoalPlatformActor.h"
 #include "Contents/Actors/TriggerBox.h"
+#include "Engine/AssetManager.h"
 #include "Renderer/CompositingPass.h"
 #include "Engine/SkeletalMeshActor.h"
 #include "SubWindow/SubEngine.h"
@@ -233,7 +228,7 @@ void ControlEditorPanel::CreateMenuButton(const ImVec2 ButtonSize, ImFont* IconF
             {
                 std::cout << FileName << '\n';
 
-                if (FObjManager::CreateStaticMesh(FileName) == nullptr)
+                if (UAssetManager::Get().GetStaticMesh(FileName) == nullptr)
                 {
                     tinyfd_messageBox("Error", "파일을 불러올 수 없습니다.", "ok", "error", 1);
                 }
@@ -357,7 +352,7 @@ void ControlEditorPanel::CreateModifyButton(const ImVec2 ButtonSize, ImFont* Ico
                     SpawnedActor = World->SpawnActor<AActor>();
                     SpawnedActor->SetActorLabel(TEXT("OBJ_SPHERE"));
                     USphereComp* SphereComp = SpawnedActor->AddComponent<USphereComp>();
-                    SphereComp->SetStaticMesh(FObjManager::GetStaticMesh(L"Contents/Sphere.obj"));
+                    SphereComp->SetStaticMesh(UAssetManager::Get().GetStaticMesh(L"Contents/Sphere.obj"));
                     break;
                 }
                 case OBJ_CUBE:

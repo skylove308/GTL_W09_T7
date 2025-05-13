@@ -1,4 +1,6 @@
 #include "StaticMeshRenderData.h"
+
+#include "Engine/AssetManager.h"
 #include "Engine/FObjLoader.h"
 #include "UObject/Casts.h"
 #include "UObject/ObjectFactory.h"
@@ -17,8 +19,8 @@ UObject* UStaticMesh::Duplicate(UObject* InOuter)
 
 uint32 UStaticMesh::GetMaterialIndex(FName MaterialSlotName) const
 {
-    for (uint32 materialIndex = 0; materialIndex < materials.Num(); materialIndex++) {
-        if (materials[materialIndex]->MaterialSlotName == MaterialSlotName)
+    for (uint32 materialIndex = 0; materialIndex < Materials.Num(); materialIndex++) {
+        if (Materials[materialIndex]->MaterialSlotName == MaterialSlotName)
             return materialIndex;
     }
 
@@ -27,7 +29,7 @@ uint32 UStaticMesh::GetMaterialIndex(FName MaterialSlotName) const
 
 void UStaticMesh::GetUsedMaterials(TArray<UMaterial*>& OutMaterial) const
 {
-    for (const FStaticMaterial* Material : materials)
+    for (const FStaticMaterial* Material : Materials)
     {
         OutMaterial.Emplace(Material->Material);
     }
@@ -38,18 +40,32 @@ FWString UStaticMesh::GetOjbectName() const
     return RenderData->ObjectName;
 }
 
-void UStaticMesh::SetData(FStaticMeshRenderData* InRenderData)
+void UStaticMesh::SetData(FStaticMeshRenderData* InRenderData, TArray<UMaterial*> InMaterials)
 {
     RenderData = InRenderData;
 
+    for (auto& material : Materials)
+    {
+        delete material;
+    } 
+    Materials.Empty();
+    
     for (int materialIndex = 0; materialIndex < RenderData->Materials.Num(); materialIndex++)
     {
-        FStaticMaterial* newMaterialSlot = new FStaticMaterial();
-        UMaterial* newMaterial = FObjManager::CreateMaterial(RenderData->Materials[materialIndex]);
+        FStaticMaterial* NewMaterialSlot = new FStaticMaterial();
 
-        newMaterialSlot->Material = newMaterial;
-        newMaterialSlot->MaterialSlotName = RenderData->Materials[materialIndex].MaterialName;
+        if (InMaterials.Num() > materialIndex)
+        {
+            UMaterial* Material = InMaterials[materialIndex];
+            NewMaterialSlot->Material = Material;
+        }
+        else
+        {
+            UMaterial* Material = UAssetManager::Get().GetMaterial(RenderData->Materials[materialIndex].MaterialName);
+            NewMaterialSlot->Material = Material;   
+        }
+        NewMaterialSlot->MaterialSlotName = RenderData->Materials[materialIndex].MaterialName;
 
-        materials.Add(newMaterialSlot);
+        Materials.Add(NewMaterialSlot);
     }
 }

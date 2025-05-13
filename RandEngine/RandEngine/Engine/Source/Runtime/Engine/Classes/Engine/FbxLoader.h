@@ -50,7 +50,7 @@ namespace std
 
 struct FFBXLoader
 {
-    static void LoadFbxAnimation(FbxScene* InScene, UAnimSequence*& OutAnimSequence);
+    static void LoadFbxAnimation(FbxScene* InScene, TArray<UAnimSequence*>& OutAnimSequenceArray);
     static void ExtractCurveData(FbxAnimStack* AnimStack, FbxScene* Scene, TArray<FBoneAnimationTrack>& OutBoneTracks, FAnimationCurveData& OutCurveData, int32
                                  & OutTotalKeyCount);
     static void TraverseNodeBoneTrack(FbxNode* Node, TArray<FBoneAnimationTrack>& OutBoneTracks, int32& OutTotalKeyCount, FbxTime::EMode TimeMode, int32
@@ -59,7 +59,7 @@ struct FFBXLoader
 
     static void CollectAllBones(FbxNode* InNode, TArray<FbxNode*>& OutBones);
     
-    static bool ParseFBX(const FString& FBXFilePath, FBX::FBXInfo& OutFBXInfo, UAnimSequence*& OutAnimSequence);
+    static bool ParseFBX(const FString& FBXFilePath, FBX::FBXInfo& OutFBXInfo, TArray<UAnimSequence*>& OutAnimSequenceArray);
 
     // Convert the Raw data to Cooked data (FSkeletalMeshRenderData)
     static bool ConvertToSkeletalMesh(const TArray<FBX::MeshRawData>& RawMeshData, const FBX::FBXInfo& FullFBXInfo, FSkeletalMeshRenderData& OutSkeletalMesh, USkeleton* OutSkeleton);
@@ -77,18 +77,18 @@ struct FManagerFBX
 public:
     static bool LoadFBX(const FString& InFilePath, FFbxLoadResult& OutResult);
 
-    static FSkeletalMeshRenderData* LoadFBXSkeletalMeshAsset(const FString& PathFileName, USkeleton* OutSkeleton, UAnimSequence*& OutAnimSequence);
-
+private:
+    static FSkeletalMeshRenderData* LoadFBXSkeletalMeshAsset(const FString& PathFileName, USkeleton* OutSkeleton, TArray<UAnimSequence*>& OutAnimSequenceArray, TArray<UMaterial*>&
+                                                             OutMaterials);
     static void CombineMaterialIndex(FSkeletalMeshRenderData& OutFSkeletalMesh);
-
-    static bool SaveSkeletalMeshToBinary(const FWString& FilePath, const FSkeletalMeshRenderData& SkeletalMesh);
-
-    static bool LoadSkeletalMeshFromBinary(const FWString& FilePath, FSkeletalMeshRenderData& OutSkeletalMesh);
+    
+    static bool LoadFBXFromBinary(const FWString& FilePath, FFbxLoadResult& OutResult);
+    static bool SaveFBXToBinary(const FWString& FilePath, const FFbxLoadResult& OutResult);
 
     static UMaterial* CreateMaterial(const FFbxMaterialInfo& MaterialInfo);
 
-    static UMaterial* GetMaterial(const FString& InName);
+    //static UMaterial* GetMaterial(const FString& InName);
 
 private:
-    inline static TMap<FString, UMaterial*> MaterialMap;
+    // inline static TMap<FString, UMaterial*> MaterialMap;
 };
