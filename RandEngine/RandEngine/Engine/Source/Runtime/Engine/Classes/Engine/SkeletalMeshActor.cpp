@@ -20,7 +20,6 @@ void ASkeletalMeshActor::SetSkeletalMesh(USkeletalMesh* InSkeletalMesh)
 {
     BoneGizmoSceneComponent->DestroyComponent();
     BoneGizmoSceneComponents.Empty();
-    BoneGizmoSceneComponent->DestroyComponent();
     BoneGizmoSceneComponent = nullptr;
     SkeletalMeshComponent->SetSkeletalMesh(InSkeletalMesh);
 

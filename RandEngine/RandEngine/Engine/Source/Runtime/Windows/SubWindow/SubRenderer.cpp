@@ -363,6 +363,7 @@ void FSubRenderer::UpdateBoneConstants() const
     BufferManager->UpdateConstantBuffer(TEXT("FBonesConstants"), Data);
 }
 
+
 void FSubRenderer::UpdateViewCamera(FEditorViewportClient* Viewport) const
 {
     FCameraConstantBuffer CameraConstantBuffer;

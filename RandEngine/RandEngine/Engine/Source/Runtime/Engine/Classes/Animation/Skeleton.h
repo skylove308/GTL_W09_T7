@@ -93,6 +93,7 @@ public:
         BoneParentMap.Empty();
         BoneNameToIndex.Empty();
     }
+    UObject* Duplicate(UObject* InOuter) override;
     // 본 추가 (인덱스 기반)
     void AddBone(const FName Name, int32 ParentIdx, const FMatrix& InGlobalBindPose, const FMatrix& InTransformMatrix);
 

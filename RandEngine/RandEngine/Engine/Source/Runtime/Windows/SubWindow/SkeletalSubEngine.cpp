@@ -6,6 +6,8 @@
 #include "UnrealClient.h"
 #include "Engine/SkeletalMeshActor.h"
 #include "Actors/Cube.h"
+#include "Components/Mesh/SkeletalMesh.h"
+
 USkeletalSubEngine::USkeletalSubEngine()
 {
 }
@@ -158,12 +160,11 @@ void USkeletalSubEngine::Release()
 
 void USkeletalSubEngine::SetSkeletalMesh(USkeletalMesh* InSkeletalMesh)
 {
-    SelectedSkeletalMesh = InSkeletalMesh;
+    SelectedSkeletalMesh = Cast<USkeletalMesh>(InSkeletalMesh->Duplicate(this));
     SkeletalMeshActor->SetSkeletalMesh(SelectedSkeletalMesh);
     if (SubRenderer)
     {
         SubRenderer->SetPreviewSkeletalMesh(SelectedSkeletalMesh);
     }
-    SkeletalMeshActor->SetSkeletalMesh(InSkeletalMesh);
     SelectedActor = SkeletalMeshActor;
 }

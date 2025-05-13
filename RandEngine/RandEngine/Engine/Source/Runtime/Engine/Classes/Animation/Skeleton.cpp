@@ -1,5 +1,7 @@
 #include "Skeleton.h"
 
+#include "UObject/Casts.h"
+
 void FAnimationPoseData::Resize(int32 NumBones)
 {
     LocalTransforms.SetNum(NumBones);
@@ -22,6 +24,20 @@ void FAnimationPoseData::MarkAllDirty()
 
 USkeleton::USkeleton()
 {
+}
+
+UObject* USkeleton::Duplicate(UObject* InOuter)
+{
+    ThisClass* newSkeleton = Cast<ThisClass>(Super::Duplicate(InOuter));
+    newSkeleton->BoneTree  = BoneTree;
+    newSkeleton->BoneParentMap = BoneParentMap;
+    newSkeleton->BoneNameToIndex =BoneNameToIndex;
+    newSkeleton->ReferenceSkeleton = ReferenceSkeleton;
+    newSkeleton->LinkupCache = LinkupCache; 
+    newSkeleton->CurrentPose = CurrentPose;
+    
+
+    return newSkeleton;
 }
 
 void USkeleton::AddBone(const FName Name, int32 ParentIdx, const FMatrix& InGlobalBindPose, const FMatrix& InTransformMatrix) // 파라미터 이름 명시

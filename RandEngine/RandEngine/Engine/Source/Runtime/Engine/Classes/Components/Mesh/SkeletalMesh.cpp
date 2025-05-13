@@ -34,7 +34,16 @@ USkeletalMesh::~USkeletalMesh()
 UObject* USkeletalMesh::Duplicate(UObject* InOuter)
 {
     // TODO: Context->CopyResource를 사용해서 Buffer복사
-    return nullptr;
+    ThisClass* newMesh = Cast<ThisClass>(Super::Duplicate(InOuter));
+
+    newMesh->Skeleton = Cast<USkeleton>(Skeleton->Duplicate(InOuter));
+    newMesh->materials = materials;
+    
+    newMesh->SkeletalMeshRenderData = SkeletalMeshRenderData;
+    GEngineLoop.GraphicDevice.DeviceContext->CopyResource(newMesh->SkeletalMeshRenderData->DynamicVertexBuffer,SkeletalMeshRenderData->DynamicVertexBuffer);
+    GEngineLoop.GraphicDevice.DeviceContext->CopyResource(newMesh->SkeletalMeshRenderData->IndexBuffer,SkeletalMeshRenderData->IndexBuffer);
+    
+    return newMesh;
 }
 
 uint32 USkeletalMesh::GetMaterialIndex(FName MaterialSlotName) const
