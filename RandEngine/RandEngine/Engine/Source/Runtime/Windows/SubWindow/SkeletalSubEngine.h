@@ -18,7 +18,9 @@ public:
     virtual void Render();
     virtual void Release();
 
-    void SetSkeletalMesh(USkeletalMesh* InSkeletalMesh);    
+    void SetSkeletalMesh(USkeletalMesh* InSkeletalMesh);
+    void SaveSkeletalMesh();
+    USkeletalMesh* OriginSkeletalMesh = nullptr;
     USkeletalMesh* SelectedSkeletalMesh = nullptr ;
     ASkeletalMeshActor* SkeletalMeshActor = nullptr;
     USceneComponent* SelectedBoneComponent = nullptr ;

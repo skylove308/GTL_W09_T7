@@ -67,7 +67,7 @@ void FDrawer::OnResize(HWND hWnd)
     Width = ClientRect.right - ClientRect.left;
     Height = ClientRect.bottom - ClientRect.top;
 }
-l
+
 void FDrawer::RenderContentDrawer()
 {
     for (auto Obj : TObjectRange<USkeletalMesh>())

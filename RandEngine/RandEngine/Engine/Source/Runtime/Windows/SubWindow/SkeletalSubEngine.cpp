@@ -160,6 +160,12 @@ void USkeletalSubEngine::Release()
 
 void USkeletalSubEngine::SetSkeletalMesh(USkeletalMesh* InSkeletalMesh)
 {
+    OriginSkeletalMesh = InSkeletalMesh;
+    if (SelectedSkeletalMesh != nullptr)
+    {
+        GUObjectArray.MarkRemoveObject(SelectedSkeletalMesh);
+        SelectedSkeletalMesh = nullptr;
+    }
     SelectedSkeletalMesh = Cast<USkeletalMesh>(InSkeletalMesh->Duplicate(this));
     SkeletalMeshActor->SetSkeletalMesh(SelectedSkeletalMesh);
     if (SubRenderer)
@@ -167,4 +173,14 @@ void USkeletalSubEngine::SetSkeletalMesh(USkeletalMesh* InSkeletalMesh)
         SubRenderer->SetPreviewSkeletalMesh(SelectedSkeletalMesh);
     }
     SelectedActor = SkeletalMeshActor;
+}
+
+void USkeletalSubEngine::SaveSkeletalMesh()
+{
+    OriginSkeletalMesh->Skeleton->BoneTree = SelectedSkeletalMesh->Skeleton->BoneTree;
+    OriginSkeletalMesh->Skeleton->BoneParentMap = SelectedSkeletalMesh->Skeleton->BoneParentMap;
+    OriginSkeletalMesh->Skeleton->ReferenceSkeleton = SelectedSkeletalMesh->Skeleton->ReferenceSkeleton;
+    OriginSkeletalMesh->Skeleton->LinkupCache = SelectedSkeletalMesh->Skeleton->LinkupCache;
+    OriginSkeletalMesh->Skeleton->CurrentPose = SelectedSkeletalMesh->Skeleton->CurrentPose;
+    OriginSkeletalMesh->Skeleton->CachedProcessingOrder = SelectedSkeletalMesh->Skeleton->CachedProcessingOrder;
 }

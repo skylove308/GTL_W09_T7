@@ -82,6 +82,11 @@ void SkeletalDetailPanel::Render(USkeletalMesh* InSkeletalMesh, int32 SelectedBo
 
                     ImGui::Unindent(10.0f);
                 }
+                if (ImGui::Button("Save",ImVec2(100,30)))
+                {
+                    USkeletalSubEngine* SkeletalSubEngine = Cast<USkeletalSubEngine>(InSkeletalMesh->GetOuter());
+                    SkeletalSubEngine->SaveSkeletalMesh();
+                }
                 if (Location == PrevLocation && Rotation == PrevRotation && Scale == PrevScale)
                 {
                     

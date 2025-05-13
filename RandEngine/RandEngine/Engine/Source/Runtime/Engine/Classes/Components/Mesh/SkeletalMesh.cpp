@@ -17,13 +17,13 @@ USkeletalMesh::~USkeletalMesh()
 {
     if (SkeletalMeshRenderData == nullptr) return;
 
-    if (SkeletalMeshRenderData)
+    if (SkeletalMeshRenderData && GetOuter() ==nullptr)
     {
         SkeletalMeshRenderData->DynamicVertexBuffer->Release();
         SkeletalMeshRenderData->DynamicVertexBuffer = nullptr;
     }
 
-    if (SkeletalMeshRenderData->IndexBuffer)
+    if (SkeletalMeshRenderData->IndexBuffer&& GetOuter() ==nullptr)
     {
         SkeletalMeshRenderData->IndexBuffer->Release();
         SkeletalMeshRenderData->IndexBuffer = nullptr;
@@ -40,16 +40,12 @@ UObject* USkeletalMesh::Duplicate(UObject* InOuter)
     newMesh->Skeleton->BoneParentMap = Skeleton->BoneParentMap;
     newMesh->Skeleton->BoneNameToIndex =Skeleton->BoneNameToIndex;
     newMesh->Skeleton->ReferenceSkeleton = Skeleton->ReferenceSkeleton;
-    newMesh->Skeleton->LinkupCache = Skeleton->LinkupCache; 
-    newMesh->Skeleton->CurrentPose.GlobalTransforms = Skeleton->CurrentPose.GlobalTransforms;
-    newMesh->Skeleton->CurrentPose.LocalTransforms = Skeleton->CurrentPose.LocalTransforms;
-    newMesh->Skeleton->CurrentPose.SkinningMatrices = Skeleton->CurrentPose.SkinningMatrices;
-    newMesh->Skeleton->CurrentPose.BoneTransformDirtyFlags = Skeleton->CurrentPose.BoneTransformDirtyFlags;
+    newMesh->Skeleton->LinkupCache = Skeleton->LinkupCache;
+    newMesh->Skeleton->CurrentPose = Skeleton->CurrentPose;
     newMesh->Skeleton->CachedProcessingOrder = Skeleton->CachedProcessingOrder;
-    newMesh->SkeletalMeshRenderData = SkeletalMeshRenderData;
-    // GEngineLoop.GraphicDevice.DeviceContext->CopyResource(newMesh->SkeletalMeshRenderData->DynamicVertexBuffer,SkeletalMeshRenderData->DynamicVertexBuffer);
-    // GEngineLoop.GraphicDevice.DeviceContext->CopyResource(newMesh->SkeletalMeshRenderData->IndexBuffer,SkeletalMeshRenderData->IndexBuffer);
     
+    newMesh->SkeletalMeshRenderData = SkeletalMeshRenderData;
+
     return newMesh;
 }
 
