@@ -72,11 +72,12 @@ struct FFbxMaterialInfo
 
     bool bHasBaseColorTexture = false;
     bool bHasNormalTexture = false;
+    bool bHasAmbientOcclusionTexture = false;
+    bool bHasSpecularTexture = false;
+    
     bool bHasMetallicTexture = false;
     bool bHasRoughnessTexture = false;
-    bool bHasSpecularTexture = false;
     bool bHasEmissiveTexture = false;
-    bool bHasAmbientOcclusionTexture = false;
     bool bHasOpacityTexture = false;
 
     bool bIsTransparent = false;
@@ -108,6 +109,7 @@ struct FSkeletalMeshRenderData
     ID3D11Buffer* DynamicVertexBuffer = nullptr;
     ID3D11Buffer* IndexBuffer = nullptr;
 
+    // TODO Bounding Box 렌더링 struct, 실제 struct 분리
     FBoundingBox Bounds;                          // 메시의 AABB
 
     FSkeletalMeshRenderData() = default;

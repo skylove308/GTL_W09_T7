@@ -1,8 +1,8 @@
 #include "SkeletalMesh.h"
 #include "Engine/FObjLoader.h"
 #include "UObject/Casts.h"
-#include "Engine/FbxLoader.h"
 #include "Container/String.h"
+#include "Engine/AssetManager.h"
 #include "UObject/ObjectFactory.h"
 #include "Engine/Asset/SkeletalMeshAsset.h"
 //#include " Skeleton.h" // USkeleton 클래스 포함
@@ -370,7 +370,7 @@ FWString USkeletalMesh::GetObjectName() const
     return FWString();
 }
 
-void USkeletalMesh::SetData(FSkeletalMeshRenderData* renderData)
+void USkeletalMesh::SetData(FSkeletalMeshRenderData* renderData, TArray<UMaterial*> InMaterials)
 {
     Skeleton->FinalizeBoneHierarchy();
 
@@ -389,11 +389,24 @@ void USkeletalMesh::SetData(FSkeletalMeshRenderData* renderData)
     for (int materialIndex = 0; materialIndex < SkeletalMeshRenderData->Materials.Num(); materialIndex++)
     {
         FStaticMaterial* newMaterialSlot = new FStaticMaterial();
-        UMaterial* newMaterial = FManagerFBX::CreateMaterial(SkeletalMeshRenderData->Materials[materialIndex]);
 
-        newMaterialSlot->Material = newMaterial;
+        if (InMaterials.Num() > materialIndex)
+        {
+            UMaterial* newMaterial = InMaterials[materialIndex];
+            newMaterialSlot->Material = newMaterial;
+        }
+        else
+        {
+            UMaterial* newMaterial = UAssetManager::Get().GetMaterial(SkeletalMeshRenderData->Materials[materialIndex].MaterialName);
+            newMaterialSlot->Material = newMaterial;
+        }
         newMaterialSlot->MaterialSlotName = SkeletalMeshRenderData->Materials[materialIndex].MaterialName;
 
         materials.Add(newMaterialSlot);
     }
+}
+
+void USkeletalMesh::SetSkeleton(USkeleton* InSkeleton)
+{
+    Skeleton = InSkeleton;
 }

@@ -1,13 +1,13 @@
 #include "FObjLoader.h"
 
-#include "UObject/ObjectFactory.h"
-#include "Components/Material/Material.h"
-#include "Components/Mesh/StaticMeshRenderData.h"
+#include "AssetManager.h"
+#include "Serializer.h"
 
 #include "Asset/StaticMeshAsset.h"
 
-#include <fstream>
-#include <sstream>
+#include "Components/Material/Material.h"
+#include "Components/Mesh/StaticMeshRenderData.h"
+#include "UObject/ObjectFactory.h"
 
 bool FObjLoader::ParseOBJ(const FString& ObjFilePath, FObjInfo& OutObjInfo)
 {
@@ -216,7 +216,7 @@ bool FObjLoader::ParseOBJ(const FString& ObjFilePath, FObjInfo& OutObjInfo)
     return true;
 }
 
-bool FObjLoader::ParseMaterial(FObjInfo& OutObjInfo, FStaticMeshRenderData& OutFStaticMesh)
+bool FObjLoader::ParseMaterial(const FObjInfo& OutObjInfo, FStaticMeshRenderData& OutFStaticMesh)
 {
     // Subset
     OutFStaticMesh.MaterialSubsets = OutObjInfo.MaterialSubsets;
@@ -454,7 +454,22 @@ bool FObjLoader::ParseMaterial(FObjInfo& OutObjInfo, FStaticMeshRenderData& OutF
     return true;
 }
 
-bool FObjLoader::ConvertToStaticMesh(const FObjInfo& RawData, FStaticMeshRenderData& OutStaticMesh)
+void FObjLoader::ExtractMaterial(const FObjInfo& ObjInfo, FStaticMeshRenderData& OutStaticMeshRenderData)
+{
+    if (ObjInfo.MaterialSubsets.Num() == 0)
+    {
+        return;
+    }
+    
+    if (!FObjLoader::ParseMaterial(ObjInfo, OutStaticMeshRenderData))
+    {
+        return;
+    }
+    
+    CombineMaterialIndex(OutStaticMeshRenderData);
+}
+
+bool FObjLoader::ExtractStaticMesh(const FObjInfo& RawData, FStaticMeshRenderData& OutStaticMesh)
 {
     OutStaticMesh.ObjectName = RawData.ObjectName;
     OutStaticMesh.DisplayName = RawData.DisplayName;
@@ -532,8 +547,24 @@ bool FObjLoader::ConvertToStaticMesh(const FObjInfo& RawData, FStaticMeshRenderD
 
     // Calculate StaticMesh BoundingBox
     ComputeBoundingBox(OutStaticMesh.Vertices, OutStaticMesh.BoundingBoxMin, OutStaticMesh.BoundingBoxMax);
-
+    
     return true;
+}
+
+void FObjLoader::CombineMaterialIndex(FStaticMeshRenderData& OutFStaticMesh)
+{
+    for (int32 i = 0; i < OutFStaticMesh.MaterialSubsets.Num(); i++)
+    {
+        FString MatName = OutFStaticMesh.MaterialSubsets[i].MaterialName;
+        for (int32 j = 0; j < OutFStaticMesh.Materials.Num(); j++)
+        {
+            if (OutFStaticMesh.Materials[j].MaterialName == MatName)
+            {
+                OutFStaticMesh.MaterialSubsets[i].MaterialIndex = j;
+                break;
+            }
+        }
+    }
 }
 
 bool FObjLoader::CreateTextureFromFile(const FWString& Filename, bool bIsSRGB)
@@ -634,80 +665,48 @@ void FObjLoader::CalculateTangent(FStaticMeshVertex& PivotVertex, const FStaticM
     PivotVertex.TangentW = Sign;
 }
 
-FStaticMeshRenderData* FObjManager::LoadObjStaticMeshAsset(const FString& PathFileName)
+bool FObjManager::LoadOBJ(const FString& InFilePath, FObjLoadResult& OutResult)
 {
-    FStaticMeshRenderData* NewStaticMesh = new FStaticMeshRenderData();
-
-    if ( const auto It = ObjStaticMeshMap.Find(PathFileName))
-    {
-        return *It;
-    }
-
-    FWString BinaryPath = (PathFileName + ".bin").ToWideString();
+    FWString BinaryPath = (InFilePath + ".bin").ToWideString();
     if (std::ifstream(BinaryPath).good())
     {
-        if (LoadStaticMeshFromBinary(BinaryPath, *NewStaticMesh))
+        if (LoadStaticMeshFromBinary(BinaryPath, OutResult))
         {
-            ObjStaticMeshMap.Add(PathFileName, NewStaticMesh);
-            return NewStaticMesh;
+            return true;
         }
     }
 
-    // Parse OBJ
+    // Parse Obj Info
     FObjInfo NewObjInfo;
-    bool Result = FObjLoader::ParseOBJ(PathFileName, NewObjInfo);
-
-    if (!Result)
+    if (!FObjLoader::ParseOBJ(InFilePath, NewObjInfo))
     {
-        delete NewStaticMesh;
-        return nullptr;
+        return false;
+    }
+    FStaticMeshRenderData* NewStaticMeshRenderData = new FStaticMeshRenderData();
+    
+    // 중요 - Extract Material -> Extract Static Mesh
+    FObjLoader::ExtractMaterial(NewObjInfo, *NewStaticMeshRenderData);
+    
+    if (!FObjLoader::ExtractStaticMesh(NewObjInfo, *NewStaticMeshRenderData))
+    {
+        delete NewStaticMeshRenderData;
+        return false;
+    }
+    
+    for (int MaterialIndex = 0; MaterialIndex < NewStaticMeshRenderData->Materials.Num(); MaterialIndex++)
+    {
+        UMaterial* Material = FObjectFactory::ConstructObject<UMaterial>(nullptr);
+        Material->SetMaterialInfo(NewStaticMeshRenderData->Materials[MaterialIndex]);
+        OutResult.Materials.Add(Material);
     }
 
-    // Material
-    if (NewObjInfo.MaterialSubsets.Num() > 0)
-    {
-        Result = FObjLoader::ParseMaterial(NewObjInfo, *NewStaticMesh);
+    UStaticMesh* StaticMesh = FObjectFactory::ConstructObject<UStaticMesh>(nullptr); // TODO: 추후 AssetManager를 생성해서 관리.
+    StaticMesh->SetData(NewStaticMeshRenderData, OutResult.Materials);
+    OutResult.StaticMesh = StaticMesh;
 
-        if (!Result)
-        {
-            delete NewStaticMesh;
-            return nullptr;
-        }
-
-        CombineMaterialIndex(*NewStaticMesh);
-
-        for (int materialIndex = 0; materialIndex < NewStaticMesh->Materials.Num(); materialIndex++) {
-            CreateMaterial(NewStaticMesh->Materials[materialIndex]);
-        }
-    }
-
-    // Convert FStaticMeshRenderData
-    Result = FObjLoader::ConvertToStaticMesh(NewObjInfo, *NewStaticMesh);
-    if (!Result)
-    {
-        delete NewStaticMesh;
-        return nullptr;
-    }
-
-    SaveStaticMeshToBinary(BinaryPath, *NewStaticMesh); 
-    ObjStaticMeshMap.Add(PathFileName, NewStaticMesh);
-    return NewStaticMesh;
-}
-
-void FObjManager::CombineMaterialIndex(FStaticMeshRenderData& OutFStaticMesh)
-{
-    for (int32 i = 0; i < OutFStaticMesh.MaterialSubsets.Num(); i++)
-    {
-        FString MatName = OutFStaticMesh.MaterialSubsets[i].MaterialName;
-        for (int32 j = 0; j < OutFStaticMesh.Materials.Num(); j++)
-        {
-            if (OutFStaticMesh.Materials[j].MaterialName == MatName)
-            {
-                OutFStaticMesh.MaterialSubsets[i].MaterialIndex = j;
-                break;
-            }
-        }
-    }
+    SaveStaticMeshToBinary(BinaryPath, *NewStaticMeshRenderData);
+    
+    return true;
 }
 
 bool FObjManager::SaveStaticMeshToBinary(const FWString& FilePath, const FStaticMeshRenderData& StaticMesh)
@@ -726,14 +725,10 @@ bool FObjManager::SaveStaticMeshToBinary(const FWString& FilePath, const FStatic
     Serializer::WriteFString(File, StaticMesh.DisplayName);
 
     // Vertices
-    uint32 VertexCount = StaticMesh.Vertices.Num();
-    File.write(reinterpret_cast<const char*>(&VertexCount), sizeof(VertexCount));
-    File.write(reinterpret_cast<const char*>(StaticMesh.Vertices.GetData()), VertexCount * sizeof(FStaticMeshVertex));
+    Serializer::WriteArray(File, StaticMesh.Vertices);
 
     // Indices
-    uint32 IndexCount = StaticMesh.Indices.Num();
-    File.write(reinterpret_cast<const char*>(&IndexCount), sizeof(IndexCount));
-    File.write(reinterpret_cast<const char*>(StaticMesh.Indices.GetData()), IndexCount * sizeof(UINT));
+    Serializer::WriteArray(File, StaticMesh.Indices);
 
     // Materials
     uint32 MaterialCount = StaticMesh.Materials.Num();
@@ -786,7 +781,7 @@ bool FObjManager::SaveStaticMeshToBinary(const FWString& FilePath, const FStatic
     return true;
 }
 
-bool FObjManager::LoadStaticMeshFromBinary(const FWString& FilePath, FStaticMeshRenderData& OutStaticMesh)
+bool FObjManager::LoadStaticMeshFromBinary(const FWString& FilePath, FObjLoadResult& OutResult)
 {
     std::ifstream File(FilePath, std::ios::binary);
     if (!File.is_open())
@@ -797,68 +792,68 @@ bool FObjManager::LoadStaticMeshFromBinary(const FWString& FilePath, FStaticMesh
 
     TArray<TPair<FWString, bool>> Textures;
 
+    UStaticMesh* StaticMesh = FObjectFactory::ConstructObject<UStaticMesh>(nullptr); // TODO: 추후 AssetManager를 생성해서 관리.
+    FStaticMeshRenderData* StaticMeshRenderData = new FStaticMeshRenderData();
     // Object Name
-    Serializer::ReadFWString(File, OutStaticMesh.ObjectName);
+    Serializer::ReadFWString(File, StaticMeshRenderData->ObjectName);
 
     //// Path Name
-    //Serializer::ReadFWString(File, OutStaticMesh.PathName);
+    //Serializer::ReadFWString(File, StaticMeshRenderData->PathName);
 
     // Display Name
-    Serializer::ReadFString(File, OutStaticMesh.DisplayName);
+    Serializer::ReadFString(File, StaticMeshRenderData->DisplayName);
 
     // Vertices
-    uint32 VertexCount = 0;
-    File.read(reinterpret_cast<char*>(&VertexCount), sizeof(VertexCount));
-    OutStaticMesh.Vertices.SetNum(VertexCount);
-    File.read(reinterpret_cast<char*>(OutStaticMesh.Vertices.GetData()), VertexCount * sizeof(FStaticMeshVertex));
+    Serializer::ReadArray(File, StaticMeshRenderData->Vertices);
 
     // Indices
-    uint32 IndexCount = 0;
-    File.read(reinterpret_cast<char*>(&IndexCount), sizeof(IndexCount));
-    OutStaticMesh.Indices.SetNum(IndexCount);
-    File.read(reinterpret_cast<char*>(OutStaticMesh.Indices.GetData()), IndexCount * sizeof(UINT));
+    Serializer::ReadArray(File, StaticMeshRenderData->Indices);
 
     // Material
     uint32 MaterialCount = 0;
     File.read(reinterpret_cast<char*>(&MaterialCount), sizeof(MaterialCount));
-    OutStaticMesh.Materials.SetNum(MaterialCount);
-    for (FObjMaterialInfo& Material : OutStaticMesh.Materials)
+    StaticMeshRenderData->Materials.SetNum(MaterialCount);
+    for (FObjMaterialInfo& MaterialInfo : StaticMeshRenderData->Materials)
     {
-        Serializer::ReadFString(File, Material.MaterialName);
-        File.read(reinterpret_cast<char*>(&Material.TextureFlag), sizeof(Material.TextureFlag));
-        
-        File.read(reinterpret_cast<char*>(&Material.bTransparent), sizeof(Material.bTransparent));
-        File.read(reinterpret_cast<char*>(&Material.DiffuseColor), sizeof(Material.DiffuseColor));
-        File.read(reinterpret_cast<char*>(&Material.SpecularColor), sizeof(Material.SpecularColor));
-        File.read(reinterpret_cast<char*>(&Material.AmbientColor), sizeof(Material.AmbientColor));
-        File.read(reinterpret_cast<char*>(&Material.EmissiveColor), sizeof(Material.EmissiveColor));
-        
-        File.read(reinterpret_cast<char*>(&Material.SpecularExponent), sizeof(Material.SpecularExponent));
-        File.read(reinterpret_cast<char*>(&Material.IOR), sizeof(Material.IOR));
-        File.read(reinterpret_cast<char*>(&Material.Transparency), sizeof(Material.Transparency));
-        File.read(reinterpret_cast<char*>(&Material.BumpMultiplier), sizeof(Material.BumpMultiplier));
-        File.read(reinterpret_cast<char*>(&Material.IlluminanceModel), sizeof(Material.IlluminanceModel));
+        Serializer::ReadFString(File, MaterialInfo.MaterialName);
+        File.read(reinterpret_cast<char*>(&MaterialInfo.TextureFlag), sizeof(MaterialInfo.TextureFlag));
+    
+        File.read(reinterpret_cast<char*>(&MaterialInfo.bTransparent), sizeof(MaterialInfo.bTransparent));
+        File.read(reinterpret_cast<char*>(&MaterialInfo.DiffuseColor), sizeof(MaterialInfo.DiffuseColor));
+        File.read(reinterpret_cast<char*>(&MaterialInfo.SpecularColor), sizeof(MaterialInfo.SpecularColor));
+        File.read(reinterpret_cast<char*>(&MaterialInfo.AmbientColor), sizeof(MaterialInfo.AmbientColor));
+        File.read(reinterpret_cast<char*>(&MaterialInfo.EmissiveColor), sizeof(MaterialInfo.EmissiveColor));
+    
+        File.read(reinterpret_cast<char*>(&MaterialInfo.SpecularExponent), sizeof(MaterialInfo.SpecularExponent));
+        File.read(reinterpret_cast<char*>(&MaterialInfo.IOR), sizeof(MaterialInfo.IOR));
+        File.read(reinterpret_cast<char*>(&MaterialInfo.Transparency), sizeof(MaterialInfo.Transparency));
+        File.read(reinterpret_cast<char*>(&MaterialInfo.BumpMultiplier), sizeof(MaterialInfo.BumpMultiplier));
+        File.read(reinterpret_cast<char*>(&MaterialInfo.IlluminanceModel), sizeof(MaterialInfo.IlluminanceModel));
 
-        File.read(reinterpret_cast<char*>(&Material.Metallic), sizeof(Material.Metallic));
-        File.read(reinterpret_cast<char*>(&Material.Roughness), sizeof(Material.Roughness));
+        File.read(reinterpret_cast<char*>(&MaterialInfo.Metallic), sizeof(MaterialInfo.Metallic));
+        File.read(reinterpret_cast<char*>(&MaterialInfo.Roughness), sizeof(MaterialInfo.Roughness));
 
         uint8 TextureNum = static_cast<uint8>(EMaterialTextureSlots::MTS_MAX);
-        Material.TextureInfos.SetNum(TextureNum);
+        MaterialInfo.TextureInfos.SetNum(TextureNum);
         for (uint8 i = 0; i < TextureNum; ++i)
         {
-            Serializer::ReadFString(File, Material.TextureInfos[i].TextureName);
-            Serializer::ReadFWString(File, Material.TextureInfos[i].TexturePath);
-            File.read(reinterpret_cast<char*>(&Material.TextureInfos[i].bIsSRGB), sizeof(Material.TextureInfos[i].bIsSRGB));
+            Serializer::ReadFString(File, MaterialInfo.TextureInfos[i].TextureName);
+            Serializer::ReadFWString(File, MaterialInfo.TextureInfos[i].TexturePath);
+            File.read(reinterpret_cast<char*>(&MaterialInfo.TextureInfos[i].bIsSRGB), sizeof(MaterialInfo.TextureInfos[i].bIsSRGB));
 
-            Textures.AddUnique({Material.TextureInfos[i].TexturePath, Material.TextureInfos[i].bIsSRGB});
+            Textures.AddUnique({MaterialInfo.TextureInfos[i].TexturePath, MaterialInfo.TextureInfos[i].bIsSRGB});
         }
+
+        UMaterial* Material = FObjectFactory::ConstructObject<UMaterial>(nullptr);
+        Material->SetMaterialInfo(MaterialInfo);
+        OutResult.Materials.Add(Material);
     }
 
     // Material Subset
     uint32 SubsetCount = 0;
     File.read(reinterpret_cast<char*>(&SubsetCount), sizeof(SubsetCount));
-    OutStaticMesh.MaterialSubsets.SetNum(SubsetCount);
-    for (FMaterialSubset& Subset : OutStaticMesh.MaterialSubsets)
+    StaticMeshRenderData->MaterialSubsets.SetNum(SubsetCount);
+    for (FMaterialSubset& Subset : StaticMeshRenderData->MaterialSubsets)
     {
         Serializer::ReadFString(File, Subset.MaterialName);
         File.read(reinterpret_cast<char*>(&Subset.IndexStart), sizeof(Subset.IndexStart));
@@ -867,10 +862,13 @@ bool FObjManager::LoadStaticMeshFromBinary(const FWString& FilePath, FStaticMesh
     }
 
     // Bounding Box
-    File.read(reinterpret_cast<char*>(&OutStaticMesh.BoundingBoxMin), sizeof(FVector));
-    File.read(reinterpret_cast<char*>(&OutStaticMesh.BoundingBoxMax), sizeof(FVector));
+    File.read(reinterpret_cast<char*>(&StaticMeshRenderData->BoundingBoxMin), sizeof(FVector));
+    File.read(reinterpret_cast<char*>(&StaticMeshRenderData->BoundingBoxMax), sizeof(FVector));
 
     File.close();
+    OutResult.StaticMesh = StaticMesh;
+    StaticMesh->SetData(StaticMeshRenderData, OutResult.Materials);
+
 
     // Texture Load
     if (Textures.Num() > 0)
@@ -885,44 +883,4 @@ bool FObjManager::LoadStaticMeshFromBinary(const FWString& FilePath, FStaticMesh
     }
 
     return true;
-}
-
-UMaterial* FObjManager::CreateMaterial(FObjMaterialInfo materialInfo)
-{
-    if (MaterialMap[materialInfo.MaterialName] != nullptr)
-        return MaterialMap[materialInfo.MaterialName];
-
-    UMaterial* newMaterial = FObjectFactory::ConstructObject<UMaterial>(nullptr); // Material은 Outer가 없이 따로 관리되는 객체이므로 Outer가 없음으로 설정. 추후 Garbage Collection이 추가되면 AssetManager를 생성해서 관리.
-    newMaterial->SetMaterialInfo(materialInfo);
-    MaterialMap.Add(materialInfo.MaterialName, newMaterial);
-    return newMaterial;
-}
-
-UMaterial* FObjManager::GetMaterial(FString name)
-{
-    return MaterialMap[name];
-}
-
-UStaticMesh* FObjManager::CreateStaticMesh(const FString& filePath)
-{
-    FStaticMeshRenderData* StaticMeshRenderData = FObjManager::LoadObjStaticMeshAsset(filePath);
-
-    if (StaticMeshRenderData == nullptr) return nullptr;
-
-    UStaticMesh* StaticMesh = GetStaticMesh(StaticMeshRenderData->ObjectName);
-    if (StaticMesh != nullptr)
-    {
-        return StaticMesh;
-    }
-
-    StaticMesh = FObjectFactory::ConstructObject<UStaticMesh>(nullptr); // TODO: 추후 AssetManager를 생성해서 관리.
-    StaticMesh->SetData(StaticMeshRenderData);
-
-    StaticMeshMap.Add(StaticMeshRenderData->ObjectName, StaticMesh); // TODO: 장기적으로 보면 파일 이름 대신 경로를 Key로 사용하는게 좋음.
-    return StaticMesh;
-}
-
-UStaticMesh* FObjManager::GetStaticMesh(FWString name)
-{
-    return StaticMeshMap[name];
 }

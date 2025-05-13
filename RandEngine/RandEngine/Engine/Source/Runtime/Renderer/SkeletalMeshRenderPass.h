@@ -13,7 +13,6 @@ class UMaterial;
 class USkeletalMeshComponent;
 struct FStaticMaterial;
 class FShadowRenderPass;
-class FLoaderFBX;
 
 class FSkeletalMeshRenderPass : public IRenderPass
 {
@@ -66,7 +65,6 @@ protected:
     FDXDShaderManager* ShaderManager;
 
     FShadowManager* ShadowManager;
-    FLoaderFBX* FBXLoader;
 };
 
 

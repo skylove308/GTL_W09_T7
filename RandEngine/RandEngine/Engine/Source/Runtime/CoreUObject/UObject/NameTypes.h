@@ -27,7 +27,7 @@ public:
     uint32 GetComparisonIndex() const { return ComparisonIndex; }
     bool IsNone() { return DisplayIndex == NAME_None && ComparisonIndex == NAME_None; }
     bool IsNone() const { return DisplayIndex == NAME_None && ComparisonIndex == NAME_None; }
-
+    
     bool operator==(const FName& Other) const;
     bool operator==(ENameNone) const;
     bool operator!=(const FName& Other) const;

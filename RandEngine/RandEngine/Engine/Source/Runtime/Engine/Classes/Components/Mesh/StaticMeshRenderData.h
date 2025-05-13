@@ -15,7 +15,7 @@ public:
 
     virtual UObject* Duplicate(UObject* InOuter) override;
 
-    const TArray<FStaticMaterial*>& GetMaterials() const { return materials; }
+    const TArray<FStaticMaterial*>& GetMaterials() const { return Materials; }
     uint32 GetMaterialIndex(FName MaterialSlotName) const;
     void GetUsedMaterials(TArray<UMaterial*>& OutMaterial) const;
     FStaticMeshRenderData* GetRenderData() const { return RenderData; }
@@ -23,9 +23,9 @@ public:
     //ObjectName은 경로까지 포함
     FWString GetOjbectName() const;
 
-    void SetData(FStaticMeshRenderData* InRenderData);
+    void SetData(FStaticMeshRenderData* InRenderData, TArray<UMaterial*> Materials = TArray<UMaterial*>());
 
 private:
     FStaticMeshRenderData* RenderData = nullptr;
-    TArray<FStaticMaterial*> materials;
+    TArray<FStaticMaterial*> Materials;
 };
