@@ -35,8 +35,12 @@ void SkeletalViewerPanel::OnResize(HWND hWnd)
 
 void SkeletalViewerPanel::CreateSkeletalTreeNode()
 {
+    USkeletalSubEngine* SubEngine = nullptr;
+    if (WindowType == WT_SkeletalSubWindow)
+        SubEngine = static_cast<USkeletalSubEngine*>(GEngineLoop.SkeletalViewerSubEngine);
+    else if (WindowType == WT_AnimationSubWindow)
+        SubEngine = static_cast<USkeletalSubEngine*>(GEngineLoop.AnimationViewerSubEngine);
 
-    USkeletalSubEngine* SubEngine = static_cast<USkeletalSubEngine*>(GEngineLoop.SkeletalViewerSubEngine);
     SkeletalMesh = SubEngine->SelectedSkeletalMesh;
 
     // if (Skeleton == Selected->Skeleton)

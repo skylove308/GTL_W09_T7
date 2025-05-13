@@ -35,13 +35,20 @@ UObject* USkeletalMesh::Duplicate(UObject* InOuter)
 {
     // TODO: Context->CopyResource를 사용해서 Buffer복사
     ThisClass* newMesh = Cast<ThisClass>(Super::Duplicate(InOuter));
-
-    newMesh->Skeleton = Cast<USkeleton>(Skeleton->Duplicate(InOuter));
     newMesh->materials = materials;
-    
+    newMesh->Skeleton->BoneTree  = Skeleton->BoneTree;
+    newMesh->Skeleton->BoneParentMap = Skeleton->BoneParentMap;
+    newMesh->Skeleton->BoneNameToIndex =Skeleton->BoneNameToIndex;
+    newMesh->Skeleton->ReferenceSkeleton = Skeleton->ReferenceSkeleton;
+    newMesh->Skeleton->LinkupCache = Skeleton->LinkupCache; 
+    newMesh->Skeleton->CurrentPose.GlobalTransforms = Skeleton->CurrentPose.GlobalTransforms;
+    newMesh->Skeleton->CurrentPose.LocalTransforms = Skeleton->CurrentPose.LocalTransforms;
+    newMesh->Skeleton->CurrentPose.SkinningMatrices = Skeleton->CurrentPose.SkinningMatrices;
+    newMesh->Skeleton->CurrentPose.BoneTransformDirtyFlags = Skeleton->CurrentPose.BoneTransformDirtyFlags;
+    newMesh->Skeleton->CachedProcessingOrder = Skeleton->CachedProcessingOrder;
     newMesh->SkeletalMeshRenderData = SkeletalMeshRenderData;
-    GEngineLoop.GraphicDevice.DeviceContext->CopyResource(newMesh->SkeletalMeshRenderData->DynamicVertexBuffer,SkeletalMeshRenderData->DynamicVertexBuffer);
-    GEngineLoop.GraphicDevice.DeviceContext->CopyResource(newMesh->SkeletalMeshRenderData->IndexBuffer,SkeletalMeshRenderData->IndexBuffer);
+    // GEngineLoop.GraphicDevice.DeviceContext->CopyResource(newMesh->SkeletalMeshRenderData->DynamicVertexBuffer,SkeletalMeshRenderData->DynamicVertexBuffer);
+    // GEngineLoop.GraphicDevice.DeviceContext->CopyResource(newMesh->SkeletalMeshRenderData->IndexBuffer,SkeletalMeshRenderData->IndexBuffer);
     
     return newMesh;
 }

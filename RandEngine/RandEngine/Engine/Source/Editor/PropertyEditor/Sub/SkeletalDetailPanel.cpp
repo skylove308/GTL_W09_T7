@@ -94,14 +94,10 @@ void SkeletalDetailPanel::Render(USkeletalMesh* InSkeletalMesh, int32 SelectedBo
                 else
                 {
                     PrevLocation = Location; PrevRotation = Rotation; PrevScale = Scale;
-                    USkeletalSubEngine* SkeletalSubEngine = Cast<USkeletalSubEngine>(GEngineLoop.SkeletalViewerSubEngine);
+                    USkeletalSubEngine* SkeletalSubEngine = Cast<USkeletalSubEngine>(InSkeletalMesh->GetOuter());
                     SkeletalSubEngine->SkeletalMeshActor->BoneGizmoSceneComponents[SelectedBone]->SetRelativeLocation(Location);
                     SkeletalSubEngine->SkeletalMeshActor->BoneGizmoSceneComponents[SelectedBone]->SetRelativeRotation(Rotation);
                     SkeletalSubEngine->SkeletalMeshActor->BoneGizmoSceneComponents[SelectedBone]->SetRelativeScale3D(Scale);
-                    USkeletalSubEngine* AnimationSubEngine = Cast<USkeletalSubEngine>(GEngineLoop.AnimationViewerSubEngine);
-                    AnimationSubEngine->SkeletalMeshActor->BoneGizmoSceneComponents[SelectedBone]->SetRelativeLocation(Location);
-                    AnimationSubEngine->SkeletalMeshActor->BoneGizmoSceneComponents[SelectedBone]->SetRelativeRotation(Rotation);
-                    AnimationSubEngine->SkeletalMeshActor->BoneGizmoSceneComponents[SelectedBone]->SetRelativeScale3D(Scale);
                 }
                 FMatrix NewLocalMatrix =
                     FMatrix::GetScaleMatrix(Scale) *

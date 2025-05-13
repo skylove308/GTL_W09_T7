@@ -36,7 +36,6 @@ UObject* USkeleton::Duplicate(UObject* InOuter)
     newSkeleton->LinkupCache = LinkupCache; 
     newSkeleton->CurrentPose = CurrentPose;
     
-
     return newSkeleton;
 }
 

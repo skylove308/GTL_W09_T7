@@ -133,8 +133,8 @@ public:
 
     // 스켈레톤 본 인덱스 → 메시 본 인덱스 변환
     /*int32 GetMeshBoneIndexFromSkeletonBoneIndex(const UObject* InMesh, int32 SkeletonBoneIndex);*/
-private:
     mutable TArray<int32> CachedProcessingOrder;
+private:
     mutable bool bProcessingOrderCacheDirty;
 private:
     void CalculateAndCacheProcessingOrder_Internal() const; // private 멤버 함수로 선언
